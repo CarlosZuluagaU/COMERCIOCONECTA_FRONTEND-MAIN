@@ -1,0 +1,153 @@
+/* Estructura general */
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.register-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.register-box {
+  display: flex;
+  width: 900px;
+  max-width: 95%;
+  background: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+/* Sección izquierda */
+.register-left {
+  flex: 1;
+  background: #1F3B4D;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+.brand-title {
+  font-size: 32px;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: 30px;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.25);
+}
+
+.brand-title strong {
+  color: #00d4aa;
+}
+
+.have-account-text {
+  margin-top: 10px;
+  font-size: 16px;
+  color: #e0e0e0;
+}
+
+.login-button {
+  margin-top: 15px;
+  padding: 12px 25px;
+  background: #00d4aa;
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.login-button:hover {
+  background: #00a88f;
+  transform: translateY(-2px);
+}
+
+/* Sección derecha */
+.register-right {
+  flex: 1;
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.register-title {
+  font-size: 26px;
+  font-weight: bold;
+  margin-bottom: 25px;
+  color: #2c3e50;
+}
+
+/* Formulario */
+.register-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.register-form label {
+  font-size: 14px;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #34495e;
+}
+
+.register-form input {
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.register-form input:focus {
+  border-color: #00d4aa;
+  box-shadow: 0 0 8px rgba(0,212,170,0.3);
+  outline: none;
+}
+
+.register-form button {
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  background: #00d4aa;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.register-form button:hover {
+  background: #00a88f;
+  transform: translateY(-2px);
+}
+
+/* Mensajes */
+.error-message {
+  background: #f8d7da;
+  color: #c0392b;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.success-message {
+  background: #d4edda;
+  color: #155724;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  text-align: center;
+}
