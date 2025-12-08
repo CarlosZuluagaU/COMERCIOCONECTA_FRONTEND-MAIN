@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import axios from "axios";
-import "./Register.css";
+import "./register.css";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
