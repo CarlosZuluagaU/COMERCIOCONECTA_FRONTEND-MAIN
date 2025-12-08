@@ -9,8 +9,10 @@ import {
   FiHome, 
   FiSettings, 
   FiPackage, 
-  FiShoppingBag 
+  FiShoppingBag,
+  FiLogOut // <-- Agregar este icono
 } from "react-icons/fi";
+import { useRouter } from "next/navigation"; // <-- Importar useRouter
 
 interface SubOption {
   label: string;
@@ -31,6 +33,7 @@ interface SidebarProps {
 
 export default function Sidebar({ activeMenu, onMenuToggle }: SidebarProps) {
   const [localActiveMenu, setLocalActiveMenu] = useState<string | null>(null);
+  const router = useRouter(); // <-- Inicializar router
 
   const menuItems: MenuItem[] = [
     { label: "Dashboard", options: [], icon: React.createElement(FiHome), path: "/dashboard" },
@@ -39,17 +42,14 @@ export default function Sidebar({ activeMenu, onMenuToggle }: SidebarProps) {
       options: [
         { label: "Agregar productos", path: "../products/add-product" },
         { label: "Listado de productos", path: "../products/product-list" },
-        { label: "Modificar productos", path: "../products/edit-product" }
       ], 
       icon: React.createElement(FiPackage) 
     },
     { 
       label: "E-commerce", 
       options: [
-        { label: "Dashboard", path: "../ecommerce/dashboard" },
+        { label: "Dashboard", path: "../store" },
         { label: "Órdenes", path: "../ecommerce/orders" },
-        { label: "Productos Tienda", path: "#" },
-        { label: "Configuración", path: "#" }
       ], 
       icon: React.createElement(FiShoppingBag) 
     },
@@ -58,16 +58,14 @@ export default function Sidebar({ activeMenu, onMenuToggle }: SidebarProps) {
       options: [
         { label: "Agregar cliente", path: "../clients/create-client" },
         { label: "Listado de clientes", path: "../clients/list-clients" },
-        
       ], 
       icon: React.createElement(FiUsers) 
     },
     { 
       label: "Facturación", 
       options: [
-        { label: "Facturas emitidas", path: "#" },
-        { label: "Notas crédito/débito", path: "#" },
-        { label: "Reportes de facturación", path: "#" }
+        { label: "Crear venta", path: "../sales/create" },
+        { label: "Ver ventas", path: "../sales" },
       ], 
       icon: React.createElement(FiFileText) 
     },
@@ -80,7 +78,6 @@ export default function Sidebar({ activeMenu, onMenuToggle }: SidebarProps) {
       ], 
       icon: React.createElement(FiBox) 
     },
-    { label: "Configuración", options: [], icon: React.createElement(FiSettings), path: "/settings" },
   ];
 
   const handleMenuClick = (menuLabel: string) => {
@@ -90,6 +87,19 @@ export default function Sidebar({ activeMenu, onMenuToggle }: SidebarProps) {
     } else {
       setLocalActiveMenu(newActiveMenu);
     }
+  };
+
+  // <-- Función para cerrar sesión
+  const handleLogout = () => {
+    // Limpiar el token de localStorage
+    localStorage.removeItem("token");
+    
+    // Opcional: Limpiar otros datos de sesión
+    // localStorage.removeItem("user");
+    // localStorage.removeItem("userRole");
+    
+    // Redirigir al login
+    router.push("/login");
   };
 
   const currentActiveMenu = activeMenu ?? localActiveMenu;
@@ -161,11 +171,40 @@ export default function Sidebar({ activeMenu, onMenuToggle }: SidebarProps) {
       )
     ),
 
-    // FOOTER
+    // FOOTER CON BOTÓN DE CERRAR SESIÓN
     React.createElement(
       "div",
       { className: "sidebar-footer" },
-      React.createElement("div", { className: "user-info" }, 
+      React.createElement(
+        "button",
+        {
+          onClick: handleLogout,
+          className: "logout-button",
+          style: {
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            width: "100%",
+            padding: "12px 16px",
+            backgroundColor: "#f56565",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontSize: "14px",
+            fontWeight: "500",
+            transition: "background-color 0.2s ease"
+          }
+        },
+        React.createElement(FiLogOut, { size: 18 }),
+        "Cerrar sesión"
+      ),
+      React.createElement(
+        "div",
+        { 
+          className: "user-info",
+          style: { marginTop: "10px", fontSize: "12px", color: "#666" }
+        }, 
         "Sistema v1.0.0"
       )
     )

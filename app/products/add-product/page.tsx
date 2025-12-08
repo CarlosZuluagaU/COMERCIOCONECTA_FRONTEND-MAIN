@@ -1,9 +1,22 @@
 "use client";
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent, useEffect } from "react"; // Agregado useEffect
 import { useAuth } from "../../context/AuthContext"; 
 import { FiSave } from "react-icons/fi";
 import Sidebar from "../../dashboard/Sidebar";
 import "../../dashboard/dashboard.css";
+
+// Interface para el proveedor
+interface Proveedor {
+  id: string;
+  nombre: string;
+  contacto: string;
+  telefono: string;
+  email: string;
+  direccion: string;
+  tipo: "Cosméticos" | "Farmacéutico" | "General";
+  estado: "Activo" | "Inactivo";
+  productos: string[];
+}
 
 interface Producto {
   id: string;
@@ -21,9 +34,13 @@ interface Producto {
   proveedor: string;
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
+
 export default function AgregarProductoPage() {
-  const { user, token } = useAuth(); // token necesario para enviar al backend
+  const { user, token } = useAuth();
   const [activeMenu, setActiveMenu] = useState<string | null>("Productos");
+  const [proveedores, setProveedores] = useState<Proveedor[]>([]); // Estado para proveedores
+  const [loading, setLoading] = useState(false); // Estado para loading
 
   const [formData, setFormData] = useState<Omit<Producto, "id">>({
     nombre: "",
@@ -39,6 +56,43 @@ export default function AgregarProductoPage() {
     stockMinimo: 5,
     proveedor: "",
   });
+
+  // ===== Fetch proveedores seguro =====
+  const fetchProveedores = async () => {
+    if (!token) {
+      console.log("No hay token disponible");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/proveedores`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        console.error("Error en la solicitud:", response.status, response.statusText);
+        setProveedores([]);
+        return;
+      }
+
+      const text = await response.text();
+      const data: Proveedor[] = text ? JSON.parse(text) : [];
+      setProveedores(data);
+    } catch (error) {
+      console.error("Error cargando proveedores:", error);
+      setProveedores([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Cargar proveedores al montar el componente o cuando cambie el token
+  useEffect(() => {
+    fetchProveedores();
+  }, [token]);
 
   const categorias = [
     "Medicamentos",
@@ -71,12 +125,8 @@ export default function AgregarProductoPage() {
     "Congelado",
   ];
 
-  const proveedores = [
-    "Distribuidora Beauty",
-    "Farmacéutica Central",
-    "Proveedor Salud",
-    "Mayorista Cosmetic",
-  ];
+  // Ya no necesitas el array estático de proveedores
+  // const proveedores = [...]
 
   const handleFormChange =
     (field: keyof Omit<Producto, "id">) =>
@@ -100,7 +150,7 @@ export default function AgregarProductoPage() {
 
   const calcularPrecioVenta = (precioCompra: number) => {
     const precioConIva = precioCompra * (1 + formData.iva / 100);
-    const margen = precioConIva * 0.3; // 30% de margen
+    const margen = precioConIva * 0.4; // 40% de margen
     return precioConIva + margen;
   };
 
@@ -130,12 +180,18 @@ export default function AgregarProductoPage() {
       return;
     }
 
+    // Validar que el proveedor seleccionado exista en la lista
+    if (formData.proveedor && !proveedores.some(p => p.nombre === formData.proveedor)) {
+      alert("Por favor seleccione un proveedor válido de la lista");
+      return;
+    }
+
     try {
-      const response = await fetch("http://localhost:8080/api/productos", {
+      const response = await fetch(`${API_BASE_URL}/productos`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // importante enviar el token JWT
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(formData),
       });
@@ -168,6 +224,24 @@ export default function AgregarProductoPage() {
       console.error(error);
       alert("Hubo un error al guardar el producto");
     }
+  };
+
+  // Función para limpiar formulario
+  const limpiarFormulario = () => {
+    setFormData({
+      nombre: "",
+      referencia: "",
+      precioCompra: 0,
+      precioVenta: 0,
+      iva: 19,
+      categoria: "",
+      marca: "",
+      almacenamiento: "",
+      estado: "Activo",
+      stock: 0,
+      stockMinimo: 5,
+      proveedor: "",
+    });
   };
 
   return (
@@ -323,14 +397,29 @@ export default function AgregarProductoPage() {
                     value={formData.proveedor}
                     onChange={handleFormChange("proveedor")}
                     className="form-input"
+                    disabled={loading || !token}
                   >
                     <option value="">Seleccionar proveedor</option>
-                    {proveedores.map((prov) => (
-                      <option key={prov} value={prov}>
-                        {prov}
-                      </option>
-                    ))}
+                    {loading ? (
+                      <option value="" disabled>Cargando proveedores...</option>
+                    ) : proveedores.length === 0 ? (
+                      <option value="" disabled>No hay proveedores disponibles</option>
+                    ) : (
+                      proveedores
+                        .filter(proveedor => proveedor.estado === "Activo") // Opcional: solo proveedores activos
+                        .map((proveedor) => (
+                          <option key={proveedor.id} value={proveedor.nombre}>
+                            {proveedor.nombre} - {proveedor.tipo}
+                          </option>
+                        ))
+                    )}
                   </select>
+                  {loading && (
+                    <p className="form-help">Cargando lista de proveedores...</p>
+                  )}
+                  {!token && (
+                    <p className="form-help error">No hay token de autenticación</p>
+                  )}
                 </div>
 
                 {/* Condiciones de almacenamiento */}
@@ -390,22 +479,7 @@ export default function AgregarProductoPage() {
               {/* Botones */}
               <div className="form-actions">
                 <button
-                  onClick={() =>
-                    setFormData({
-                      nombre: "",
-                      referencia: "",
-                      precioCompra: 0,
-                      precioVenta: 0,
-                      iva: 19,
-                      categoria: "",
-                      marca: "",
-                      almacenamiento: "",
-                      estado: "Activo",
-                      stock: 0,
-                      stockMinimo: 5,
-                      proveedor: "",
-                    })
-                  }
+                  onClick={limpiarFormulario}
                   className="btn-secondary"
                 >
                   Limpiar Formulario

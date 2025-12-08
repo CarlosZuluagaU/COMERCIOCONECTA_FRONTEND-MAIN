@@ -118,7 +118,7 @@ export default function RealizarCompraPage() {
     try {
       const compraDTO = {
         numeroFactura,
-        proveedor, 
+        proveedorId: proveedor, 
         fechaCompra,
         subtotal,
         iva: Math.round(totalIVA),
