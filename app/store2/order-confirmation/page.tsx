@@ -94,11 +94,11 @@ export default function OrderConfirmationPage() {
   };
 
   const continuarComprando = () => {
-    router.push("/store");
+    router.push("/store2");
   };
 
   const verHistorial = () => {
-    router.push("/store/orders");
+    router.push("/store2/orders");
   };
 
   const descargarFactura = () => {
@@ -139,7 +139,7 @@ export default function OrderConfirmationPage() {
             <div className="header-actions-tienda">
               <button 
                 className="cart-btn-tienda"
-                onClick={() => router.push("/store")}
+                onClick={() => router.push("/store2")}
               >
                 <FiShoppingBag />
               </button>

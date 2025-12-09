@@ -3,6 +3,9 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./register.css";
 
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
     nombre: "",
@@ -29,7 +32,7 @@ export default function RegisterPage() {
     setSuccess(null);
 
     try {
-      await axios.post("http://localhost:8080/api/comercios", formData);
+      await axios.post(`${API_BASE_URL}/comercios`, formData);
       setSuccess("Registro exitoso. Pronto nos contactaremos con usted.");
       setFormData({
         nombre: "",

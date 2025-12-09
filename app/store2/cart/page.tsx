@@ -24,7 +24,7 @@ export default function CarritoPage() {
   const [cuponAplicado, setCuponAplicado] = useState(false);
   const [descuento, setDescuento] = useState(0);
 
-  // Usa las mismas imágenes de tu tienda
+  
   const [carrito, setCarrito] = useState<CarritoItem[]>([
     {
       producto: {
@@ -117,11 +117,11 @@ export default function CarritoPage() {
       alert("Tu carrito está vacío");
       return;
     }
-    router.push("/store/checkout");
+    router.push("/store2/checkout");
   };
 
   const continuarComprando = () => {
-    router.push("/store");
+    router.push("/store2");
   };
 
   return (

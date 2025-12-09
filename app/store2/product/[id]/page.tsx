@@ -117,7 +117,7 @@ export default function ProductoPage({ params }: { params: Params }) {
 
   const comprarAhora = () => {
     agregarAlCarrito();
-    router.push("/store/checkout");
+    router.push("/store2/checkout");
   };
 
   const handleCantidadChange = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -160,7 +160,7 @@ export default function ProductoPage({ params }: { params: Params }) {
             
             <button 
               className="nav-item-tienda"
-              onClick={() => router.push("/store")}
+              onClick={() => router.push("/store2")}
               style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
             >
               <FiHome />
@@ -191,14 +191,14 @@ export default function ProductoPage({ params }: { params: Params }) {
         }}>
           <span 
             style={{ cursor: "pointer", color: "#8b5cf6" }}
-            onClick={() => router.push("/store")}
+            onClick={() => router.push("/store2")}
           >
             Tienda
           </span>
           <span>›</span>
           <span 
             style={{ cursor: "pointer", color: "#8b5cf6" }}
-            onClick={() => router.push(`/store/categoria/${producto.categoria.toLowerCase()}`)}
+            onClick={() => router.push(`/store2/categoria/${producto.categoria.toLowerCase()}`)}
           >
             {producto.categoria}
           </span>
@@ -553,7 +553,7 @@ export default function ProductoPage({ params }: { params: Params }) {
               <div 
                 key={prod.id} 
                 className="product-card-tienda"
-                onClick={() => router.push(`/store/product/${prod.id}`)}
+                onClick={() => router.push(`/store2/product/${prod.id}`)}
                 style={{ cursor: "pointer" }}
               >
                 <div className="product-image-section" style={{ height: "200px" }}>
@@ -603,7 +603,7 @@ export default function ProductoPage({ params }: { params: Params }) {
                     </div>
                     
                     <button
-                      onClick={() => router.push(`/store/product/${prod.id}`)}
+                      onClick={() => router.push(`/store2/product/${prod.id}`)}
                       style={{
                         width: "100%",
                         background: "#8b5cf6",

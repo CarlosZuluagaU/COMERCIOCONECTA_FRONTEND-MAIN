@@ -48,7 +48,7 @@ export default function Sidebar({ activeMenu, onMenuToggle }: SidebarProps) {
     { 
       label: "E-commerce", 
       options: [
-        { label: "Dashboard", path: "../store" },
+        { label: "Dashboard", path: "../store2" },
         { label: "Órdenes", path: "../ecommerce/orders" },
       ], 
       icon: React.createElement(FiShoppingBag) 

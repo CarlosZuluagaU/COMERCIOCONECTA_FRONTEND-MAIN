@@ -22,6 +22,8 @@ interface CarritoItem {
   cantidad: number;
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export default function TiendaPage() {
   const [carrito, setCarrito] = useState<CarritoItem[]>([]);
   const [busqueda, setBusqueda] = useState("");
@@ -205,7 +207,7 @@ export default function TiendaPage() {
       };
 
       const createOrderRes = await fetch(
-        "http://localhost:8080/api/checkout/create-order",
+        `${API_BASE_URL}/checkout/create-order`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -218,7 +220,7 @@ export default function TiendaPage() {
       const orderId = orderData.orderId;
 
       const linkRes = await fetch(
-        `http://localhost:8080/api/checkout/create-payment-link/${orderId}`,
+        `${API_BASE_URL}/checkout/create-payment-link/${orderId}`,
         { method: "POST" }
       );
 

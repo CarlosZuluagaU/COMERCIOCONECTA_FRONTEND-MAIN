@@ -24,13 +24,15 @@ interface FormData {
   codigoPostal: string;
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export default function CheckoutPage() {
   const router = useRouter();
   const [pasoActual, setPasoActual] = useState(1);
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // 🛒 Usa las mismas imágenes que tu tienda
+
   const [carrito] = useState<CarritoItem[]>([
     {
       producto: {
@@ -85,7 +87,7 @@ export default function CheckoutPage() {
   const siguientePaso = () => pasoActual < 2 && setPasoActual(pasoActual + 1);
   const pasoAnterior = () => pasoActual > 1 && setPasoActual(pasoActual - 1);
 
-  // 🧾 Crear orden y generar link de pago
+  // Crear orden y generar link de pago
   const procesarPago = async () => {
     if (!aceptaTerminos) {
       alert("Debe aceptar los términos y condiciones");
@@ -95,8 +97,8 @@ export default function CheckoutPage() {
     try {
       setLoading(true);
 
-      // 1️⃣ Crear orden
-      const orderRes = await fetch("http://localhost:8080/api/checkout/create-order", {
+      // Crear orden
+      const orderRes = await fetch(`${API_BASE_URL}/checkout/create-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -119,7 +121,7 @@ export default function CheckoutPage() {
 
       // 2️⃣ Crear link de pago
       const paymentRes = await fetch(
-        `http://localhost:8080/api/checkout/create-payment-link/${orderId}`,
+        `${API_BASE_URL}/checkout/create-payment-link/${orderId}`,
         { method: "POST" }
       );
 
@@ -128,7 +130,7 @@ export default function CheckoutPage() {
 
       const paymentUrl = paymentData.payment_url || paymentData.url;
 
-      // 3️⃣ Redirigir a Wompi
+      // 3 Redirigir a Wompi
       if (paymentUrl) {
         window.location.href = paymentUrl;
       } else {
