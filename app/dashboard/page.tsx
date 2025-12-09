@@ -33,7 +33,7 @@ export default function DashboardPage() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
       
       // Cargar múltiples endpoints en paralelo
       const [ordenesRes, productosRes, comprasRes, ventasRes] = await Promise.all([

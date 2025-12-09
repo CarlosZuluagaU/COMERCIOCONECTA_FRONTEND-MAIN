@@ -244,7 +244,7 @@ export default function TiendaPage() {
           <div className="header-content-tienda">
             <div className="brand-tienda">
               <h1>ComerciosConecta</h1>
-              <span>Belleza & Cuidado</span>
+              
             </div>
             
             <div className="search-bar-tienda">
