@@ -1,0 +1,756 @@
+/* Ventas.css - Estilos específicos para la página de ventas */
+
+/* ============================================
+   CONTENEDOR PRINCIPAL
+   ============================================ */
+.ventas-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Efecto de fondo decorativo */
+.ventas-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 280px;
+  background: linear-gradient(90deg, 
+    rgba(31, 59, 77, 0.04) 0%, 
+    rgba(0, 212, 170, 0.04) 50%, 
+    rgba(31, 59, 77, 0.04) 100%);
+  clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+  z-index: 0;
+}
+
+/* ============================================
+   HEADER ESPECÍFICO PARA VENTAS
+   ============================================ */
+.ventas-page .dashboard-header.ventas-header {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 1.75rem 2rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 25px rgba(31, 59, 77, 0.15);
+}
+
+.ventas-page .dashboard-header.ventas-header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, 
+    var(--accent-color) 0%, 
+    rgba(0, 212, 170, 0.5) 50%, 
+    var(--accent-color) 100%);
+}
+
+.ventas-page .dashboard-header.ventas-header .header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.ventas-page .dashboard-header.ventas-header .welcome-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ventas-page .dashboard-header.ventas-header .welcome-title {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: white;
+  margin: 0;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ventas-page .dashboard-header.ventas-header .welcome-title svg {
+  width: 36px;
+  height: 36px;
+}
+
+.ventas-page .dashboard-header.ventas-header .welcome-date {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.375rem 1rem;
+  border-radius: 50px;
+  display: inline-block;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Botón Actualizar específico para Ventas */
+.ventas-page .btn-secondary.ventas-btn-refresh {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  backdrop-filter: blur(10px);
+  letter-spacing: 0.3px;
+}
+
+.ventas-page .btn-secondary.ventas-btn-refresh:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.ventas-page .btn-secondary.ventas-btn-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.ventas-page .btn-secondary.ventas-btn-refresh .spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ============================================
+   ERROR MESSAGE
+   ============================================ */
+.ventas-error {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  padding: 1rem 2rem;
+  margin: 1rem 2rem;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: slideDown 0.3s ease-out;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.ventas-error svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.ventas-error span {
+  flex: 1;
+  margin: 0 1rem;
+  font-weight: 500;
+}
+
+.ventas-error button {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.ventas-error button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================
+   ESTADÍSTICAS
+   ============================================ */
+.ventas-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 100%);
+  opacity: 0.8;
+}
+
+.stat-card h3 {
+  color: var(--primary-color);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.75rem;
+  opacity: 0.8;
+}
+
+.stat-number {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--primary-color);
+  margin: 0;
+  line-height: 1;
+}
+
+.stat-card .stat-error {
+  color: #ef4444;
+}
+
+/* ============================================
+   CONTENIDO PRINCIPAL ESPECÍFICO PARA VENTAS
+   ============================================ */
+.ventas-page .content-section.ventas-content-section {
+  padding: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.ventas-page .content-card.ventas-content-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 2rem;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.ventas-page .content-card.ventas-content-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 100%);
+  opacity: 0.9;
+}
+
+/* ============================================
+   HEADER DE CARTA ESPECÍFICO PARA VENTAS
+   ============================================ */
+.ventas-page .card-header.ventas-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(0, 212, 170, 0.15);
+  position: relative;
+}
+
+.ventas-page .card-header.ventas-card-header::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 80px;
+  height: 2px;
+  background: var(--accent-color);
+  border-radius: 1px;
+}
+
+.ventas-page .card-header.ventas-card-header h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ventas-page .card-header.ventas-card-header h3::before {
+  content: "";
+  display: block;
+  width: 24px;
+  height: 24px;
+  background: var(--accent-color);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 13H21V11H3V13ZM3 6H21V4H3V6ZM3 18H21V16H3V18Z'/%3E%3C/svg%3E") center no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 13H21V11H3V13ZM3 6H21V4H3V6ZM3 18H21V16H3V18Z'/%3E%3C/svg%3E") center no-repeat;
+}
+
+.ventas-page .card-header.ventas-card-header .ventas-count {
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-dark) 100%);
+  color: white;
+  padding: 0.375rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* ============================================
+   TABLA ESPECÍFICA PARA VENTAS
+   ============================================ */
+.ventas-page .table-container.ventas-table-container {
+  margin: 1rem 0;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  min-height: 300px;
+}
+
+.ventas-page .data-table.ventas-data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.95rem;
+}
+
+.ventas-page .data-table.ventas-data-table thead {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+}
+
+.ventas-page .data-table.ventas-data-table th {
+  padding: 1.25rem 1.5rem;
+  text-align: left;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.ventas-page .data-table.ventas-data-table th::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 25%;
+  height: 50%;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.ventas-page .data-table.ventas-data-table th:last-child::after {
+  display: none;
+}
+
+.ventas-page .data-table.ventas-data-table td {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  background: white;
+  color: #4a5568;
+  transition: all 0.2s ease;
+}
+
+.ventas-page .data-table.ventas-data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.ventas-page .data-table.ventas-data-table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.ventas-page .data-table.ventas-data-table tbody tr:hover {
+  background-color: #f8fafc;
+  transform: scale(1.002);
+}
+
+/* Celdas específicas */
+.ventas-id {
+  font-weight: 700;
+  color: var(--primary-color);
+  font-family: 'Courier New', monospace;
+}
+
+.ventas-cliente .cliente-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ventas-cliente .cliente-info small {
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+.ventas-fecha {
+  color: #6b7280;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.ventas-estado .estado-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ventas-estado .estado-badge svg {
+  width: 14px;
+  height: 14px;
+}
+
+.ventas-total {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.ventas-items {
+  text-align: center;
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+/* Botón de acciones */
+.btn-ver-factura {
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-dark) 100%);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.btn-ver-factura:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 212, 170, 0.3);
+}
+
+.btn-ver-factura:active {
+  transform: translateY(0);
+}
+
+.btn-ver-factura svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================
+   ESTADO VACÍO
+   ============================================ */
+.ventas-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+.ventas-empty svg {
+  width: 64px;
+  height: 64px;
+  color: #d1d5db;
+  margin-bottom: 1rem;
+}
+
+.ventas-empty h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 0.5rem;
+}
+
+.ventas-empty p {
+  color: #9ca3af;
+  margin: 0;
+}
+
+/* ============================================
+   PAGINACIÓN
+   ============================================ */
+.ventas-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid rgba(0, 212, 170, 0.15);
+}
+
+.ventas-pagination-info {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.ventas-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ventas-pagination-controls button {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 100px;
+}
+
+.ventas-pagination-controls button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(31, 59, 77, 0.3);
+}
+
+.ventas-pagination-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.ventas-pagination-controls .pagination-current {
+  background: var(--accent-color);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  margin: 0 0.5rem;
+}
+
+/* ============================================
+   ESTADOS ESPECÍFICOS PARA VENTAS
+   ============================================ */
+/* Loading State */
+.ventas-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: var(--primary-color);
+}
+
+.ventas-loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(0, 212, 170, 0.2);
+  border-top-color: var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+.ventas-loading h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* ============================================
+   ANIMACIONES
+   ============================================ */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1024px) {
+  .ventas-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .ventas-page .data-table.ventas-data-table {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .ventas-page .dashboard-header.ventas-header {
+    padding: 1.25rem 1.5rem;
+  }
+  
+  .ventas-page .dashboard-header.ventas-header .welcome-title {
+    font-size: 1.5rem;
+  }
+  
+  .ventas-page .content-section.ventas-content-section {
+    padding: 1rem;
+  }
+  
+  .ventas-page .content-card.ventas-content-card {
+    padding: 1.5rem;
+  }
+  
+  .ventas-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .ventas-page .data-table.ventas-data-table th,
+  .ventas-page .data-table.ventas-data-table td {
+    padding: 1rem;
+  }
+  
+  .ventas-pagination {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .ventas-pagination-controls {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .ventas-error {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .ventas-error button {
+    width: 100%;
+  }
+  
+  .ventas-page .data-table.ventas-data-table {
+    font-size: 0.875rem;
+  }
+  
+  .btn-ver-factura {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ============================================
+   DARK MODE
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+  .ventas-page {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  }
+  
+  .ventas-page::before {
+    background: linear-gradient(90deg, 
+      rgba(31, 59, 77, 0.1) 0%, 
+      rgba(0, 212, 170, 0.1) 50%, 
+      rgba(31, 59, 77, 0.1) 100%);
+  }
+  
+  .ventas-page .content-card.ventas-content-card,
+  .stat-card {
+    background: #111111;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .ventas-page .data-table.ventas-data-table td {
+    background: #111111;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .ventas-page .data-table.ventas-data-table tbody tr:hover {
+    background-color: #1a1a1a;
+  }
+  
+  .ventas-cliente .cliente-info small {
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .ventas-fecha {
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .ventas-total {
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .ventas-empty {
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .ventas-empty h3 {
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .ventas-empty p {
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  .ventas-pagination-info {
+    color: rgba(255, 255, 255, 0.6);
+  }
+}
