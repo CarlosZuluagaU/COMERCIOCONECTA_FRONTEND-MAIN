@@ -39,8 +39,10 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8
 export default function AgregarProductoPage() {
   const { user, token } = useAuth();
   const [activeMenu, setActiveMenu] = useState<string | null>("Productos");
-  const [proveedores, setProveedores] = useState<Proveedor[]>([]); // Estado para proveedores
-  const [loading, setLoading] = useState(false); // Estado para loading
+  const [proveedores, setProveedores] = useState<Proveedor[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [imagenFile, setImagenFile] = useState<File | null>(null);
+  const [imagenPreview, setImagenPreview] = useState<string>("");
 
   const [formData, setFormData] = useState<Omit<Producto, "id">>({
     nombre: "",
@@ -148,6 +150,19 @@ export default function AgregarProductoPage() {
     }));
   };
 
+  const handleImagenChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImagenFile(file);
+      // Crear preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagenPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const calcularPrecioVenta = (precioCompra: number) => {
     const precioConIva = precioCompra * (1 + formData.iva / 100);
     const margen = precioConIva * 0.4; // 40% de margen
@@ -180,6 +195,11 @@ export default function AgregarProductoPage() {
       return;
     }
 
+    if (!imagenFile) {
+      alert("Por favor seleccione una imagen para el producto");
+      return;
+    }
+
     // Validar que el proveedor seleccionado exista en la lista
     if (formData.proveedor && !proveedores.some(p => p.nombre === formData.proveedor)) {
       alert("Por favor seleccione un proveedor válido de la lista");
@@ -187,13 +207,28 @@ export default function AgregarProductoPage() {
     }
 
     try {
+      // Usar FormData para enviar la imagen
+      const formDataWithImage = new FormData();
+      formDataWithImage.append("nombre", formData.nombre);
+      formDataWithImage.append("referencia", formData.referencia);
+      formDataWithImage.append("precioCompra", formData.precioCompra.toString());
+      formDataWithImage.append("precioVenta", formData.precioVenta.toString());
+      formDataWithImage.append("iva", formData.iva.toString());
+      formDataWithImage.append("categoria", formData.categoria);
+      formDataWithImage.append("marca", formData.marca);
+      formDataWithImage.append("almacenamiento", formData.almacenamiento);
+      formDataWithImage.append("estado", formData.estado);
+      formDataWithImage.append("stock", formData.stock.toString());
+      formDataWithImage.append("stockMinimo", formData.stockMinimo.toString());
+      formDataWithImage.append("proveedor", formData.proveedor);
+      formDataWithImage.append("imagen", imagenFile);
+
       const response = await fetch(`${API_BASE_URL}/productos`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: formDataWithImage,
       });
 
       if (!response.ok) {
@@ -220,6 +255,8 @@ export default function AgregarProductoPage() {
         stockMinimo: 5,
         proveedor: "",
       });
+      setImagenFile(null);
+      setImagenPreview("");
     } catch (error) {
       console.error(error);
       alert("Hubo un error al guardar el producto");
@@ -242,6 +279,8 @@ export default function AgregarProductoPage() {
       stockMinimo: 5,
       proveedor: "",
     });
+    setImagenFile(null);
+    setImagenPreview("");
   };
 
   return (
@@ -451,7 +490,38 @@ export default function AgregarProductoPage() {
                     <option value="Inactivo">Inactivo</option>
                   </select>
                 </div>
+
+                {/* Imagen del producto */}
+                <div className="form-group">
+                  <label>Imagen del Producto *</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImagenChange}
+                    className="form-input"
+                  />
+                </div>
               </div>
+
+              {/* Preview de imagen */}
+              {imagenPreview && (
+                <div style={{ 
+                  marginBottom: "1.5rem", 
+                  padding: "1rem", 
+                  backgroundColor: "var(--gray-alpha-100)", 
+                  borderRadius: "0.5rem",
+                  textAlign: "center"
+                }}>
+                  <p style={{ marginBottom: "0.5rem", fontSize: "0.875rem", color: "var(--text-gray)" }}>
+                    Vista previa de la imagen
+                  </p>
+                  <img 
+                    src={imagenPreview} 
+                    alt="Preview" 
+                    style={{ maxWidth: "100%", maxHeight: "200px", borderRadius: "0.5rem" }}
+                  />
+                </div>
+              )}
 
               {/* Resumen de precios */}
               <div className="price-summary">
@@ -491,7 +561,8 @@ export default function AgregarProductoPage() {
                     !formData.nombre ||
                     !formData.referencia ||
                     !formData.categoria ||
-                    formData.precioCompra <= 0
+                    formData.precioCompra <= 0 ||
+                    !imagenFile
                   }
                 >
                   <FiSave style={{ marginRight: "8px" }} />

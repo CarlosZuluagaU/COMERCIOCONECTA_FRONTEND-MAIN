@@ -17,6 +17,13 @@ interface StatsCard {
 export default function DashboardPage() {
   const { user } = useAuth();
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string>("");
+  const [businessName, setBusinessName] = useState<string>("");
+  
+  useEffect(() => {
+    setUserName(localStorage.getItem("userName") || "");
+    setBusinessName(localStorage.getItem("businessName") || "");
+  }, []);
   const [statsData, setStatsData] = useState({
     totalVentas: 0,
     totalOrdenes: 0,
@@ -179,8 +186,16 @@ export default function DashboardPage() {
           React.createElement(
             "div",
             { className: "welcome-section" },
-            React.createElement("h1", { className: "welcome-title" }, "Bienvenido, ", React.createElement("strong", null, user || "Usuario")),
-            React.createElement("p", { className: "welcome-date" }, today)
+            React.createElement(
+              "div",
+              { className: "welcome-content" },
+              React.createElement("h1", { className: "welcome-title" }, 
+                "Bienvenido",
+                userName && [", ", React.createElement("strong", null, userName.split(" ")[0])]
+              ),
+              businessName && React.createElement("p", { className: "welcome-business" }, businessName),
+              React.createElement("p", { className: "welcome-date" }, today)
+            )
           ),
           React.createElement(
             "div",

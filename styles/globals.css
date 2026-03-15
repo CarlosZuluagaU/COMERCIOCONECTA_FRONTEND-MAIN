@@ -1,15 +1,53 @@
 /* styles/globals.css */
 
+/* ── TEMA CLARO (por defecto) ── */
+:root,
+[data-theme="light"] {
+  --color-bg: #f9f9f9;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f1f5f9;
+  --color-border: #e2e8f0;
+  --color-text: #111827;
+  --color-text-secondary: #6b7280;
+  --color-primary: #00a88f;
+  --color-primary-dark: #008f77;
+  --color-link: #2563eb;
+  --color-error-bg: #fee2e2;
+  --color-error-text: #b91c1c;
+  --color-input-border: #ccc;
+  --color-input-focus: #00a88f;
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* ── TEMA OSCURO ── */
+[data-theme="dark"] {
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-surface-alt: #263347;
+  --color-border: #334155;
+  --color-text: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-primary: #00d4aa;
+  --color-primary-dark: #00a88f;
+  --color-link: #60a5fa;
+  --color-error-bg: #450a0a;
+  --color-error-text: #fca5a5;
+  --color-input-border: #475569;
+  --color-input-focus: #00d4aa;
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
 html, body, #__next {
   height: 100%;
   margin: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f9f9f9; /* blanco suave */
-  
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 a {
-  color: #2563eb;
+  color: var(--color-link);
   text-decoration: none;
 }
 
@@ -21,23 +59,26 @@ input {
   width: 100%;
   padding: 12px;
   border-radius: 8px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-input-border);
   margin-top: 6px;
   margin-bottom: 18px;
   box-sizing: border-box;
   font-size: 15px;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 input:focus {
   outline: none;
-  border-color: #00a88f;
+  border-color: var(--color-input-focus);
   box-shadow: 0 0 5px rgba(0, 168, 143, 0.3);
 }
 
 button {
   width: 100%;
   padding: 12px;
-  background-color: #00a88f;
+  background-color: var(--color-primary);
   color: white;
   border: none;
   border-radius: 8px;
@@ -48,12 +89,12 @@ button {
 }
 
 button:hover {
-  background-color: #008f77;
+  background-color: var(--color-primary-dark);
 }
 
 .error-message {
-  background-color: #fee2e2;
-  color: #b91c1c;
+  background-color: var(--color-error-bg);
+  color: var(--color-error-text);
   padding: 10px;
   border-radius: 8px;
   text-align: center;
@@ -61,17 +102,18 @@ button:hover {
 }
 
 .card {
-  background-color: white;
+  background-color: var(--color-surface);
   padding: 30px;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-card);
   max-width: 400px;
   width: 100%;
   text-align: center;
+  transition: background-color 0.3s ease;
 }
 
 h1 {
   margin-bottom: 20px;
   font-size: 28px;
-  color: #111827;
+  color: var(--color-text);
 }

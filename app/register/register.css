@@ -1,32 +1,32 @@
-/* Estructura general */
+/* ── REGISTRO: ambos pasos ── */
+
 body {
   margin: 0;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f4f6f8;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
 }
 
 .register-page {
   display: flex;
   justify-content: center;
   align-items: center;
+  min-height: 100vh;
   width: 100%;
+  background-color: var(--color-bg, #f4f6f8);
+  transition: background-color 0.3s ease;
 }
 
 .register-box {
   display: flex;
   width: 900px;
   max-width: 95%;
-  background: #ffffff;
+  background: var(--color-surface, #ffffff);
   border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-card, 0 10px 30px rgba(0, 0, 0, 0.12));
   overflow: hidden;
+  transition: background-color 0.3s ease;
 }
 
-/* Sección izquierda */
+/* ── Panel izquierdo ── */
 .register-left {
   flex: 1;
   background: #1F3B4D;
@@ -36,14 +36,15 @@ body {
   justify-content: center;
   align-items: center;
   padding: 40px;
+  gap: 12px;
 }
 
 .brand-title {
   font-size: 32px;
   font-weight: 900;
   text-transform: uppercase;
-  margin-bottom: 30px;
   text-shadow: 2px 2px 8px rgba(0,0,0,0.25);
+  margin: 0 0 12px;
 }
 
 .brand-title strong {
@@ -51,26 +52,288 @@ body {
 }
 
 .have-account-text {
-  margin-top: 10px;
-  font-size: 16px;
+  font-size: 15px;
   color: #e0e0e0;
+  margin: 0;
 }
 
 .login-button {
-  margin-top: 15px;
-  padding: 12px 25px;
+  margin-top: 4px;
+  padding: 12px 28px;
   background: #00d4aa;
   color: #fff;
   border-radius: 8px;
   text-decoration: none;
   font-weight: 600;
   transition: background 0.3s ease, transform 0.2s ease;
+  display: inline-block;
 }
 
 .login-button:hover {
   background: #00a88f;
   transform: translateY(-2px);
+  text-decoration: none;
 }
+
+/* ── Panel derecho ── */
+.register-right {
+  flex: 1;
+  padding: 40px 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+/* ── Stepper ── */
+.steps-indicator {
+  display: flex;
+  align-items: center;
+  margin-bottom: 28px;
+  gap: 0;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.step-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid #d1d5db;
+  background: transparent;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.step-label {
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.step.active .step-number {
+  background: #00d4aa;
+  border-color: #00d4aa;
+  color: #ffffff;
+}
+
+.step.active .step-label {
+  color: #00d4aa;
+  font-weight: 700;
+}
+
+.step.completed .step-number {
+  background: #00a88f;
+  border-color: #00a88f;
+  color: #ffffff;
+}
+
+.step.completed .step-label {
+  color: #00a88f;
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: #e5e7eb;
+  margin: 0 8px;
+  margin-bottom: 20px;
+  transition: background 0.3s ease;
+}
+
+.step-line.completed {
+  background: #00a88f;
+}
+
+/* ── Títulos ── */
+.register-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: var(--color-text, #2c3e50);
+}
+
+.register-subtitle {
+  font-size: 14px;
+  color: var(--color-text-secondary, #6b7280);
+  margin: 0 0 22px;
+}
+
+/* ── Formulario ── */
+.register-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.register-form label {
+  font-size: 13px;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: var(--color-text, #34495e);
+}
+
+.register-form input {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--color-input-border, #ccc);
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: var(--color-surface, #ffffff);
+  color: var(--color-text, #111);
+  transition: border 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.register-form input:focus {
+  border-color: #00d4aa;
+  box-shadow: 0 0 8px rgba(0,212,170,0.25);
+  outline: none;
+}
+
+.register-form button[type="submit"] {
+  padding: 13px;
+  border: none;
+  border-radius: 8px;
+  background: #00d4aa;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.register-form button[type="submit"]:hover:not(:disabled) {
+  background: #00a88f;
+  transform: translateY(-2px);
+}
+
+.register-form button[type="submit"]:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ── Botón Volver + Finalizar en fila ── */
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.btn-back {
+  padding: 13px 18px;
+  border-radius: 8px;
+  border: 1.5px solid var(--color-border, #d1d5db);
+  background: transparent;
+  color: var(--color-text-secondary, #6b7280);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-back:hover {
+  border-color: #00d4aa;
+  color: #00d4aa;
+  text-decoration: none;
+}
+
+/* ── Mensajes ── */
+.error-message {
+  background: var(--color-error-bg, #f8d7da);
+  color: var(--color-error-text, #c0392b);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.success-message {
+  background: #d4edda;
+  color: #155724;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* ── Divider OAuth ── */
+.oauth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 14px;
+  color: var(--color-text-secondary, #9ca3af);
+  font-size: 13px;
+}
+
+.oauth-divider::before,
+.oauth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-border, #e5e7eb);
+}
+
+/* ── Botón Google ── */
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 16px;
+  border: 1.5px solid var(--color-border, #d1d5db);
+  border-radius: 8px;
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text, #374151);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: not-allowed;
+  opacity: 0.7;
+  width: 100%;
+  transition: background-color 0.3s ease;
+}
+
+.coming-soon {
+  font-size: 11px;
+  color: var(--color-text-secondary, #9ca3af);
+  margin-left: 6px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .register-box {
+    flex-direction: column;
+    max-height: none;
+  }
+
+  .register-left {
+    padding: 30px 20px;
+  }
+
+  .register-right {
+    padding: 30px 24px;
+    max-height: none;
+  }
+}
+
 
 /* Sección derecha */
 .register-right {

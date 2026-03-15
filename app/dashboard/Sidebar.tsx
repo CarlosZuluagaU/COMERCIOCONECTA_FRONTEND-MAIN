@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   FiChevronDown, 
   FiChevronUp, 
@@ -10,9 +10,12 @@ import {
   FiSettings, 
   FiPackage, 
   FiShoppingBag,
-  FiLogOut // <-- Agregar este icono
+  FiLogOut,
+  FiSun,
+  FiMoon
 } from "react-icons/fi";
-import { useRouter } from "next/navigation"; // <-- Importar useRouter
+import { useRouter } from "next/navigation";
+import { useTheme } from "../context/ThemeContext";
 
 interface SubOption {
   label: string;
@@ -33,7 +36,56 @@ interface SidebarProps {
 
 export default function Sidebar({ activeMenu, onMenuToggle }: SidebarProps) {
   const [localActiveMenu, setLocalActiveMenu] = useState<string | null>(null);
-  const router = useRouter(); // <-- Inicializar router
+  const [businessName, setBusinessName] = useState<string>("");
+  const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
+
+  useEffect(() => {
+    // Primero intenta obtener del backend
+    const fetchBusinessName = async () => {
+      try {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
+        const token = localStorage.getItem("token");
+        
+        if (!token) {
+          // Si no hay token, usar localStorage
+          setBusinessName(localStorage.getItem("businessName") || "");
+          return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/comercios`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+          const comercios = await response.json();
+          // Si hay comercios, usar el primero (el del usuario actual)
+          if (Array.isArray(comercios) && comercios.length > 0) {
+            setBusinessName(comercios[0].nombre);
+            localStorage.setItem("businessName", comercios[0].nombre);
+          } else {
+            setBusinessName(localStorage.getItem("businessName") || "");
+          }
+        } else {
+          // Si falla, usar localStorage
+          setBusinessName(localStorage.getItem("businessName") || "");
+        }
+      } catch (error) {
+        // En caso de error, usar localStorage
+        setBusinessName(localStorage.getItem("businessName") || "");
+      }
+    };
+
+    fetchBusinessName();
+
+    // Escuchar cambios en localStorage
+    const handleStorageChange = () => {
+      setBusinessName(localStorage.getItem("businessName") || "");
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   const menuItems: MenuItem[] = [
     { label: "Dashboard", options: [], icon: React.createElement(FiHome), path: "/dashboard" },
@@ -121,7 +173,13 @@ export default function Sidebar({ activeMenu, onMenuToggle }: SidebarProps) {
       React.createElement("div", { className: "brand-subtitle" }, "Suite empresarial")
     ),
 
-    // NAVIGATION
+    // COMERCIO ACTUAL
+    React.createElement(
+      "div",
+      { className: "sidebar-commerce-info" },
+      React.createElement("p", { className: "commerce-label" }, "📍 Comercio actual"),
+      React.createElement("p", { className: "commerce-name" }, businessName || "No registrado")
+    ),
     React.createElement(
       "nav",
       { className: "sidebar-nav" },
@@ -175,6 +233,35 @@ export default function Sidebar({ activeMenu, onMenuToggle }: SidebarProps) {
     React.createElement(
       "div",
       { className: "sidebar-footer" },
+      // Botón de cambio de tema
+      React.createElement(
+        "button",
+        {
+          onClick: toggleTheme,
+          className: "logout-button",
+          style: {
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            width: "100%",
+            padding: "12px 16px",
+            backgroundColor: theme === "dark" ? "#334155" : "rgba(255,255,255,0.15)",
+            color: "white",
+            border: "1px solid rgba(255,255,255,0.2)",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontSize: "14px",
+            fontWeight: "500",
+            transition: "background-color 0.2s ease",
+            marginBottom: "8px"
+          }
+        },
+        theme === "dark"
+          ? React.createElement(FiSun, { size: 18 })
+          : React.createElement(FiMoon, { size: 18 }),
+        theme === "dark" ? "Modo claro" : "Modo oscuro"
+      ),
+      // Botón de cerrar sesión
       React.createElement(
         "button",
         {
