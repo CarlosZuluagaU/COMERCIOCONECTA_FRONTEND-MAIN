@@ -1,3 +1,12 @@
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #f8fafc;
+}
+
 .complete-profile-box {
   width: 600px;
   max-width: 95%;
@@ -80,4 +89,17 @@
 
 .back-link a:hover {
   color: #00a88f;
+}
+
+@media (max-width: 768px) {
+  .register-page {
+    align-items: flex-start;
+    padding: 16px;
+  }
+
+  .complete-profile-box {
+    width: 100%;
+    max-width: 100%;
+    padding: 28px 20px;
+  }
 }

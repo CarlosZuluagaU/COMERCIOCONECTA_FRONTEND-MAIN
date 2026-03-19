@@ -55,7 +55,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       payload = await res.json();
     }
     if (!payload) throw new Error("Token de Google invalido");
-    const gUser: GoogleUser = { email: payload.email, name: payload.name, picture: payload.picture, sub: payload.sub };
+
+    const subject = payload.sub || payload.id;
+    if (!payload.email || !subject) {
+      throw new Error("No se pudo obtener la identidad del usuario de Google");
+    }
+
+    const gUser: GoogleUser = {
+      email: payload.email,
+      name: payload.name || payload.email,
+      picture: payload.picture,
+      sub: subject,
+    };
     localStorage.setItem("googleUser", JSON.stringify(gUser));
     setGoogleUser(gUser);
     try {

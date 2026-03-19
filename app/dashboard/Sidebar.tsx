@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import "./sidebar.css";
 
@@ -67,9 +67,30 @@ const menu = [
 export default function Sidebar({ activeMenu, onMenuToggle }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [open, setOpen] = useState<string | null>(null);
+  const [open, setOpen] = useState<string | null>(activeMenu ?? null);
 
-  const toggle = (label: string) => setOpen(prev => prev === label ? null : label);
+  useEffect(() => {
+    if (activeMenu !== undefined) {
+      setOpen(activeMenu);
+    }
+  }, [activeMenu]);
+
+  useEffect(() => {
+    const currentParent = menu.find(
+      item => !item.path && item.sub.some(s => pathname.startsWith(s.path))
+    );
+
+    if (currentParent) {
+      setOpen(currentParent.label);
+      onMenuToggle?.(currentParent.label);
+    }
+  }, [pathname, onMenuToggle]);
+
+  const toggle = (label: string) => {
+    const next = open === label ? null : label;
+    setOpen(next);
+    onMenuToggle?.(next);
+  };
 
   const handleLogout = () => {
     ["token", "refreshToken", "user", "googleUser"].forEach(k => localStorage.removeItem(k));
