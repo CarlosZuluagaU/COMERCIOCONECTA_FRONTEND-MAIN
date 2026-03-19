@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ComerciosConecta – Configuración: Costo de Envío (HU-15)</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',sans-serif;background:#f4f6f8;display:flex;min-height:100vh}
+  .sidebar{width:240px;background:#1F3B4D;color:#fff;padding:24px 0;flex-shrink:0}
+  .sidebar-brand{padding:0 20px 24px;font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,.1)}
+  .sidebar-brand span{color:#00d4aa}
+  .nav-item{padding:12px 20px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.7);transition:background .2s}
+  .nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
+  .nav-item.active{background:rgba(255,255,255,.08);color:#fff;border-left:3px solid #00d4aa;padding-left:17px}
+  .main{flex:1;overflow:auto}
+  .topbar{background:#fff;padding:16px 32px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between}
+  .breadcrumb{font-size:13px;color:#888;display:flex;align-items:center;gap:6px}
+  .breadcrumb a{color:#00d4aa;text-decoration:none}
+  .breadcrumb .current{color:#1F3B4D;font-weight:600}
+  .content{padding:28px 32px;max-width:760px}
+  .page-title{font-size:22px;font-weight:800;color:#1F3B4D;margin-bottom:4px}
+  .page-sub{font-size:14px;color:#888;margin-bottom:32px}
+  /* Settings cards */
+  .settings-card{background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.06);padding:28px;margin-bottom:20px}
+  .card-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#1F3B4D;border-bottom:2px solid #00d4aa;padding-bottom:8px;margin-bottom:20px}
+  /* Shipping field */
+  .shipping-field{display:flex;align-items:center;gap:0;border:2px solid #ddd;border-radius:10px;overflow:hidden;max-width:260px;transition:border .2s}
+  .shipping-field:focus-within{border-color:#00d4aa}
+  .currency-prefix{background:#f4f6f8;padding:12px 16px;font-size:16px;font-weight:700;color:#1F3B4D;border-right:1px solid #ddd}
+  .shipping-field input{border:none;outline:none;padding:12px 16px;font-size:18px;font-weight:700;color:#1F3B4D;width:160px;font-family:inherit}
+  .shipping-hint{font-size:13px;color:#888;margin-top:10px}
+  .free-badge{display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:5px 10px;font-size:13px;color:#16a34a;margin-top:12px}
+  /* Preview */
+  .preview-box{background:#f8f9fa;border:1px solid #e0e0e0;border-radius:10px;padding:16px 20px;margin-top:16px}
+  .preview-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#888;margin-bottom:12px}
+  .preview-row{display:flex;justify-content:space-between;font-size:13px;color:#666;margin-bottom:6px}
+  .preview-total{display:flex;justify-content:space-between;font-size:15px;font-weight:800;color:#1F3B4D;margin-top:8px;padding-top:8px;border-top:1px solid #ddd}
+  .preview-shipping{color:#00d4aa;font-weight:600}
+  /* Toggle free shipping */
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #f0f0f0}
+  .toggle-row:last-child{border-bottom:none;padding-bottom:0}
+  .toggle-info h4{font-size:14px;font-weight:600;color:#1F3B4D;margin-bottom:2px}
+  .toggle-info p{font-size:12px;color:#888}
+  .toggle{position:relative;display:inline-block;width:44px;height:24px}
+  .toggle input{display:none}
+  .slider{position:absolute;top:0;left:0;right:0;bottom:0;background:#ddd;border-radius:24px;cursor:pointer;transition:.3s}
+  .slider:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s}
+  input:checked+.slider{background:#00d4aa}
+  input:checked+.slider:before{transform:translateX(20px)}
+  /* Save button */
+  .btn-save{padding:12px 28px;background:#00d4aa;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:background .2s}
+  .btn-save:hover{background:#00b89a}
+  .btn-back{color:#888;font-size:13px;cursor:pointer;background:none;border:none;text-decoration:underline;margin-right:16px}
+  /* Toast */
+  .toast{position:fixed;bottom:24px;right:24px;background:#1F3B4D;color:#fff;padding:14px 20px;border-radius:10px;font-size:14px;display:none;align-items:center;gap:10px;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+  .toast.show{display:flex}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">Comercios<span>Conecta</span></div>
+  <div class="nav-item">🏠 Dashboard</div>
+  <div class="nav-item">📦 Productos</div>
+  <div class="nav-item">🧾 Ventas</div>
+  <div class="nav-item">👥 Clientes</div>
+  <div class="nav-item">🛒 Compras</div>
+  <div class="nav-item">🛍️ E-commerce</div>
+  <div class="nav-item">⚙️ Mi Perfil</div>
+  <div class="nav-item active">🔧 Configuración</div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">
+      <a href="#">Panel</a> <span>›</span>
+      <span class="current">Configuración</span>
+    </div>
+    <div style="font-size:13px;color:#888">admin@mitienda.com</div>
+  </div>
+
+  <div class="content">
+    <div class="page-title">Configuración</div>
+    <p class="page-sub">Administra las preferencias de tu tienda online.</p>
+
+    <!-- Costo de envío -->
+    <div class="settings-card">
+      <div class="card-title">🚚 Costo de envío</div>
+
+      <p style="font-size:14px;color:#555;margin-bottom:18px">
+        Define el costo fijo que se sumará al total de cada pedido. Ingresa <strong>0</strong> para ofrecer envío gratuito.
+      </p>
+
+      <div class="shipping-field">
+        <span class="currency-prefix">$</span>
+        <input type="number" id="shippingCost" value="15000" min="0" step="500" oninput="updatePreview()">
+      </div>
+      <p class="shipping-hint">Valor en pesos colombianos (COP)</p>
+      <div class="free-badge" id="freeBadge" style="display:none">🎁 Los clientes verán "Envío: Gratis"</div>
+
+      <!-- Preview en la tienda -->
+      <div class="preview-box">
+        <div class="preview-title">Vista previa en la tienda del cliente</div>
+        <div class="preview-row"><span>Subtotal productos</span><span>$250.000</span></div>
+        <div class="preview-row"><span>Costo de envío</span><span class="preview-shipping" id="previewShipping">$15.000</span></div>
+        <div class="preview-total"><span>Total a pagar</span><span id="previewTotal">$265.000</span></div>
+      </div>
+    </div>
+
+    <!-- Opciones adicionales -->
+    <div class="settings-card">
+      <div class="card-title">🛍️ Opciones de la tienda</div>
+
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <h4>Aceptar pedidos</h4>
+          <p>Si lo desactivas, los clientes no podrán realizar nuevos pedidos</p>
+        </div>
+        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <h4>Mostrar precios en la tienda</h4>
+          <p>Oculta los precios si prefieres que los clientes te contacten primero</p>
+        </div>
+        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <h4>Notificaciones por email de nuevos pedidos</h4>
+          <p>Recibe un correo cada vez que llega un nuevo pedido</p>
+        </div>
+        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div>
+      <button class="btn-back">← Volver</button>
+      <button class="btn-save" onclick="guardar()">Guardar configuración</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <span style="color:#00d4aa;font-size:18px">✓</span>
+  Configuración guardada correctamente
+</div>
+
+<script>
+  function updatePreview() {
+    const val = parseInt(document.getElementById('shippingCost').value) || 0;
+    const subtotal = 250000;
+    const total = subtotal + val;
+    const shipping = val === 0 ? 'Gratis 🎁' : '$' + val.toLocaleString('es-CO');
+    document.getElementById('previewShipping').textContent = shipping;
+    document.getElementById('previewTotal').textContent = '$' + total.toLocaleString('es-CO');
+    document.getElementById('freeBadge').style.display = val === 0 ? 'inline-flex' : 'none';
+  }
+  function guardar() {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>

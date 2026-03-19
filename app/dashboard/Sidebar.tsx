@@ -1,212 +1,140 @@
 "use client";
-import React, { useState } from "react";
-import { 
-  FiChevronDown, 
-  FiChevronUp, 
-  FiUsers, 
-  FiFileText, 
-  FiBox, 
-  FiHome, 
-  FiSettings, 
-  FiPackage, 
-  FiShoppingBag,
-  FiLogOut // <-- Agregar este icono
-} from "react-icons/fi";
-import { useRouter } from "next/navigation"; // <-- Importar useRouter
-
-interface SubOption {
-  label: string;
-  path: string;
-}
-
-interface MenuItem {
-  label: string;
-  options: SubOption[];
-  icon: React.ReactNode;
-  path?: string;
-}
+import { useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import "./sidebar.css";
 
 interface SidebarProps {
   activeMenu?: string | null;
   onMenuToggle?: (menu: string | null) => void;
 }
 
+const menu = [
+  {
+    label: "Estadísticas",
+    icon: "📊",
+    path: "/dashboard",
+    sub: [],
+  },
+  {
+    label: "Productos",
+    icon: "📦",
+    sub: [
+      { label: "Listado de productos", path: "/products/product-list" },
+      { label: "Agregar producto",     path: "/products/add-product" },
+    ],
+  },
+  {
+    label: "Pedidos",
+    icon: "🛒",
+    sub: [
+      { label: "Ver pedidos", path: "/ecommerce/orders" },
+    ],
+  },
+  {
+    label: "Clientes",
+    icon: "👥",
+    sub: [
+      { label: "Listado de clientes", path: "/clients/list-clients" },
+      { label: "Agregar cliente",     path: "/clients/create-client" },
+    ],
+  },
+  {
+    label: "Facturación",
+    icon: "🧾",
+    sub: [
+      { label: "Ver ventas",  path: "/sales" },
+      { label: "Crear venta", path: "/sales/create" },
+    ],
+  },
+  {
+    label: "Compras",
+    icon: "📋",
+    sub: [
+      { label: "Histórico de compras", path: "/purchases/purchase-history" },
+      { label: "Realizar compra",      path: "/purchases/create-purchase" },
+      { label: "Proveedores",          path: "/purchases/suppliers" },
+    ],
+  },
+  {
+    label: "Personalización",
+    icon: "🎨",
+    sub: [
+      { label: "Apariencia de la tienda", path: "/personalization/store" },
+    ],
+  },
+];
+
 export default function Sidebar({ activeMenu, onMenuToggle }: SidebarProps) {
-  const [localActiveMenu, setLocalActiveMenu] = useState<string | null>(null);
-  const router = useRouter(); // <-- Inicializar router
+  const router = useRouter();
+  const pathname = usePathname();
+  const [open, setOpen] = useState<string | null>(null);
 
-  const menuItems: MenuItem[] = [
-    { label: "Dashboard", options: [], icon: React.createElement(FiHome), path: "/dashboard" },
-    { 
-      label: "Productos", 
-      options: [
-        { label: "Agregar productos", path: "../products/add-product" },
-        { label: "Listado de productos", path: "../products/product-list" },
-      ], 
-      icon: React.createElement(FiPackage) 
-    },
-    { 
-      label: "E-commerce", 
-      options: [
-        { label: "Dashboard", path: "../store2" },
-        { label: "Órdenes", path: "../ecommerce/orders" },
-      ], 
-      icon: React.createElement(FiShoppingBag) 
-    },
-    { 
-      label: "Clientes", 
-      options: [
-        { label: "Agregar cliente", path: "../clients/create-client" },
-        { label: "Listado de clientes", path: "../clients/list-clients" },
-      ], 
-      icon: React.createElement(FiUsers) 
-    },
-    { 
-      label: "Facturación", 
-      options: [
-        { label: "Crear venta", path: "../sales/create" },
-        { label: "Ver ventas", path: "../sales" },
-      ], 
-      icon: React.createElement(FiFileText) 
-    },
-    { 
-      label: "Compras", 
-      options: [
-        { label: "Realizar compra", path: "../purchases/create-purchase" },
-        { label: "Histórico de compras", path: "../purchases/purchase-history" },
-        { label: "Proveedores", path: "../purchases/suppliers" }
-      ], 
-      icon: React.createElement(FiBox) 
-    },
-  ];
+  const toggle = (label: string) => setOpen(prev => prev === label ? null : label);
 
-  const handleMenuClick = (menuLabel: string) => {
-    const newActiveMenu = (activeMenu ?? localActiveMenu) === menuLabel ? null : menuLabel;
-    if (onMenuToggle) {
-      onMenuToggle(newActiveMenu);
-    } else {
-      setLocalActiveMenu(newActiveMenu);
-    }
-  };
-
-  // <-- Función para cerrar sesión
   const handleLogout = () => {
-    // Limpiar el token de localStorage
-    localStorage.removeItem("token");
-    
-    // Opcional: Limpiar otros datos de sesión
-    // localStorage.removeItem("user");
-    // localStorage.removeItem("userRole");
-    
-    // Redirigir al login
+    ["token", "refreshToken", "user", "googleUser"].forEach(k => localStorage.removeItem(k));
     router.push("/login");
   };
 
-  const currentActiveMenu = activeMenu ?? localActiveMenu;
+  return (
+    <aside className="sb">
+      <div className="sb-brand">
+        <h1>Comercios<span>Conecta</span></h1>
+        <p>Suite empresarial</p>
+      </div>
 
-  return React.createElement(
-    "aside",
-    { className: "dashboard-sidebar" },
-    
-    // HEADER
-    React.createElement(
-      "div",
-      { className: "sidebar-header" },
-      React.createElement(
-        "h1", 
-        { className: "brand-title" },
-        "Comercios",
-        React.createElement("span", { className: "brand-accent" }, "Conecta")
-      ),
-      React.createElement("div", { className: "brand-subtitle" }, "Suite empresarial")
-    ),
+      <nav className="sb-nav">
+        {menu.map(item => {
+          const isActive = item.path
+            ? pathname === item.path
+            : item.sub.some(s => pathname.startsWith(s.path));
+          const isOpen = open === item.label;
 
-    // NAVIGATION
-    React.createElement(
-      "nav",
-      { className: "sidebar-nav" },
-      React.createElement(
-        "ul",
-        { className: "menu-list" },
-        menuItems.map(menu =>
-          React.createElement(
-            "li",
-            { key: menu.label, className: "menu-item" },
-            
-            // Botón principal
-            React.createElement(
-              menu.path ? "a" : "button",
-              {
-                className: `menu-button ${currentActiveMenu === menu.label ? "active" : ""}`,
-                onClick: menu.options.length > 0 ? () => handleMenuClick(menu.label) : undefined,
-                href: menu.path || undefined
-              },
-              React.createElement("span", { className: "menu-icon" }, menu.icon),
-              React.createElement("span", { className: "menu-label" }, menu.label),
-              menu.options.length > 0 && 
-                React.createElement("span", { className: "chevron" }, 
-                  currentActiveMenu === menu.label ? React.createElement(FiChevronUp) : React.createElement(FiChevronDown)
-                )
-            ),
+          return (
+            <div key={item.label}>
+              {item.path && item.sub.length === 0 ? (
+                <a
+                  href={item.path}
+                  className={`sb-item ${isActive ? "active" : ""}`}
+                >
+                  <span className="sb-icon">{item.icon}</span>
+                  {item.label}
+                </a>
+              ) : (
+                <button
+                  className={`sb-item ${isActive ? "active" : ""}`}
+                  onClick={() => toggle(item.label)}
+                >
+                  <span className="sb-icon">{item.icon}</span>
+                  {item.label}
+                  <span className="sb-chevron">{isOpen ? "▴" : "▾"}</span>
+                </button>
+              )}
 
-            // Submenú
-            currentActiveMenu === menu.label && menu.options.length > 0 &&
-              React.createElement(
-                "ul",
-                { className: "submenu-list" },
-                menu.options.map(option =>
-                  React.createElement(
-                    "li",
-                    { key: option.label, className: "submenu-item" },
-                    React.createElement(
-                      "a",
-                      { href: option.path, className: "submenu-link" },
-                      option.label
-                    )
-                  )
-                )
-              )
-          )
-        )
-      )
-    ),
+              {isOpen && item.sub.length > 0 && (
+                <div className="sb-sub">
+                  {item.sub.map(s => (
+                    <a
+                      key={s.path}
+                      href={s.path}
+                      className={`sb-sub-link ${pathname === s.path ? "active" : ""}`}
+                    >
+                      {s.label}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </nav>
 
-    // FOOTER CON BOTÓN DE CERRAR SESIÓN
-    React.createElement(
-      "div",
-      { className: "sidebar-footer" },
-      React.createElement(
-        "button",
-        {
-          onClick: handleLogout,
-          className: "logout-button",
-          style: {
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            width: "100%",
-            padding: "12px 16px",
-            backgroundColor: "#f56565",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontSize: "14px",
-            fontWeight: "500",
-            transition: "background-color 0.2s ease"
-          }
-        },
-        React.createElement(FiLogOut, { size: 18 }),
-        "Cerrar sesión"
-      ),
-      React.createElement(
-        "div",
-        { 
-          className: "user-info",
-          style: { marginTop: "10px", fontSize: "12px", color: "#666" }
-        }, 
-        "Sistema v1.0.0"
-      )
-    )
+      <div className="sb-footer">
+        <button className="sb-logout" onClick={handleLogout}>
+          🚪 Cerrar sesión
+        </button>
+        <p className="sb-version">Sistema v1.0.0</p>
+      </div>
+    </aside>
   );
 }

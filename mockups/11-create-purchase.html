@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Crear Compra – ComerciosConecta</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; display: flex; min-height: 100vh; }
+  aside { width: 220px; background: linear-gradient(180deg,#1F3B4D,#16303f); color: white; display: flex; flex-direction: column; min-height: 100vh; flex-shrink: 0; }
+  .sb-brand { padding: 28px 20px 20px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .sb-brand h1 { font-size: 1.2rem; font-weight: 800; } .sb-brand h1 span { color: #00d4aa; }
+  .sb-brand p { font-size: .7rem; color: rgba(255,255,255,.4); margin-top: 2px; }
+  nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: .85rem; color: rgba(255,255,255,.7); text-decoration: none; }
+  .nav-item.active { background: rgba(0,212,170,.15); color: #00d4aa; }
+  .sb-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,.08); }
+  .logout { display: flex; align-items: center; gap: 10px; background: #f56565; color: white; border: none; width: 100%; padding: 10px 14px; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; }
+  main { flex: 1; display: flex; flex-direction: column; }
+  header { background: white; padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  header h1 { font-size: 1.1rem; color: #1F3B4D; }
+  .btn-secondary { padding: 9px 18px; background: white; color: #1F3B4D; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; text-decoration: none; }
+  .content { padding: 24px 28px; display: grid; grid-template-columns: 1fr 280px; gap: 20px; align-items: start; }
+  .left { display: flex; flex-direction: column; gap: 20px; }
+  .card { background: white; border-radius: 12px; padding: 22px; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+  .card h3 { font-size: .95rem; color: #1F3B4D; font-weight: 700; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #00d4aa; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  label { font-size: .78rem; font-weight: 600; color: #555; }
+  input, select { padding: 10px 13px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: .88rem; outline: none; font-family: inherit; }
+  input:focus, select:focus { border-color: #00d4aa; }
+  .btn-add { padding: 9px 18px; background: #1F3B4D; color: white; border: none; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+  thead th { background: #f7f8fa; padding: 10px 12px; font-size: .75rem; color: #888; text-align: left; text-transform: uppercase; }
+  tbody td { padding: 10px 12px; font-size: .85rem; color: #333; border-bottom: 1px solid #f0f0f0; }
+  .btn-del { background: #fef2f2; color: #dc2626; border: none; padding: 5px 8px; border-radius: 6px; cursor: pointer; }
+  .total-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: .9rem; }
+  .total-row.grand { border-bottom: none; font-size: 1.1rem; font-weight: 800; color: #1F3B4D; padding-top: 14px; }
+  .btn-primary { padding: 13px; background: linear-gradient(135deg,#00d4aa,#00a88f); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; width: 100%; margin-top: 8px; }
+</style>
+</head>
+<body>
+<aside>
+  <div class="sb-brand"><h1>Comercios<span>Conecta</span></h1><p>Suite empresarial</p></div>
+  <nav>
+    <a class="nav-item" href="03-dashboard.html"><span>📊</span> Estadísticas</a>
+    <a class="nav-item" href="04-products-list.html"><span>📦</span> Productos</a>
+    <a class="nav-item" href="13-ecommerce-orders.html"><span>🛒</span> Pedidos</a>
+    <a class="nav-item" href="08-clients-list.html"><span>👥</span> Clientes</a>
+    <a class="nav-item" href="06-sales-list.html"><span>🧾</span> Facturación</a>
+    <a class="nav-item active" href="10-purchases-history.html"><span>📋</span> Compras</a>
+    <a class="nav-item" href="15-store-customizer.html"><span>🎨</span> Personalización</a>
+  </nav>
+  <div class="sb-footer"><button class="logout">🚪 Cerrar sesión</button></div>
+</aside>
+
+<main>
+  <header>
+    <h1>📋 Nueva Compra</h1>
+    <a class="btn-secondary" href="10-purchases-history.html">← Volver</a>
+  </header>
+
+  <div class="content">
+    <div class="left">
+      <div class="card">
+        <h3>Datos del Proveedor</h3>
+        <div class="row">
+          <div class="form-group">
+            <label>Proveedor *</label>
+            <select><option>Beiersdorf S.A.</option><option>Procter & Gamble</option><option>MAC Cosméticos</option><option>Farmacéuticos Unidos</option></select>
+          </div>
+          <div class="form-group">
+            <label>Fecha de compra *</label>
+            <input type="date" value="2026-03-10" />
+          </div>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <div class="form-group">
+            <label>Número de factura proveedor</label>
+            <input value="FAC-2026-0892" placeholder="Ej: FAC-2026-001" />
+          </div>
+          <div class="form-group">
+            <label>Método de pago</label>
+            <select><option>Transferencia</option><option>Efectivo</option><option>Cheque</option><option>Crédito 30 días</option></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Productos Comprados</h3>
+        <div class="row">
+          <div class="form-group">
+            <label>Producto</label>
+            <select><option>Crema Hidratante Nivea</option><option>Shampoo H&S</option><option>Protector Solar 50 FPS</option></select>
+          </div>
+          <div class="form-group">
+            <label>Cantidad</label>
+            <input type="number" value="50" />
+          </div>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <div class="form-group">
+            <label>Precio unitario (sin IVA)</label>
+            <input type="number" value="18000" />
+          </div>
+          <div class="form-group">
+            <label>IVA (%)</label>
+            <select><option>19%</option><option>5%</option><option>0%</option></select>
+          </div>
+        </div>
+        <button class="btn-add" style="margin-top:14px">＋ Agregar Producto</button>
+
+        <table>
+          <thead><tr><th>Producto</th><th>Cant</th><th>Precio unit.</th><th>IVA</th><th>Subtotal</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>Crema Hidratante Nivea</td><td>50</td><td>$18.000</td><td>19%</td><td>$1.071.000</td><td><button class="btn-del">🗑</button></td></tr>
+            <tr><td>Protector Solar 50 FPS</td><td>30</td><td>$22.000</td><td>19%</td><td>$785.400</td><td><button class="btn-del">🗑</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Resumen</h3>
+      <div class="total-row"><span>Subtotal:</span><span>$1.900.000</span></div>
+      <div class="total-row"><span>IVA total:</span><span>$361.000</span></div>
+      <div class="total-row grand"><span>Total:</span><span>$2.261.000</span></div>
+      <button class="btn-primary">💾 Registrar Compra</button>
+      <div style="margin-top:14px">
+        <div class="form-group">
+          <label>Observaciones</label>
+          <input placeholder="Notas adicionales…" />
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

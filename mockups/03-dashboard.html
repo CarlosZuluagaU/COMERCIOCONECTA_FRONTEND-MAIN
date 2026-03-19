@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard – ComerciosConecta</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; display: flex; min-height: 100vh; }
+  .back { position: fixed; top: 12px; left: 230px; z-index: 100; text-decoration: none; color: #1F3B4D; font-size: .78rem; font-weight: 600; background: white; padding: 5px 12px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+
+  /* SIDEBAR */
+  aside { width: 220px; background: linear-gradient(180deg,#1F3B4D,#16303f); color: white; display: flex; flex-direction: column; padding: 0; min-height: 100vh; flex-shrink: 0; }
+  .sb-brand { padding: 28px 20px 20px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .sb-brand h1 { font-size: 1.2rem; font-weight: 800; }
+  .sb-brand h1 span { color: #00d4aa; }
+  .sb-brand p { font-size: .7rem; color: rgba(255,255,255,.45); margin-top: 2px; }
+  nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: .85rem; color: rgba(255,255,255,.7); cursor: pointer; transition: background .15s; text-decoration: none; }
+  .nav-item:hover, .nav-item.active { background: rgba(0,212,170,.15); color: #00d4aa; }
+  .nav-item .icon { width: 18px; text-align: center; }
+  .nav-sub { padding-left: 40px; display: flex; flex-direction: column; gap: 2px; }
+  .nav-sub a { font-size: .78rem; color: rgba(255,255,255,.55); padding: 6px 8px; border-radius: 6px; text-decoration: none; }
+  .nav-sub a:hover { color: #00d4aa; }
+  .sb-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,.08); }
+  .logout { display: flex; align-items: center; gap: 10px; background: #f56565; color: white; border: none; width: 100%; padding: 10px 14px; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; }
+
+  /* MAIN */
+  main { flex: 1; display: flex; flex-direction: column; overflow: auto; }
+  header { background: white; padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .welcome h1 { font-size: 1.15rem; color: #1F3B4D; }
+  .welcome h1 strong { color: #00d4aa; }
+  .welcome p { font-size: .78rem; color: #888; margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .notif-btn { background: #f0f4f8; border: none; padding: 8px 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+  .avatar { width: 36px; height: 36px; background: linear-gradient(135deg,#00d4aa,#00a88f); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: .9rem; }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; padding: 24px 28px 0; }
+  .stat-card { background: white; border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: flex-start; box-shadow: 0 2px 8px rgba(0,0,0,.06); border-left: 4px solid var(--c); }
+  .stat-card h3 { font-size: .75rem; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+  .stat-card .val { font-size: 1.6rem; font-weight: 800; color: #1F3B4D; margin-top: 6px; }
+  .stat-card .change { font-size: .75rem; margin-top: 4px; color: #10b981; }
+  .stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; background: var(--bg); }
+
+  /* CONTENT */
+  .content-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; padding: 20px 28px; }
+  .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .card-header h3 { font-size: .95rem; color: #1F3B4D; font-weight: 700; }
+  .btn-text { background: none; border: none; color: #00a88f; font-size: .8rem; font-weight: 600; cursor: pointer; }
+  .summary-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: .88rem; color: #444; }
+  .summary-item:last-child { border-bottom: none; }
+  .s-icon { width: 32px; height: 32px; border-radius: 8px; background: #f0fdf4; display: flex; align-items: center; justify-content: center; font-size: .95rem; }
+  .activity-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+  .activity-item:last-child { border-bottom: none; }
+  .a-icon { width: 36px; height: 36px; background: #e0f2fe; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+  .a-text p { font-size: .85rem; color: #333; font-weight: 600; }
+  .a-text span { font-size: .75rem; color: #888; }
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← Índice</a>
+
+<aside>
+  <div class="sb-brand">
+    <h1>Comercios<span>Conecta</span></h1>
+    <p>Suite empresarial</p>
+  </div>
+  <nav>
+    <a class="nav-item active" href="03-dashboard.html"><span>📊</span> Estadísticas</a>
+    <a class="nav-item" href="04-products-list.html"><span>📦</span> Productos</a>
+    <a class="nav-item" href="13-ecommerce-orders.html"><span>🛒</span> Pedidos</a>
+    <a class="nav-item" href="08-clients-list.html"><span>👥</span> Clientes</a>
+    <a class="nav-item" href="06-sales-list.html"><span>🧾</span> Facturación</a>
+    <a class="nav-item" href="10-purchases-history.html"><span>📋</span> Compras</a>
+    <a class="nav-item" href="15-store-customizer.html"><span>🎨</span> Personalización</a>
+  </nav>
+  <div class="sb-footer">
+    <button class="logout">🚪 Cerrar sesión</button>
+    <p style="font-size:.7rem;color:rgba(255,255,255,.3);margin-top:10px;text-align:center">Sistema v1.0.0</p>
+  </div>
+</aside>
+
+<main>
+  <header>
+    <div class="welcome">
+      <h1>Bienvenido, <strong>admin@supermarket.com</strong></h1>
+      <p>lunes, 10 de marzo de 2026</p>
+    </div>
+    <div class="header-right">
+      <button class="notif-btn">🔔</button>
+      <div class="avatar">A</div>
+    </div>
+  </header>
+
+  <div class="stats-grid">
+    <div class="stat-card" style="--c:#00d4aa;--bg:#f0fdf4">
+      <div>
+        <h3>Ventas Totales</h3>
+        <div class="val">$4.820.000</div>
+        <div class="change">▲ +12.5%</div>
+      </div>
+      <div class="stat-icon">📈</div>
+    </div>
+    <div class="stat-card" style="--c:#1F3B4D;--bg:#e0f2fe">
+      <div>
+        <h3>Órdenes E-commerce</h3>
+        <div class="val">38</div>
+        <div class="change">✓ 24 confirmadas</div>
+      </div>
+      <div class="stat-icon">🛒</div>
+    </div>
+    <div class="stat-card" style="--c:#00a88f;--bg:#f0fdf4">
+      <div>
+        <h3>Productos en Inventario</h3>
+        <div class="val">127</div>
+        <div class="change">▲ +2.4%</div>
+      </div>
+      <div class="stat-icon">📦</div>
+    </div>
+    <div class="stat-card" style="--c:#2c3e50;--bg:#fef9c3">
+      <div>
+        <h3>Ventas por Facturar</h3>
+        <div class="val">12</div>
+        <div class="change" style="color:#f59e0b">⚠ Requieren atención</div>
+      </div>
+      <div class="stat-icon">🧾</div>
+    </div>
+  </div>
+
+  <div class="content-row">
+    <div class="card">
+      <div class="card-header">
+        <h3>Resumen General</h3>
+        <button class="btn-text">Actualizar datos</button>
+      </div>
+      <div class="summary-item"><div class="s-icon">🛒</div> 38 órdenes en total</div>
+      <div class="summary-item"><div class="s-icon">✅</div> 24 órdenes confirmadas</div>
+      <div class="summary-item"><div class="s-icon">📦</div> 127 productos en inventario</div>
+      <div class="summary-item"><div class="s-icon">💵</div> $4.820.000 en ventas</div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>Actividad Reciente</h3></div>
+      <div class="activity-item">
+        <div class="a-icon">🛒</div>
+        <div class="a-text"><p>14 órdenes pendientes</p><span>E-commerce</span></div>
+      </div>
+      <div class="activity-item">
+        <div class="a-icon">🧾</div>
+        <div class="a-text"><p>12 ventas por facturar</p><span>Sistema de ventas</span></div>
+      </div>
+      <div class="activity-item">
+        <div class="a-icon">📦</div>
+        <div class="a-text"><p>127 productos registrados</p><span>Inventario actual</span></div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

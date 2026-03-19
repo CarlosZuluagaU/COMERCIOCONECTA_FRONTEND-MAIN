@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tienda – ComerciosConecta</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f7f8fa; }
+  .back { position: fixed; top: 12px; left: 12px; z-index: 200; text-decoration: none; color: #1F3B4D; font-size: .78rem; font-weight: 600; background: white; padding: 5px 12px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+
+  /* HEADER */
+  .store-header { background: #1F3B4D; color: white; padding: 0 40px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,.2); }
+  .header-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .logo h1 { font-size: 1.3rem; font-weight: 800; }
+  .logo h1 span { color: #00d4aa; }
+  .logo sub { font-size: .7rem; color: rgba(255,255,255,.5); display: block; margin-top: -4px; }
+  .search-bar { display: flex; align-items: center; background: rgba(255,255,255,.1); border-radius: 8px; padding: 8px 14px; gap: 8px; width: 340px; }
+  .search-bar input { background: none; border: none; color: white; flex: 1; font-size: .9rem; outline: none; }
+  .search-bar input::placeholder { color: rgba(255,255,255,.5); }
+  .cart-btn { display: flex; align-items: center; gap: 8px; background: #00d4aa; color: #1F3B4D; border: none; padding: 9px 18px; border-radius: 8px; font-weight: 700; font-size: .88rem; cursor: pointer; position: relative; }
+  .cart-count { background: #1F3B4D; color: white; width: 18px; height: 18px; border-radius: 50%; font-size: .7rem; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+
+  /* NAV */
+  .store-nav { background: white; border-bottom: 1px solid #eee; }
+  .nav-inner { display: flex; gap: 4px; padding: 0 40px; overflow-x: auto; }
+  .nav-btn { padding: 14px 18px; border: none; background: none; font-size: .88rem; color: #666; cursor: pointer; border-bottom: 2px solid transparent; font-weight: 500; white-space: nowrap; }
+  .nav-btn.active { color: #1F3B4D; border-bottom-color: #00d4aa; font-weight: 700; }
+
+  /* HERO */
+  .hero { background: linear-gradient(135deg, #1F3B4D 0%, #2c5364 60%, #00d4aa 100%); color: white; padding: 60px 40px; text-align: center; }
+  .hero h2 { font-size: 2.2rem; font-weight: 800; }
+  .hero p { margin-top: 10px; opacity: .8; font-size: 1rem; }
+  .hero-btn { margin-top: 24px; display: inline-block; padding: 13px 36px; background: #00d4aa; color: #1F3B4D; border-radius: 50px; font-weight: 800; font-size: 1rem; cursor: pointer; border: none; }
+
+  /* PRODUCTS */
+  .products-section { padding: 40px; max-width: 1200px; margin: 0 auto; }
+  .section-title { text-align: center; margin-bottom: 32px; }
+  .section-title h2 { font-size: 1.5rem; color: #1F3B4D; }
+  .section-title p { color: #888; font-size: .9rem; margin-top: 6px; }
+  .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+  .product-card { background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.07); transition: transform .2s, box-shadow .2s; }
+  .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+  .product-img { height: 180px; background: linear-gradient(135deg,#f0f4f8,#e0e7ef); display: flex; align-items: center; justify-content: center; font-size: 4rem; position: relative; }
+  .discount-badge { position: absolute; top: 10px; left: 10px; background: #dc2626; color: white; padding: 2px 8px; border-radius: 6px; font-size: .72rem; font-weight: 700; }
+  .featured-badge { position: absolute; top: 10px; right: 10px; background: #f59e0b; color: white; padding: 2px 8px; border-radius: 6px; font-size: .72rem; font-weight: 700; }
+  .product-info { padding: 16px; }
+  .product-cat { font-size: .72rem; color: #00a88f; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+  .product-name { font-size: .95rem; font-weight: 700; color: #1F3B4D; margin-top: 4px; }
+  .product-brand { font-size: .78rem; color: #888; margin-top: 2px; }
+  .stars { display: flex; gap: 2px; color: #f59e0b; font-size: .85rem; margin-top: 6px; }
+  .rating-count { font-size: .75rem; color: #888; margin-left: 4px; }
+  .price-row { display: flex; align-items: baseline; gap: 8px; margin-top: 10px; }
+  .old-price { font-size: .82rem; color: #aaa; text-decoration: line-through; }
+  .cur-price { font-size: 1.15rem; font-weight: 800; color: #1F3B4D; }
+  .add-btn { width: 100%; margin-top: 12px; padding: 10px; background: linear-gradient(135deg,#1F3B4D,#2c5364); color: white; border: none; border-radius: 8px; font-size: .88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .add-btn:hover { background: linear-gradient(135deg,#00d4aa,#00a88f); color: #1F3B4D; }
+
+  /* CART OVERLAY */
+  .cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 300; display: flex; justify-content: flex-end; }
+  .cart-sidebar { background: white; width: 380px; height: 100%; display: flex; flex-direction: column; box-shadow: -4px 0 20px rgba(0,0,0,.15); }
+  .cart-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid #eee; }
+  .cart-header h3 { font-size: 1.1rem; color: #1F3B4D; font-weight: 700; }
+  .close-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #888; }
+  .cart-items { flex: 1; overflow-y: auto; padding: 16px 24px; display: flex; flex-direction: column; gap: 14px; }
+  .cart-item { display: flex; gap: 12px; align-items: center; }
+  .cart-item-img { width: 54px; height: 54px; background: #f0f4f8; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; flex-shrink: 0; }
+  .cart-item-info { flex: 1; }
+  .cart-item-info h4 { font-size: .85rem; color: #1F3B4D; font-weight: 600; }
+  .cart-item-price { font-size: .88rem; color: #00a88f; font-weight: 700; margin-top: 3px; }
+  .qty-ctrl { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+  .qty-btn { width: 24px; height: 24px; border: 1.5px solid #e0e0e0; border-radius: 6px; background: white; cursor: pointer; font-size: .9rem; display: flex; align-items: center; justify-content: center; }
+  .qty-val { font-size: .88rem; font-weight: 700; }
+  .cart-footer { padding: 20px 24px; border-top: 1px solid #eee; }
+  .cart-total { display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 800; color: #1F3B4D; margin-bottom: 14px; }
+  .checkout-btn { width: 100%; padding: 13px; background: linear-gradient(135deg,#00d4aa,#00a88f); color: #1F3B4D; border: none; border-radius: 10px; font-size: 1rem; font-weight: 800; cursor: pointer; }
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← Índice</a>
+
+<header class="store-header">
+  <div class="header-inner">
+    <div class="logo"><h1>Comercios<span>Conecta</span></h1><sub>Tu tienda de confianza</sub></div>
+    <div class="search-bar"><span>🔍</span><input placeholder="Buscar productos, marcas…" /></div>
+    <button class="cart-btn">🛒 Carrito <span class="cart-count">2</span></button>
+  </div>
+</header>
+
+<nav class="store-nav">
+  <div class="nav-inner">
+    <button class="nav-btn active">Todos</button>
+    <button class="nav-btn">Cuidado Personal</button>
+    <button class="nav-btn">Cuidado Capilar</button>
+    <button class="nav-btn">Maquillaje</button>
+    <button class="nav-btn">Cuidado Piel</button>
+    <button class="nav-btn">Medicamentos</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <h2>Descubre tu belleza interior</h2>
+  <p>Productos de calidad premium · Envíos rápidos · Precios increíbles</p>
+  <button class="hero-btn">Explorar Productos</button>
+</div>
+
+<div class="products-section">
+  <div class="section-title">
+    <h2>Productos Destacados</h2>
+    <p>Descubre nuestra selección de productos más populares</p>
+  </div>
+  <div class="products-grid">
+
+    <div class="product-card">
+      <div class="product-img">🧴<span class="featured-badge">Destacado</span></div>
+      <div class="product-info">
+        <div class="product-cat">Cuidado Personal</div>
+        <div class="product-name">Crema Hidratante Nivea</div>
+        <div class="product-brand">Nivea</div>
+        <div class="stars">★★★★☆ <span class="rating-count">(142)</span></div>
+        <div class="price-row"><span class="cur-price">$28.000</span></div>
+        <button class="add-btn">🛒 Agregar al Carrito</button>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">🧴<span class="featured-badge">Destacado</span></div>
+      <div class="product-info">
+        <div class="product-cat">Cuidado Capilar</div>
+        <div class="product-name">Shampoo Anticaspa H&S</div>
+        <div class="product-brand">Head & Shoulders</div>
+        <div class="stars">★★★★☆ <span class="rating-count">(89)</span></div>
+        <div class="price-row"><span class="cur-price">$33.000</span></div>
+        <button class="add-btn">🛒 Agregar al Carrito</button>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">💄</div>
+      <div class="product-info">
+        <div class="product-cat">Maquillaje</div>
+        <div class="product-name">Labial Matte MAC</div>
+        <div class="product-brand">MAC</div>
+        <div class="stars">★★★★★ <span class="rating-count">(256)</span></div>
+        <div class="price-row"><span class="cur-price">$45.000</span></div>
+        <button class="add-btn">🛒 Agregar al Carrito</button>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">☀️<span class="discount-badge">-16%</span><span class="featured-badge">Destacado</span></div>
+      <div class="product-info">
+        <div class="product-cat">Cuidado Piel</div>
+        <div class="product-name">Protector Solar 50 FPS</div>
+        <div class="product-brand">Nivea</div>
+        <div class="stars">★★★★☆ <span class="rating-count">(167)</span></div>
+        <div class="price-row"><span class="old-price">$38.000</span><span class="cur-price">$32.000</span></div>
+        <button class="add-btn">🛒 Agregar al Carrito</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CARRITO LATERAL (visible en mockup) -->
+<div class="cart-overlay">
+  <div class="cart-sidebar">
+    <div class="cart-header">
+      <h3>🛒 Tu Carrito</h3>
+      <button class="close-btn">✕</button>
+    </div>
+    <div class="cart-items">
+      <div class="cart-item">
+        <div class="cart-item-img">🧴</div>
+        <div class="cart-item-info">
+          <h4>Crema Hidratante Nivea</h4>
+          <div class="cart-item-price">$28.000</div>
+          <div class="qty-ctrl">
+            <button class="qty-btn">−</button>
+            <span class="qty-val">1</span>
+            <button class="qty-btn">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="cart-item">
+        <div class="cart-item-img">☀️</div>
+        <div class="cart-item-info">
+          <h4>Protector Solar 50 FPS</h4>
+          <div class="cart-item-price">$32.000</div>
+          <div class="qty-ctrl">
+            <button class="qty-btn">−</button>
+            <span class="qty-val">1</span>
+            <button class="qty-btn">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form cliente -->
+    <div style="padding:0 24px 16px;display:flex;flex-direction:column;gap:8px;border-top:1px solid #eee;padding-top:16px">
+      <p style="font-size:.82rem;font-weight:700;color:#1F3B4D">Información del Cliente</p>
+      <input style="padding:9px 12px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:.85rem" placeholder="Nombre completo" value="María González" />
+      <input style="padding:9px 12px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:.85rem" placeholder="Correo electrónico" value="maria@gmail.com" />
+      <input style="padding:9px 12px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:.85rem" placeholder="Teléfono" value="3001234567" />
+    </div>
+
+    <div class="cart-footer">
+      <div class="cart-total"><span>Total:</span><span>$60.000</span></div>
+      <button class="checkout-btn">✓ Proceder al Pago</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

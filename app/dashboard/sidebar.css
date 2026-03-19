@@ -1,0 +1,130 @@
+/* ── SIDEBAR ── */
+.sb {
+  width: 220px;
+  background: linear-gradient(180deg, #1F3B4D, #16303f);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  flex-shrink: 0;
+}
+
+.sb-brand {
+  padding: 28px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.sb-brand h1 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin: 0;
+  color: white;
+}
+
+.sb-brand h1 span { color: #00d4aa; }
+
+.sb-brand p {
+  font-size: .7rem;
+  color: rgba(255,255,255,.45);
+  margin-top: 2px;
+}
+
+.sb-nav {
+  flex: 1;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: .85rem;
+  color: rgba(255,255,255,.7);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  text-decoration: none;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+}
+
+.sb-item:hover,
+.sb-item.active {
+  background: rgba(0,212,170,.15);
+  color: #00d4aa;
+}
+
+.sb-icon {
+  width: 20px;
+  text-align: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.sb-chevron {
+  margin-left: auto;
+  font-size: .7rem;
+  opacity: .6;
+}
+
+.sb-sub {
+  padding-left: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: 2px;
+}
+
+.sb-sub-link {
+  font-size: .78rem;
+  color: rgba(255,255,255,.55);
+  padding: 7px 10px;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: color .15s, background .15s;
+  display: block;
+}
+
+.sb-sub-link:hover,
+.sb-sub-link.active {
+  color: #00d4aa;
+  background: rgba(0,212,170,.08);
+}
+
+.sb-footer {
+  padding: 16px 12px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.sb-logout {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f56565;
+  color: white;
+  border: none;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s;
+  font-family: inherit;
+}
+
+.sb-logout:hover { background: #e53e3e; }
+
+.sb-version {
+  font-size: .7rem;
+  color: rgba(255,255,255,.3);
+  margin-top: 10px;
+  text-align: center;
+}

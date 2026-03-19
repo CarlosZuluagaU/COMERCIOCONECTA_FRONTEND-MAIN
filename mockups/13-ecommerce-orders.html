@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Órdenes E-commerce – ComerciosConecta</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; display: flex; min-height: 100vh; }
+  aside { width: 220px; background: linear-gradient(180deg,#1F3B4D,#16303f); color: white; display: flex; flex-direction: column; min-height: 100vh; flex-shrink: 0; }
+  .sb-brand { padding: 28px 20px 20px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .sb-brand h1 { font-size: 1.2rem; font-weight: 800; } .sb-brand h1 span { color: #00d4aa; }
+  .sb-brand p { font-size: .7rem; color: rgba(255,255,255,.4); margin-top: 2px; }
+  nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: .85rem; color: rgba(255,255,255,.7); text-decoration: none; }
+  .nav-item.active { background: rgba(0,212,170,.15); color: #00d4aa; }
+  .sb-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,.08); }
+  .logout { display: flex; align-items: center; gap: 10px; background: #f56565; color: white; border: none; width: 100%; padding: 10px 14px; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; }
+  main { flex: 1; display: flex; flex-direction: column; }
+  header { background: white; padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  header div h1 { font-size: 1.1rem; color: #1F3B4D; }
+  header div p { font-size: .78rem; color: #888; margin-top: 2px; }
+  .btn-secondary { padding: 9px 18px; background: white; color: #1F3B4D; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .content { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
+  .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+  .stat { background: white; border-radius: 10px; padding: 16px 20px; box-shadow: 0 2px 6px rgba(0,0,0,.05); border-left: 4px solid var(--c); }
+  .stat h4 { font-size: .74rem; color: #888; text-transform: uppercase; letter-spacing: .5px; }
+  .stat .val { font-size: 1.55rem; font-weight: 800; color: #1F3B4D; margin-top: 4px; }
+  .filters { background: white; border-radius: 10px; padding: 14px 18px; display: flex; gap: 12px; box-shadow: 0 2px 6px rgba(0,0,0,.05); }
+  .search { flex: 1; display: flex; align-items: center; gap: 8px; background: #f7f8fa; border-radius: 8px; padding: 8px 14px; }
+  .search input { border: none; background: none; flex: 1; font-size: .9rem; outline: none; }
+  select { padding: 8px 14px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: .88rem; font-family: inherit; }
+  .card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.05); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { background: #f7f8fa; padding: 11px 16px; text-align: left; font-size: .76rem; color: #888; font-weight: 700; text-transform: uppercase; }
+  tbody td { padding: 13px 16px; font-size: .86rem; color: #333; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+  tbody tr:hover { background: #fafffe; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: .74rem; font-weight: 600; }
+  .paid { background: #d1fae5; color: #065f46; }
+  .created { background: #ede9fe; color: #4c1d95; }
+  .shipped { background: #dbeafe; color: #1e40af; }
+  .cancelled { background: #fef2f2; color: #dc2626; }
+  .customer { display: flex; flex-direction: column; }
+  .customer span { font-size: .75rem; color: #888; margin-top: 1px; }
+  .actions { display: flex; gap: 6px; }
+  .btn-icon { padding: 5px 10px; border: none; border-radius: 6px; cursor: pointer; font-size: .8rem; }
+  .btn-view { background: #e0f2fe; color: #0369a1; }
+  .btn-ship { background: #d1fae5; color: #065f46; }
+  .pagination { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; font-size: .82rem; color: #888; }
+  .page-btns button { padding: 5px 11px; border: 1.5px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer; font-size: .82rem; margin-left: 4px; }
+  .page-btns button.active { background: #1F3B4D; color: white; border-color: #1F3B4D; }
+</style>
+</head>
+<body>
+<aside>
+  <div class="sb-brand"><h1>Comercios<span>Conecta</span></h1><p>Suite empresarial</p></div>
+  <nav>
+    <a class="nav-item" href="03-dashboard.html"><span>📊</span> Estadísticas</a>
+    <a class="nav-item" href="04-products-list.html"><span>📦</span> Productos</a>
+    <a class="nav-item active" href="13-ecommerce-orders.html"><span>🛒</span> Pedidos</a>
+    <a class="nav-item" href="08-clients-list.html"><span>👥</span> Clientes</a>
+    <a class="nav-item" href="06-sales-list.html"><span>🧾</span> Facturación</a>
+    <a class="nav-item" href="10-purchases-history.html"><span>📋</span> Compras</a>
+    <a class="nav-item" href="15-store-customizer.html"><span>🎨</span> Personalización</a>
+  </nav>
+  <div class="sb-footer"><button class="logout">🚪 Cerrar sesión</button></div>
+</aside>
+
+<main>
+  <header>
+    <div>
+      <h1>🛍️ Órdenes E-commerce</h1>
+      <p>Gestión de pedidos de la tienda online</p>
+    </div>
+    <button class="btn-secondary">🔄 Actualizar</button>
+  </header>
+
+  <div class="content">
+    <div class="stats-row">
+      <div class="stat" style="--c:#8b5cf6"><h4>Total Órdenes</h4><div class="val">38</div></div>
+      <div class="stat" style="--c:#10b981"><h4>Pagadas</h4><div class="val">24</div></div>
+      <div class="stat" style="--c:#3b82f6"><h4>Enviadas</h4><div class="val">8</div></div>
+      <div class="stat" style="--c:#f59e0b"><h4>Pendientes</h4><div class="val">6</div></div>
+    </div>
+
+    <div class="filters">
+      <div class="search"><span>🔍</span><input placeholder="Buscar por ID, cliente, email…" /></div>
+      <select>
+        <option>Todos los estados</option>
+        <option>PAID – Pagada</option>
+        <option>CREATED – Pendiente</option>
+        <option>SHIPPED – Enviada</option>
+        <option>CANCELLED – Cancelada</option>
+      </select>
+      <input type="date" style="padding:8px 14px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:.88rem" value="2026-03-10" />
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr><th>Orden ID</th><th>Cliente</th><th>Fecha</th><th>Items</th><th>Total</th><th>Estado</th><th>Método Pago</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>ORD-0038</strong></td>
+            <td><div class="customer"><strong>María González</strong><span>maria@gmail.com</span></div></td>
+            <td>10/03/2026 09:15</td><td>3 items</td><td><strong>$110.000</strong></td>
+            <td><span class="badge paid">✅ PAGADA</span></td><td>Wompi</td>
+            <td><div class="actions"><button class="btn-icon btn-view">👁 Ver</button><button class="btn-icon btn-ship">🚚 Enviar</button></div></td>
+          </tr>
+          <tr>
+            <td><strong>ORD-0037</strong></td>
+            <td><div class="customer"><strong>Carlos Rodríguez</strong><span>carlos@empresa.com</span></div></td>
+            <td>09/03/2026 14:20</td><td>1 item</td><td><strong>$32.000</strong></td>
+            <td><span class="badge created">📄 PENDIENTE</span></td><td>Wompi</td>
+            <td><div class="actions"><button class="btn-icon btn-view">👁 Ver</button></div></td>
+          </tr>
+          <tr>
+            <td><strong>ORD-0036</strong></td>
+            <td><div class="customer"><strong>Ana Martínez</strong><span>ana@outlook.com</span></div></td>
+            <td>08/03/2026 11:05</td><td>5 items</td><td><strong>$234.200</strong></td>
+            <td><span class="badge shipped">🚚 ENVIADA</span></td><td>Wompi</td>
+            <td><div class="actions"><button class="btn-icon btn-view">👁 Ver</button></div></td>
+          </tr>
+          <tr>
+            <td><strong>ORD-0035</strong></td>
+            <td><div class="customer"><strong>Luis Hernández</strong><span>luis.h@hotmail.com</span></div></td>
+            <td>07/03/2026 16:45</td><td>2 items</td><td><strong>$78.000</strong></td>
+            <td><span class="badge paid">✅ PAGADA</span></td><td>Wompi</td>
+            <td><div class="actions"><button class="btn-icon btn-view">👁 Ver</button><button class="btn-icon btn-ship">🚚 Enviar</button></div></td>
+          </tr>
+          <tr>
+            <td><strong>ORD-0034</strong></td>
+            <td><div class="customer"><strong>Sofía Pérez</strong><span>sofia@gmail.com</span></div></td>
+            <td>06/03/2026 08:30</td><td>1 item</td><td><strong>$45.000</strong></td>
+            <td><span class="badge cancelled">✕ CANCELADA</span></td><td>Wompi</td>
+            <td><div class="actions"><button class="btn-icon btn-view">👁 Ver</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="pagination">
+        <span>Mostrando 5 de 38 órdenes</span>
+        <div class="page-btns">
+          <button disabled>‹</button><button class="active">1</button><button>2</button><button>›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

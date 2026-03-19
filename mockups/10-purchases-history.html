@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Histórico de Compras – ComerciosConecta</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; display: flex; min-height: 100vh; }
+  aside { width: 220px; background: linear-gradient(180deg,#1F3B4D,#16303f); color: white; display: flex; flex-direction: column; min-height: 100vh; flex-shrink: 0; }
+  .sb-brand { padding: 28px 20px 20px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .sb-brand h1 { font-size: 1.2rem; font-weight: 800; } .sb-brand h1 span { color: #00d4aa; }
+  .sb-brand p { font-size: .7rem; color: rgba(255,255,255,.4); margin-top: 2px; }
+  nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: .85rem; color: rgba(255,255,255,.7); text-decoration: none; }
+  .nav-item.active { background: rgba(0,212,170,.15); color: #00d4aa; }
+  .sb-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,.08); }
+  .logout { display: flex; align-items: center; gap: 10px; background: #f56565; color: white; border: none; width: 100%; padding: 10px 14px; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; }
+  main { flex: 1; display: flex; flex-direction: column; }
+  header { background: white; padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  header h1 { font-size: 1.1rem; color: #1F3B4D; }
+  .btn-primary { padding: 9px 18px; background: linear-gradient(135deg,#00d4aa,#00a88f); color: white; border: none; border-radius: 8px; font-size: .85rem; font-weight: 700; cursor: pointer; text-decoration: none; }
+  .content { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
+  .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+  .stat { background: white; border-radius: 10px; padding: 16px 20px; box-shadow: 0 2px 6px rgba(0,0,0,.05); }
+  .stat h4 { font-size: .75rem; color: #888; text-transform: uppercase; letter-spacing: .5px; }
+  .stat .val { font-size: 1.6rem; font-weight: 800; color: #1F3B4D; margin-top: 4px; }
+  .tabs { display: flex; gap: 4px; background: white; border-radius: 10px; padding: 6px; box-shadow: 0 2px 6px rgba(0,0,0,.05); width: fit-content; }
+  .tab { padding: 8px 20px; border-radius: 7px; font-size: .85rem; font-weight: 600; cursor: pointer; color: #888; border: none; background: none; }
+  .tab.active { background: #1F3B4D; color: white; }
+  .card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.05); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { background: #f7f8fa; padding: 11px 16px; text-align: left; font-size: .76rem; color: #888; font-weight: 700; text-transform: uppercase; }
+  tbody td { padding: 13px 16px; font-size: .86rem; color: #333; border-bottom: 1px solid #f5f5f5; }
+  tbody tr:hover { background: #fafffe; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: .74rem; font-weight: 600; }
+  .recibida { background: #d1fae5; color: #065f46; }
+  .pendiente { background: #fef9c3; color: #92400e; }
+  .cancelada { background: #fef2f2; color: #dc2626; }
+  .actions { display: flex; gap: 6px; }
+  .btn-icon { padding: 5px 10px; border: none; border-radius: 6px; cursor: pointer; font-size: .8rem; }
+  .btn-view { background: #e0f2fe; color: #0369a1; }
+  .btn-del { background: #fef2f2; color: #dc2626; }
+  .pagination { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; font-size: .82rem; color: #888; }
+  .page-btns button { padding: 5px 11px; border: 1.5px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer; font-size: .82rem; margin-left: 4px; }
+  .page-btns button.active { background: #1F3B4D; color: white; border-color: #1F3B4D; }
+</style>
+</head>
+<body>
+<aside>
+  <div class="sb-brand"><h1>Comercios<span>Conecta</span></h1><p>Suite empresarial</p></div>
+  <nav>
+    <a class="nav-item" href="03-dashboard.html"><span>📊</span> Estadísticas</a>
+    <a class="nav-item" href="04-products-list.html"><span>📦</span> Productos</a>
+    <a class="nav-item" href="13-ecommerce-orders.html"><span>🛒</span> Pedidos</a>
+    <a class="nav-item" href="08-clients-list.html"><span>👥</span> Clientes</a>
+    <a class="nav-item" href="06-sales-list.html"><span>🧾</span> Facturación</a>
+    <a class="nav-item active" href="10-purchases-history.html"><span>📋</span> Compras</a>
+    <a class="nav-item" href="15-store-customizer.html"><span>🎨</span> Personalización</a>
+  </nav>
+  <div class="sb-footer"><button class="logout">🚪 Cerrar sesión</button></div>
+</aside>
+
+<main>
+  <header>
+    <h1>📋 Histórico de Compras</h1>
+    <a class="btn-primary" href="11-create-purchase.html">＋ Nueva Compra</a>
+  </header>
+
+  <div class="content">
+    <div class="stats-row">
+      <div class="stat"><h4>Total Compras</h4><div class="val">54</div></div>
+      <div class="stat"><h4>Total Invertido</h4><div class="val">$12.380.000</div></div>
+      <div class="stat"><h4>Proveedores Activos</h4><div class="val">8</div></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active">Todas</button>
+      <button class="tab">Recibidas</button>
+      <button class="tab">Pendientes</button>
+      <button class="tab">Canceladas</button>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Proveedor</th><th>Fecha</th><th>Productos</th><th>Total</th><th>Estado</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>#54</td><td><strong>Beiersdorf S.A.</strong></td><td>10/03/2026</td>
+            <td>Crema Hidratante x50, Protector Solar x30</td><td><strong>$1.250.000</strong></td>
+            <td><span class="badge recibida">✅ Recibida</span></td>
+            <td><div class="actions"><button class="btn-icon btn-view">👁</button></div></td>
+          </tr>
+          <tr>
+            <td>#53</td><td><strong>Procter & Gamble</strong></td><td>08/03/2026</td>
+            <td>Shampoo H&S x100</td><td><strong>$2.000.000</strong></td>
+            <td><span class="badge pendiente">⏳ Pendiente</span></td>
+            <td><div class="actions"><button class="btn-icon btn-view">👁</button><button class="btn-icon btn-del">✕</button></div></td>
+          </tr>
+          <tr>
+            <td>#52</td><td><strong>MAC Cosméticos</strong></td><td>05/03/2026</td>
+            <td>Labial Matte x20, Base Líquida x15</td><td><strong>$900.000</strong></td>
+            <td><span class="badge recibida">✅ Recibida</span></td>
+            <td><div class="actions"><button class="btn-icon btn-view">👁</button></div></td>
+          </tr>
+          <tr>
+            <td>#51</td><td><strong>Farmacéuticos Unidos</strong></td><td>01/03/2026</td>
+            <td>Acetaminofén x200, Ibuprofeno x100</td><td><strong>$780.000</strong></td>
+            <td><span class="badge cancelada">✕ Cancelada</span></td>
+            <td><div class="actions"><button class="btn-icon btn-view">👁</button></div></td>
+          </tr>
+          <tr>
+            <td>#50</td><td><strong>Beiersdorf S.A.</strong></td><td>25/02/2026</td>
+            <td>Crema Hidratante x80</td><td><strong>$1.440.000</strong></td>
+            <td><span class="badge recibida">✅ Recibida</span></td>
+            <td><div class="actions"><button class="btn-icon btn-view">👁</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="pagination">
+        <span>Mostrando 5 de 54 compras</span>
+        <div class="page-btns">
+          <button disabled>‹</button><button class="active">1</button><button>2</button><button>›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

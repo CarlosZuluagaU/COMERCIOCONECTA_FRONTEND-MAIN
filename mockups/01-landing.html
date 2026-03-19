@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ComerciosConecta – Landing Pro</title>
+<style>
+/* ── RESET & TOKENS ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --primary: #1F3B4D;
+  --accent:  #00d4aa;
+  --accent2: #00a88f;
+  --dark:    #0d2333;
+  --light:   #f0f7ff;
+  --text:    #334155;
+  --muted:   #64748b;
+  --border:  #e2e8f0;
+  --white:   #ffffff;
+  --r:       12px;
+  --shadow:  0 4px 24px rgba(31,59,77,.10);
+  --shadow-lg: 0 16px 48px rgba(31,59,77,.18);
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; color: var(--text); background: var(--white); overflow-x: hidden; }
+a { text-decoration: none; color: inherit; }
+
+/* ── UTILIDADES ── */
+.container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 20px; font-size: .75rem; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; }
+.badge-accent { background: rgba(0,212,170,.12); color: var(--accent2); border: 1px solid rgba(0,212,170,.3); }
+.badge-white  { background: rgba(255,255,255,.15); color: white; border: 1px solid rgba(255,255,255,.3); }
+.section-tag { text-align: center; margin-bottom: 14px; }
+.section-title { font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 800; color: var(--primary); line-height: 1.2; }
+.section-sub { font-size: 1.05rem; color: var(--muted); margin-top: 10px; line-height: 1.6; max-width: 580px; margin-left: auto; margin-right: auto; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; border-radius: 50px; font-size: .95rem; font-weight: 700; cursor: pointer; border: none; transition: all .2s; }
+.btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: var(--primary); box-shadow: 0 4px 20px rgba(0,212,170,.35); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,212,170,.45); }
+.btn-outline { background: transparent; color: white; border: 2px solid rgba(255,255,255,.4); }
+.btn-outline:hover { background: rgba(255,255,255,.1); border-color: white; }
+.btn-dark { background: var(--primary); color: white; box-shadow: var(--shadow); }
+.btn-dark:hover { background: var(--dark); transform: translateY(-2px); }
+
+/* ── NAVBAR ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  padding: 0 24px; height: 68px;
+  display: flex; align-items: center;
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  transition: box-shadow .3s;
+}
+.nav-inner { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 1160px; margin: 0 auto; }
+.logo { display: flex; align-items: center; gap: 10px; font-size: 1.3rem; font-weight: 800; color: var(--primary); }
+.logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+.logo span { color: var(--accent2); }
+.nav-links { display: flex; align-items: center; gap: 32px; }
+.nav-links a { font-size: .9rem; color: var(--muted); font-weight: 500; transition: color .2s; }
+.nav-links a:hover { color: var(--primary); }
+.nav-cta { display: flex; align-items: center; gap: 10px; }
+.nav-login { font-size: .9rem; font-weight: 600; color: var(--primary); }
+.nav-btn { padding: 9px 22px; background: var(--primary); color: white; border-radius: 50px; font-size: .88rem; font-weight: 700; border: none; cursor: pointer; transition: all .2s; }
+.nav-btn:hover { background: var(--dark); transform: translateY(-1px); }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh; display: flex; align-items: center;
+  background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 55%, #1a5068 100%);
+  position: relative; overflow: hidden; padding-top: 68px;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 70% 50%, rgba(0,212,170,.18) 0%, transparent 70%);
+}
+.hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; padding: 80px 0; position: relative; }
+.hero-left { display: flex; flex-direction: column; gap: 24px; }
+.hero-eyebrow { display: flex; align-items: center; gap: 8px; }
+.hero-title { font-size: clamp(2.2rem, 4.5vw, 3.4rem); font-weight: 900; color: white; line-height: 1.1; letter-spacing: -.5px; }
+.hero-title .hl { color: var(--accent); }
+.hero-desc { font-size: 1.1rem; color: rgba(255,255,255,.72); line-height: 1.7; max-width: 480px; }
+.hero-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.hero-trust { display: flex; align-items: center; gap: 10px; }
+.avatars { display: flex; }
+.avatars span { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #0097ff); border: 2px solid var(--dark); display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 700; color: white; margin-left: -8px; }
+.avatars span:first-child { margin-left: 0; }
+.trust-text { font-size: .82rem; color: rgba(255,255,255,.65); }
+.trust-text strong { color: var(--accent); }
+
+/* Hero Dashboard Preview */
+.hero-right { position: relative; }
+.dashboard-preview {
+  background: white; border-radius: 16px; box-shadow: 0 32px 80px rgba(0,0,0,.4);
+  overflow: hidden; transform: perspective(1000px) rotateY(-4deg) rotateX(2deg);
+  transition: transform .4s;
+}
+.dashboard-preview:hover { transform: perspective(1000px) rotateY(-1deg) rotateX(0deg); }
+.dp-header { background: var(--primary); padding: 12px 16px; display: flex; align-items: center; gap: 8px; }
+.dp-dots { display: flex; gap: 5px; }
+.dp-dot { width: 10px; height: 10px; border-radius: 50%; }
+.dp-title { font-size: .78rem; color: rgba(255,255,255,.6); font-weight: 600; margin-left: 8px; }
+.dp-body { padding: 16px; }
+.dp-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 12px; }
+.dp-stat { background: var(--light); border-radius: 8px; padding: 10px; }
+.dp-stat .lbl { font-size: .65rem; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+.dp-stat .val { font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-top: 2px; }
+.dp-stat .val.green { color: #10b981; }
+.dp-chart { background: var(--light); border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+.dp-chart-label { font-size: .68rem; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
+.bars { display: flex; align-items: flex-end; gap: 4px; height: 50px; }
+.bar { flex: 1; border-radius: 3px 3px 0 0; background: linear-gradient(to top, var(--accent2), var(--accent)); opacity: .7; transition: opacity .2s; }
+.bar:hover { opacity: 1; }
+.dp-list { display: flex; flex-direction: column; gap: 6px; }
+.dp-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; background: var(--light); border-radius: 7px; }
+.dp-row-left { display: flex; align-items: center; gap: 8px; font-size: .75rem; color: var(--primary); font-weight: 600; }
+.dp-icon { width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: .7rem; }
+.chip { padding: 2px 8px; border-radius: 10px; font-size: .65rem; font-weight: 700; }
+.chip-green { background: #d1fae5; color: #065f46; }
+.chip-yellow { background: #fef9c3; color: #92400e; }
+
+/* Glow */
+.hero-glow { position: absolute; width: 300px; height: 300px; border-radius: 50%; background: rgba(0,212,170,.2); filter: blur(80px); top: -60px; right: -60px; pointer-events: none; }
+
+/* ── LOGOS ── */
+.logos-section { padding: 40px 0; border-bottom: 1px solid var(--border); }
+.logos-label { text-align: center; font-size: .78rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px; }
+.logos-grid { display: flex; align-items: center; justify-content: center; gap: 48px; flex-wrap: wrap; }
+.logo-item { font-size: .95rem; font-weight: 800; color: #cbd5e1; letter-spacing: -0.5px; }
+
+/* ── FEATURES ── */
+.features { padding: 100px 0; background: var(--white); }
+.features-header { text-align: center; margin-bottom: 64px; }
+.features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+.feature-card {
+  padding: 32px 28px; border-radius: var(--r); border: 1px solid var(--border);
+  transition: all .3s; cursor: default;
+  position: relative; overflow: hidden;
+}
+.feature-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(0,212,170,.06) 0%, transparent 60%);
+  opacity: 0; transition: opacity .3s;
+}
+.feature-card:hover { border-color: var(--accent); box-shadow: 0 8px 32px rgba(0,212,170,.12); transform: translateY(-4px); }
+.feature-card:hover::before { opacity: 1; }
+.feat-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 18px; }
+.feature-card h3 { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 10px; }
+.feature-card p { font-size: .9rem; color: var(--muted); line-height: 1.6; }
+.feat-tag { display: inline-block; margin-top: 14px; font-size: .72rem; font-weight: 700; color: var(--accent2); }
+
+/* ── HOW IT WORKS ── */
+.how { padding: 100px 0; background: var(--light); }
+.how-header { text-align: center; margin-bottom: 64px; }
+.steps { display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; position: relative; }
+.steps::before {
+  content: ''; position: absolute; top: 28px; left: 12%; right: 12%; height: 2px;
+  background: linear-gradient(to right, var(--accent), var(--accent2));
+  opacity: .3;
+}
+.step { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.step-num { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: var(--primary); font-size: 1.1rem; font-weight: 900; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,212,170,.3); position: relative; z-index: 1; }
+.step h4 { font-size: .95rem; font-weight: 700; color: var(--primary); }
+.step p { font-size: .83rem; color: var(--muted); line-height: 1.5; }
+
+/* ── STATS ── */
+.stats { padding: 80px 0; background: linear-gradient(135deg, var(--primary), var(--dark)); }
+.stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; text-align: center; }
+.stat-item { padding: 20px; }
+.stat-item .num { font-size: 2.8rem; font-weight: 900; color: var(--accent); line-height: 1; }
+.stat-item .label { font-size: .88rem; color: rgba(255,255,255,.65); margin-top: 8px; font-weight: 500; }
+
+/* ── PRICING ── */
+.pricing { padding: 100px 0; background: white; }
+.pricing-header { text-align: center; margin-bottom: 64px; }
+.pricing-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; align-items: start; }
+.price-card {
+  border: 1.5px solid var(--border); border-radius: 16px; padding: 36px 32px;
+  display: flex; flex-direction: column; gap: 20px; transition: all .3s;
+}
+.price-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); }
+.price-card.popular {
+  border-color: var(--accent); background: linear-gradient(135deg, var(--dark), var(--primary));
+  color: white; transform: scale(1.04);
+  box-shadow: 0 20px 60px rgba(31,59,77,.3);
+}
+.popular-label { background: var(--accent); color: var(--primary); padding: 4px 14px; border-radius: 20px; font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; align-self: flex-start; }
+.price-name { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
+.price-card.popular .price-name { color: rgba(255,255,255,.8); }
+.price-amount { display: flex; align-items: baseline; gap: 4px; }
+.price-amount .curr { font-size: 1.1rem; font-weight: 700; color: var(--muted); }
+.price-amount .amt { font-size: 3rem; font-weight: 900; color: var(--primary); line-height: 1; }
+.price-card.popular .curr, .price-card.popular .amt { color: white; }
+.price-amount .period { font-size: .85rem; color: var(--muted); }
+.price-card.popular .period { color: rgba(255,255,255,.6); }
+.price-desc { font-size: .85rem; color: var(--muted); }
+.price-card.popular .price-desc { color: rgba(255,255,255,.6); }
+.price-divider { border: none; border-top: 1px solid var(--border); }
+.price-card.popular .price-divider { border-color: rgba(255,255,255,.15); }
+.price-features { display: flex; flex-direction: column; gap: 10px; }
+.pf { display: flex; align-items: center; gap: 10px; font-size: .88rem; color: var(--text); }
+.price-card.popular .pf { color: rgba(255,255,255,.85); }
+.pf-check { width: 20px; height: 20px; border-radius: 50%; background: rgba(0,212,170,.15); color: var(--accent2); display: flex; align-items: center; justify-content: center; font-size: .7rem; flex-shrink: 0; }
+.price-card.popular .pf-check { background: rgba(0,212,170,.25); }
+.btn-price { padding: 14px; border-radius: 50px; font-weight: 700; font-size: .95rem; cursor: pointer; border: none; transition: all .2s; text-align: center; }
+.btn-price-outline { background: transparent; color: var(--primary); border: 1.5px solid var(--border); }
+.btn-price-outline:hover { border-color: var(--accent); color: var(--accent2); }
+.btn-price-accent { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: var(--primary); box-shadow: 0 4px 20px rgba(0,212,170,.4); }
+.btn-price-accent:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,212,170,.5); }
+
+/* ── TESTIMONIALS ── */
+.testimonials { padding: 100px 0; background: var(--light); }
+.test-header { text-align: center; margin-bottom: 64px; }
+.test-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+.test-card { background: white; border-radius: var(--r); padding: 28px; box-shadow: var(--shadow); }
+.stars { color: #f59e0b; font-size: .9rem; letter-spacing: 2px; margin-bottom: 14px; }
+.test-text { font-size: .92rem; color: var(--text); line-height: 1.7; font-style: italic; }
+.test-author { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
+.test-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: .9rem; }
+.test-name { font-size: .88rem; font-weight: 700; color: var(--primary); }
+.test-role { font-size: .76rem; color: var(--muted); }
+
+/* ── CTA SECTION ── */
+.cta-section {
+  padding: 100px 0;
+  background: linear-gradient(135deg, var(--dark), var(--primary));
+  position: relative; overflow: hidden; text-align: center;
+}
+.cta-section::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 70% at 50% 50%, rgba(0,212,170,.15), transparent);
+}
+.cta-inner { position: relative; }
+.cta-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; color: white; line-height: 1.15; margin-bottom: 16px; }
+.cta-title span { color: var(--accent); }
+.cta-sub { font-size: 1.05rem; color: rgba(255,255,255,.65); margin-bottom: 36px; }
+.cta-actions { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+.cta-note { font-size: .78rem; color: rgba(255,255,255,.4); margin-top: 16px; }
+
+/* ── FOOTER ── */
+footer { background: var(--dark); color: rgba(255,255,255,.6); padding: 60px 0 32px; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+.footer-brand .logo { color: white; margin-bottom: 12px; }
+.footer-brand p { font-size: .85rem; line-height: 1.6; max-width: 260px; }
+.footer-col h5 { font-size: .82rem; font-weight: 700; color: white; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 16px; }
+.footer-col a { display: block; font-size: .85rem; color: rgba(255,255,255,.5); margin-bottom: 10px; transition: color .2s; }
+.footer-col a:hover { color: var(--accent); }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,.08); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; font-size: .8rem; }
+.footer-social { display: flex; gap: 10px; }
+.soc { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,.08); display: flex; align-items: center; justify-content: center; font-size: .85rem; transition: background .2s; cursor: pointer; }
+.soc:hover { background: var(--accent); }
+
+/* Back link */
+.back { position: fixed; bottom: 20px; left: 20px; z-index: 2000; background: white; color: var(--primary); padding: 8px 16px; border-radius: 20px; font-size: .78rem; font-weight: 700; box-shadow: var(--shadow); }
+</style>
+</head>
+<body>
+
+<a class="back" href="index.html">← Índice</a>
+
+<!-- ══════════ NAVBAR ══════════ -->
+<nav>
+  <div class="nav-inner">
+    <div class="logo">
+      <div class="logo-icon">🛍</div>
+      Comercios<span>Conecta</span>
+    </div>
+    <div class="nav-links">
+      <a href="#features">Funciones</a>
+      <a href="#how">Cómo funciona</a>
+      <a href="#pricing">Precios</a>
+      <a href="#testimonials">Clientes</a>
+    </div>
+    <div class="nav-cta">
+      <a class="nav-login" href="#">Iniciar sesión</a>
+      <button class="nav-btn">Prueba gratis →</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════ HERO ══════════ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-left">
+        <div class="hero-eyebrow">
+          <span class="badge badge-white">✨ Nuevo · Facturación electrónica integrada</span>
+        </div>
+        <h1 class="hero-title">
+          Gestiona tu<br/>comercio con<br/><span class="hl">superpoderes</span>
+        </h1>
+        <p class="hero-desc">
+          La plataforma todo-en-uno para pymes colombianas. Inventario, ventas, e-commerce y facturación Factus — todo conectado y listo en minutos.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#">Empieza gratis 14 días</a>
+          <a class="btn btn-outline" href="#">Ver demo →</a>
+        </div>
+        <div class="hero-trust">
+          <div class="avatars">
+            <span>M</span><span>C</span><span>A</span><span>+</span>
+          </div>
+          <p class="trust-text">Más de <strong>+800 comercios</strong> ya confían en nosotros</p>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="hero-glow"></div>
+        <div class="dashboard-preview">
+          <div class="dp-header">
+            <div class="dp-dots">
+              <div class="dp-dot" style="background:#ff5f57"></div>
+              <div class="dp-dot" style="background:#febc2e"></div>
+              <div class="dp-dot" style="background:#28c840"></div>
+            </div>
+            <div class="dp-title">Panel · ComerciosConecta</div>
+          </div>
+          <div class="dp-body">
+            <div class="dp-stats">
+              <div class="dp-stat"><div class="lbl">Ventas hoy</div><div class="val green">$4.8M</div></div>
+              <div class="dp-stat"><div class="lbl">Órdenes</div><div class="val">38</div></div>
+              <div class="dp-stat"><div class="lbl">Productos</div><div class="val">127</div></div>
+            </div>
+            <div class="dp-chart">
+              <div class="dp-chart-label">Ventas últimos 7 días</div>
+              <div class="bars">
+                <div class="bar" style="height:30%"></div>
+                <div class="bar" style="height:55%"></div>
+                <div class="bar" style="height:40%"></div>
+                <div class="bar" style="height:75%"></div>
+                <div class="bar" style="height:60%"></div>
+                <div class="bar" style="height:85%"></div>
+                <div class="bar" style="height:100%"></div>
+              </div>
+            </div>
+            <div class="dp-list">
+              <div class="dp-row">
+                <div class="dp-row-left"><div class="dp-icon">🛒</div>Crema Hidratante</div>
+                <span class="chip chip-green">Activo</span>
+              </div>
+              <div class="dp-row">
+                <div class="dp-row-left"><div class="dp-icon">📦</div>Stock bajo: MAC</div>
+                <span class="chip chip-yellow">Alerta</span>
+              </div>
+              <div class="dp-row">
+                <div class="dp-row-left"><div class="dp-icon">🧾</div>Venta #38 facturada</div>
+                <span class="chip chip-green">OK</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ LOGOS ══════════ -->
+<section class="logos-section">
+  <div class="container">
+    <p class="logos-label">Integraciones incluidas</p>
+    <div class="logos-grid">
+      <div class="logo-item">WOMPI</div>
+      <div class="logo-item">FACTUS</div>
+      <div class="logo-item">DIAN</div>
+      <div class="logo-item">PostgreSQL</div>
+      <div class="logo-item">WhatsApp</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FEATURES ══════════ -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="features-header">
+      <div class="section-tag"><span class="badge badge-accent">Funcionalidades</span></div>
+      <h2 class="section-title">Todo lo que necesita<br/>tu negocio, en un solo lugar</h2>
+      <p class="section-sub">Sin tecnicismos, sin configuraciones complejas. Empieza a vender en minutos.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feat-icon" style="background:#e0f2fe">📦</div>
+        <h3>Inventario Inteligente</h3>
+        <p>Controla tu stock en tiempo real. Alertas automáticas cuando un producto baje del mínimo.</p>
+        <span class="feat-tag">→ Ver más</span>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon" style="background:#d1fae5">🛍️</div>
+        <h3>Tienda Online Propia</h3>
+        <p>Tu e-commerce personalizado con tu logo y colores. Pagos vía Wompi integrados.</p>
+        <span class="feat-tag">→ Ver más</span>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon" style="background:#fef9c3">🧾</div>
+        <h3>Facturación Electrónica</h3>
+        <p>Genera facturas DIAN-validas con Factus automáticamente desde cada venta.</p>
+        <span class="feat-tag">→ Ver más</span>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon" style="background:#ede9fe">📊</div>
+        <h3>Dashboard en Tiempo Real</h3>
+        <p>KPIs de ventas, inventario y e-commerce en una sola pantalla. Toma decisiones basadas en datos.</p>
+        <span class="feat-tag">→ Ver más</span>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon" style="background:#fee2e2">👥</div>
+        <h3>Gestión de Clientes</h3>
+        <p>CRM básico con historial de compras, datos de facturación y segmentación.</p>
+        <span class="feat-tag">→ Ver más</span>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon" style="background:#fce7f3">🎨</div>
+        <h3>Tienda Personalizable</h3>
+        <p>Cambia colores, logo y contenido de tu tienda en vivo. Sin código, sin diseñador.</p>
+        <span class="feat-tag">→ Ver más</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ HOW IT WORKS ══════════ -->
+<section class="how" id="how">
+  <div class="container">
+    <div class="how-header">
+      <div class="section-tag"><span class="badge badge-accent">Proceso</span></div>
+      <h2 class="section-title">En 4 pasos estás vendiendo</h2>
+      <p class="section-sub">Sin instalaciones ni conocimiento técnico requerido.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h4>Crea tu cuenta</h4>
+        <p>Regístrarte toma menos de 2 minutos. Solo email y nombre de tu comercio.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h4>Carga tu inventario</h4>
+        <p>Importa desde Excel o carga uno a uno. El sistema organiza todo automáticamente.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h4>Personaliza tu tienda</h4>
+        <p>Elige colores, sube tu logo y configura categorías. Tu marca, tu identidad.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h4>¡Empieza a vender!</h4>
+        <p>Comparte el link de tu tienda. Las ventas y facturas se gestionan solas.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ STATS ══════════ -->
+<section class="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item"><div class="num">+800</div><div class="label">Comercios activos</div></div>
+      <div class="stat-item"><div class="num">$2.4B</div><div class="label">Facturado en la plataforma</div></div>
+      <div class="stat-item"><div class="num">99.9%</div><div class="label">Uptime garantizado</div></div>
+      <div class="stat-item"><div class="num">4.9★</div><div class="label">Calificación promedio</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ PRICING ══════════ -->
+<section class="pricing" id="pricing">
+  <div class="container">
+    <div class="pricing-header">
+      <div class="section-tag"><span class="badge badge-accent">Planes</span></div>
+      <h2 class="section-title">Precios claros, sin sorpresas</h2>
+      <p class="section-sub">Empieza gratis. Crece sin límites.</p>
+    </div>
+    <div class="pricing-grid">
+      <!-- Starter -->
+      <div class="price-card">
+        <div class="price-name">Starter</div>
+        <div class="price-amount"><span class="curr">$</span><span class="amt">0</span><span class="period">/mes</span></div>
+        <div class="price-desc">Para comercios que empiezan</div>
+        <hr class="price-divider" />
+        <div class="price-features">
+          <div class="pf"><div class="pf-check">✓</div>Hasta 50 productos</div>
+          <div class="pf"><div class="pf-check">✓</div>1 usuario</div>
+          <div class="pf"><div class="pf-check">✓</div>Tienda online básica</div>
+          <div class="pf"><div class="pf-check">✓</div>10 ventas/mes</div>
+        </div>
+        <button class="btn-price btn-price-outline">Comenzar gratis</button>
+      </div>
+      <!-- Pro -->
+      <div class="price-card popular">
+        <div class="popular-label">⚡ Más popular</div>
+        <div class="price-name">Pro</div>
+        <div class="price-amount"><span class="curr">$</span><span class="amt">89K</span><span class="period">/mes</span></div>
+        <div class="price-desc">Para comercios en crecimiento</div>
+        <hr class="price-divider" />
+        <div class="price-features">
+          <div class="pf"><div class="pf-check">✓</div>Productos ilimitados</div>
+          <div class="pf"><div class="pf-check">✓</div>3 usuarios</div>
+          <div class="pf"><div class="pf-check">✓</div>Tienda personalizable</div>
+          <div class="pf"><div class="pf-check">✓</div>Ventas ilimitadas</div>
+          <div class="pf"><div class="pf-check">✓</div>Facturación electrónica</div>
+          <div class="pf"><div class="pf-check">✓</div>Soporte prioritario</div>
+        </div>
+        <button class="btn-price btn-price-accent">Empezar ahora →</button>
+      </div>
+      <!-- Enterprise -->
+      <div class="price-card">
+        <div class="price-name">Enterprise</div>
+        <div class="price-amount"><span class="curr">$</span><span class="amt">199K</span><span class="period">/mes</span></div>
+        <div class="price-desc">Para cadenas y multitiendas</div>
+        <hr class="price-divider" />
+        <div class="price-features">
+          <div class="pf"><div class="pf-check">✓</div>Todo en Pro</div>
+          <div class="pf"><div class="pf-check">✓</div>Usuarios ilimitados</div>
+          <div class="pf"><div class="pf-check">✓</div>Múltiples sucursales</div>
+          <div class="pf"><div class="pf-check">✓</div>API acceso completo</div>
+          <div class="pf"><div class="pf-check">✓</div>SLA 99.9% garantizado</div>
+          <div class="pf"><div class="pf-check">✓</div>Gerente de cuenta</div>
+        </div>
+        <button class="btn-price btn-price-outline">Contactar ventas</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ TESTIMONIALS ══════════ -->
+<section class="testimonials" id="testimonials">
+  <div class="container">
+    <div class="test-header">
+      <div class="section-tag"><span class="badge badge-accent">Testimonios</span></div>
+      <h2 class="section-title">Lo que dicen nuestros clientes</h2>
+    </div>
+    <div class="test-grid">
+      <div class="test-card">
+        <div class="stars">★★★★★</div>
+        <p class="test-text">"Antes llevaba todo en Excel. Hoy con ComerciosConecta tengo mi tienda online, facturo electrónicamente y veo mis ventas en tiempo real. Increíble."</p>
+        <div class="test-author">
+          <div class="test-avatar">M</div>
+          <div><div class="test-name">María González</div><div class="test-role">Farmacia La Salud, Bogotá</div></div>
+        </div>
+      </div>
+      <div class="test-card">
+        <div class="stars">★★★★★</div>
+        <p class="test-text">"La facturación electrónica con Factus me salvó. Antes me tocaba contratar un contador extra. Ahora todo sale automático desde el sistema."</p>
+        <div class="test-author">
+          <div class="test-avatar">C</div>
+          <div><div class="test-name">Carlos Rodríguez</div><div class="test-role">Distribuidora CR, Medellín</div></div>
+        </div>
+      </div>
+      <div class="test-card">
+        <div class="stars">★★★★★</div>
+        <p class="test-text">"Personalicé mi tienda online con mis colores en 10 minutos. Mis clientes no saben que es ComerciosConecta, sienten que es mi propia plataforma."</p>
+        <div class="test-author">
+          <div class="test-avatar">A</div>
+          <div><div class="test-name">Ana Martínez</div><div class="test-role">Beauty Store, Cali</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CTA ══════════ -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-inner">
+      <h2 class="cta-title">Listo para llevar tu<br/>comercio al <span>siguiente nivel</span>?</h2>
+      <p class="cta-sub">14 días gratis. Sin tarjeta de crédito. Cancela cuando quieras.</p>
+      <div class="cta-actions">
+        <a class="btn btn-primary" href="#">Crear cuenta gratis →</a>
+        <a class="btn btn-outline" href="#">Hablar con un asesor</a>
+      </div>
+      <p class="cta-note">✓ Sin contrato · ✓ Soporte en español · ✓ Datos en Colombia</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo" style="margin-bottom:12px">
+          <div class="logo-icon">🛍</div>
+          Comercios<span>Conecta</span>
+        </div>
+        <p>La plataforma todo-en-uno para pymes colombianas. Vende más, gestiona mejor.</p>
+        <div class="footer-social" style="margin-top:16px">
+          <div class="soc">📘</div><div class="soc">📸</div><div class="soc">💼</div><div class="soc">🐦</div>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h5>Producto</h5>
+        <a href="#">Funciones</a><a href="#">Precios</a><a href="#">Integraciones</a><a href="#">Actualizaciones</a>
+      </div>
+      <div class="footer-col">
+        <h5>Empresa</h5>
+        <a href="#">Nosotros</a><a href="#">Blog</a><a href="#">Empleos</a><a href="#">Prensa</a>
+      </div>
+      <div class="footer-col">
+        <h5>Soporte</h5>
+        <a href="#">Centro de ayuda</a><a href="#">Contacto</a><a href="#">Estado del sistema</a><a href="#">API</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 ComerciosConecta. Todos los derechos reservados.</span>
+      <span>Hecho con ❤️ en Colombia 🇨🇴</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

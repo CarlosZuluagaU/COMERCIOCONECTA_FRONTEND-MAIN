@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Productos – ComerciosConecta</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; display: flex; min-height: 100vh; }
+  aside { width: 220px; background: linear-gradient(180deg,#1F3B4D,#16303f); color: white; display: flex; flex-direction: column; padding: 0; min-height: 100vh; flex-shrink: 0; }
+  .sb-brand { padding: 28px 20px 20px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .sb-brand h1 { font-size: 1.2rem; font-weight: 800; }
+  .sb-brand h1 span { color: #00d4aa; }
+  .sb-brand p { font-size: .7rem; color: rgba(255,255,255,.4); margin-top: 2px; }
+  nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: .85rem; color: rgba(255,255,255,.7); cursor: pointer; text-decoration: none; }
+  .nav-item.active { background: rgba(0,212,170,.15); color: #00d4aa; }
+  .sb-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,.08); }
+  .logout { display: flex; align-items: center; gap: 10px; background: #f56565; color: white; border: none; width: 100%; padding: 10px 14px; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; }
+  main { flex: 1; display: flex; flex-direction: column; }
+  header { background: white; padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  header h1 { font-size: 1.15rem; color: #1F3B4D; display: flex; align-items: center; gap: 8px; }
+  .btn-primary { padding: 10px 20px; background: linear-gradient(135deg,#00d4aa,#00a88f); color: white; border: none; border-radius: 8px; font-size: .88rem; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+  .content { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
+  .filters { background: white; border-radius: 12px; padding: 16px 20px; display: flex; gap: 12px; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+  .search { flex: 1; display: flex; align-items: center; gap: 8px; background: #f7f8fa; border-radius: 8px; padding: 8px 14px; }
+  .search input { border: none; background: none; flex: 1; font-size: .9rem; outline: none; }
+  select { padding: 8px 14px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: .88rem; font-family: inherit; }
+  .card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.05); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { background: #f7f8fa; padding: 12px 16px; text-align: left; font-size: .78rem; color: #888; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid #eee; }
+  tbody td { padding: 14px 16px; font-size: .88rem; color: #333; border-bottom: 1px solid #f5f5f5; }
+  tbody tr:hover { background: #fafffe; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: .75rem; font-weight: 600; }
+  .badge-ok { background: #d1fae5; color: #065f46; }
+  .badge-low { background: #fef9c3; color: #92400e; }
+  .badge-out { background: #fef2f2; color: #dc2626; }
+  .actions { display: flex; gap: 6px; }
+  .btn-icon { padding: 6px 10px; border: none; border-radius: 6px; cursor: pointer; font-size: .85rem; }
+  .btn-edit { background: #e0f2fe; color: #0369a1; }
+  .btn-del { background: #fef2f2; color: #dc2626; }
+  .product-img { width: 36px; height: 36px; background: #f0f4f8; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+  .product-name { display: flex; align-items: center; gap: 10px; }
+  .pagination { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-top: 1px solid #eee; font-size: .83rem; color: #888; }
+  .page-btns { display: flex; gap: 4px; }
+  .page-btns button { padding: 6px 12px; border: 1.5px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer; font-size: .83rem; }
+  .page-btns button.active { background: #1F3B4D; color: white; border-color: #1F3B4D; }
+</style>
+</head>
+<body>
+<aside>
+  <div class="sb-brand"><h1>Comercios<span>Conecta</span></h1><p>Suite empresarial</p></div>
+  <nav>
+    <a class="nav-item" href="03-dashboard.html"><span>📊</span> Estadísticas</a>
+    <a class="nav-item active" href="04-products-list.html"><span>📦</span> Productos</a>
+    <a class="nav-item" href="13-ecommerce-orders.html"><span>🛒</span> Pedidos</a>
+    <a class="nav-item" href="08-clients-list.html"><span>👥</span> Clientes</a>
+    <a class="nav-item" href="06-sales-list.html"><span>🧾</span> Facturación</a>
+    <a class="nav-item" href="10-purchases-history.html"><span>📋</span> Compras</a>
+    <a class="nav-item" href="15-store-customizer.html"><span>🎨</span> Personalización</a>
+  </nav>
+  <div class="sb-footer"><button class="logout">🚪 Cerrar sesión</button></div>
+</aside>
+
+<main>
+  <header>
+    <h1>📦 Listado de Productos</h1>
+    <a class="btn-primary" href="05-add-product.html">＋ Agregar Producto</a>
+  </header>
+
+  <div class="content">
+    <div class="filters">
+      <div class="search">
+        <span>🔍</span>
+        <input placeholder="Buscar por nombre, referencia, marca…" value="" />
+      </div>
+      <select><option>Todas las categorías</option><option>Cuidado Personal</option><option>Medicamentos</option><option>Maquillaje</option></select>
+      <select><option>Todos los estados</option><option>Activo</option><option>Inactivo</option></select>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Referencia</th>
+            <th>Categoría</th>
+            <th>Precio compra</th>
+            <th>Precio venta</th>
+            <th>Stock</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="product-name"><div class="product-img">🧴</div><strong>Crema Hidratante Nivea</strong></div></td>
+            <td>NIV-001</td><td>Cuidado Personal</td><td>$18.000</td><td>$28.000</td>
+            <td><span class="badge badge-ok">45 und</span></td>
+            <td><span class="badge badge-ok">Activo</span></td>
+            <td><div class="actions"><button class="btn-icon btn-edit">✏️</button><button class="btn-icon btn-del">🗑️</button></div></td>
+          </tr>
+          <tr>
+            <td><div class="product-name"><div class="product-img">🧴</div><strong>Shampoo Anticaspa H&S</strong></div></td>
+            <td>HYS-002</td><td>Cuidado Capilar</td><td>$20.000</td><td>$33.000</td>
+            <td><span class="badge badge-ok">25 und</span></td>
+            <td><span class="badge badge-ok">Activo</span></td>
+            <td><div class="actions"><button class="btn-icon btn-edit">✏️</button><button class="btn-icon btn-del">🗑️</button></div></td>
+          </tr>
+          <tr>
+            <td><div class="product-name"><div class="product-img">💄</div><strong>Labial Matte MAC</strong></div></td>
+            <td>MAC-003</td><td>Maquillaje</td><td>$30.000</td><td>$45.000</td>
+            <td><span class="badge badge-low">8 und</span></td>
+            <td><span class="badge badge-ok">Activo</span></td>
+            <td><div class="actions"><button class="btn-icon btn-edit">✏️</button><button class="btn-icon btn-del">🗑️</button></div></td>
+          </tr>
+          <tr>
+            <td><div class="product-name"><div class="product-img">☀️</div><strong>Protector Solar 50 FPS</strong></div></td>
+            <td>NIV-004</td><td>Cuidado Piel</td><td>$22.000</td><td>$32.000</td>
+            <td><span class="badge badge-ok">15 und</span></td>
+            <td><span class="badge badge-ok">Activo</span></td>
+            <td><div class="actions"><button class="btn-icon btn-edit">✏️</button><button class="btn-icon btn-del">🗑️</button></div></td>
+          </tr>
+          <tr>
+            <td><div class="product-name"><div class="product-img">💊</div><strong>Acetaminofén 500mg x10</strong></div></td>
+            <td>MED-005</td><td>Medicamentos</td><td>$3.000</td><td>$5.500</td>
+            <td><span class="badge badge-out">0 und</span></td>
+            <td><span class="badge badge-out">Sin stock</span></td>
+            <td><div class="actions"><button class="btn-icon btn-edit">✏️</button><button class="btn-icon btn-del">🗑️</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="pagination">
+        <span>Mostrando 5 de 127 productos</span>
+        <div class="page-btns">
+          <button disabled>‹</button>
+          <button class="active">1</button>
+          <button>2</button>
+          <button>3</button>
+          <button>›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

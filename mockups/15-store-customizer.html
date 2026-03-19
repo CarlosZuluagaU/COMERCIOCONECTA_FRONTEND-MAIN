@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Personalizador de Tienda – ComerciosConecta</title>
+<style>
+/* ─────────────────────────────────────────────
+   RESET & BASE
+───────────────────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+/* ─────────────────────────────────────────────
+   TOP BAR
+───────────────────────────────────────────── */
+.top-bar {
+  background: linear-gradient(135deg, #1F3B4D, #2c5364);
+  color: white; padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px; flex-shrink: 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,.2);
+}
+.top-bar-left { display: flex; align-items: center; gap: 14px; }
+.back-link { color: rgba(255,255,255,.6); font-size: .8rem; text-decoration: none; display: flex; align-items: center; gap: 6px; }
+.back-link:hover { color: white; }
+.divider-v { width: 1px; height: 20px; background: rgba(255,255,255,.2); }
+.top-bar h1 { font-size: .95rem; font-weight: 700; }
+.top-bar h1 span { color: #00d4aa; }
+.top-bar-right { display: flex; align-items: center; gap: 10px; }
+.device-btns { display: flex; background: rgba(255,255,255,.1); border-radius: 8px; overflow: hidden; }
+.dev-btn { padding: 6px 12px; border: none; background: none; color: rgba(255,255,255,.6); cursor: pointer; font-size: .85rem; transition: all .15s; }
+.dev-btn.active { background: rgba(0,212,170,.3); color: #00d4aa; }
+.btn-save { padding: 8px 22px; background: linear-gradient(135deg,#00d4aa,#00a88f); color: #1F3B4D; border: none; border-radius: 8px; font-weight: 800; font-size: .88rem; cursor: pointer; }
+.btn-preview { padding: 8px 16px; background: rgba(255,255,255,.1); color: white; border: 1px solid rgba(255,255,255,.2); border-radius: 8px; font-size: .85rem; cursor: pointer; }
+
+/* ─────────────────────────────────────────────
+   LAYOUT PRINCIPAL
+───────────────────────────────────────────── */
+.layout { display: flex; flex: 1; overflow: hidden; }
+
+/* ─────────────────────────────────────────────
+   PANEL IZQUIERDO – CONTROLES
+───────────────────────────────────────────── */
+.control-panel {
+  width: 340px; flex-shrink: 0;
+  background: white; border-right: 1px solid #e8ecef;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.panel-tabs { display: flex; border-bottom: 1px solid #eee; flex-shrink: 0; }
+.ptab { flex: 1; padding: 12px 6px; border: none; background: none; font-size: .78rem; font-weight: 600; color: #888; cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; }
+.ptab.active { color: #1F3B4D; border-bottom-color: #00d4aa; }
+.panel-body { flex: 1; overflow-y: auto; padding: 0; }
+
+/* Secciones del panel */
+.section { border-bottom: 1px solid #f0f0f0; }
+.section-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; cursor: pointer; user-select: none;
+}
+.section-hdr-left { display: flex; align-items: center; gap: 10px; }
+.section-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: .9rem; }
+.section-hdr h3 { font-size: .85rem; font-weight: 700; color: #1F3B4D; }
+.section-hdr p { font-size: .72rem; color: #888; margin-top: 1px; }
+.chevron { font-size: .7rem; color: #aaa; transition: transform .2s; }
+.chevron.open { transform: rotate(180deg); }
+.section-body { padding: 4px 18px 16px; display: flex; flex-direction: column; gap: 12px; }
+
+/* Controles de formulario */
+.ctrl-group { display: flex; flex-direction: column; gap: 5px; }
+.ctrl-label { font-size: .75rem; font-weight: 600; color: #555; display: flex; justify-content: space-between; align-items: center; }
+.ctrl-hint { font-size: .68rem; color: #aaa; font-weight: 400; }
+input[type="text"], input[type="url"], select, textarea {
+  padding: 8px 12px; border: 1.5px solid #e0e0e0; border-radius: 8px;
+  font-size: .85rem; font-family: inherit; outline: none; transition: border .2s; width: 100%;
+}
+input:focus, select:focus, textarea:focus { border-color: #00d4aa; }
+textarea { resize: vertical; min-height: 60px; }
+
+/* Color pickers */
+.color-row { display: flex; gap: 8px; align-items: center; }
+.color-swatch { width: 36px; height: 36px; border-radius: 8px; border: 2px solid #eee; cursor: pointer; flex-shrink: 0; }
+.color-value { flex: 1; font-size: .8rem; color: #555; font-family: monospace; background: #f7f8fa; padding: 6px 10px; border-radius: 6px; border: 1px solid #eee; }
+
+/* Paletas de color */
+.palette-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.palette-color { width: 100%; aspect-ratio: 1; border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: transform .15s; }
+.palette-color:hover { transform: scale(1.1); }
+.palette-color.selected { border-color: #1F3B4D; }
+
+/* Toggle switch */
+.toggle-row { display: flex; justify-content: space-between; align-items: center; }
+.toggle-row span { font-size: .82rem; color: #444; }
+.toggle { position: relative; width: 40px; height: 22px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; inset: 0; background: #ddd; border-radius: 22px; cursor: pointer; transition: .2s; }
+.slider::before { content:''; position: absolute; height: 16px; width: 16px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .2s; }
+input:checked + .slider { background: #00d4aa; }
+input:checked + .slider::before { transform: translateX(18px); }
+
+/* Upload area */
+.upload-zone {
+  border: 2px dashed #d0d0d0; border-radius: 10px;
+  padding: 20px; text-align: center; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  transition: border .2s; background: #fafafa;
+}
+.upload-zone:hover { border-color: #00d4aa; background: #f0fdf4; }
+.upload-zone .up-icon { font-size: 1.8rem; }
+.upload-zone p { font-size: .78rem; color: #888; }
+.upload-zone strong { font-size: .82rem; color: #1F3B4D; }
+.logo-preview { width: 100%; height: 60px; background: #f0f4f8; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: 1px solid #eee; }
+
+/* Font selector */
+.font-option { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border: 1.5px solid #eee; border-radius: 8px; cursor: pointer; transition: border .15s; }
+.font-option:hover, .font-option.selected { border-color: #00d4aa; background: #f0fdf4; }
+.font-option span { font-size: .9rem; color: #333; }
+.font-option small { font-size: .72rem; color: #888; }
+.font-check { color: #00a88f; font-size: 1rem; }
+
+/* Style selector (botones) */
+.style-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.style-opt { border: 1.5px solid #eee; border-radius: 8px; padding: 10px 12px; cursor: pointer; text-align: center; transition: all .15s; }
+.style-opt:hover, .style-opt.selected { border-color: #00d4aa; background: #f0fdf4; }
+.style-opt .preview-btn { display: inline-block; padding: 4px 14px; margin-top: 6px; font-size: .78rem; font-weight: 700; color: white; background: #1F3B4D; }
+.style-opt .preview-btn.rounded { border-radius: 20px; }
+.style-opt .preview-btn.square { border-radius: 2px; }
+.style-opt .preview-btn.soft { border-radius: 8px; }
+.style-opt small { display: block; font-size: .7rem; color: #888; margin-top: 4px; }
+
+/* ─────────────────────────────────────────────
+   ÁREA DE PREVIEW
+───────────────────────────────────────────── */
+.preview-area {
+  flex: 1; background: #e8ecef; display: flex; flex-direction: column;
+  align-items: center; overflow: hidden;
+}
+.preview-bar {
+  width: 100%; background: white; border-bottom: 1px solid #e0e0e0;
+  padding: 8px 20px; display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.preview-bar span { font-size: .78rem; color: #888; font-weight: 600; }
+.preview-url { font-size: .75rem; color: #aaa; font-family: monospace; background: #f7f8fa; padding: 4px 12px; border-radius: 20px; border: 1px solid #eee; }
+.preview-frame-wrap {
+  flex: 1; width: 100%; display: flex; align-items: flex-start; justify-content: center;
+  overflow: auto; padding: 20px;
+}
+.preview-frame {
+  background: white; border-radius: 12px; overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,.15);
+  transition: width .3s ease;
+}
+.preview-frame.desktop { width: 100%; min-width: 800px; }
+.preview-frame.tablet  { width: 768px; }
+.preview-frame.mobile  { width: 375px; }
+
+/* ─────────────────────────────────────────────
+   STORE PREVIEW (dentro del frame)
+───────────────────────────────────────────── */
+.s-header {
+  padding: 0 24px; height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--primary, #1F3B4D); color: white;
+}
+.s-logo { font-size: 1.1rem; font-weight: 800; }
+.s-logo sub { font-size: .65rem; display: block; opacity: .55; margin-top: -3px; }
+.s-search { flex: 1; max-width: 280px; margin: 0 16px; display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,.12); border-radius: 7px; padding: 6px 12px; font-size: .8rem; color: rgba(255,255,255,.6); }
+.s-cart-btn { padding: 7px 14px; border: none; border-radius: 7px; font-weight: 700; font-size: .8rem; cursor: pointer; background: var(--accent, #00d4aa); color: var(--primary, #1F3B4D); }
+
+.s-nav { background: white; border-bottom: 1px solid #eee; padding: 0 24px; display: flex; gap: 2px; overflow-x: auto; }
+.s-nav-item { padding: 10px 14px; font-size: .8rem; color: #666; border-bottom: 2px solid transparent; white-space: nowrap; cursor: pointer; }
+.s-nav-item.active { color: var(--primary, #1F3B4D); border-bottom-color: var(--accent, #00d4aa); font-weight: 700; }
+
+.s-hero {
+  padding: 36px 24px; text-align: center; color: white;
+  background: var(--primary, #1F3B4D);
+}
+.s-hero h2 { font-size: 1.6rem; font-weight: 800; }
+.s-hero p { margin-top: 6px; opacity: .75; font-size: .88rem; }
+.s-hero-btn { margin-top: 16px; display: inline-block; padding: 10px 28px; border: none; cursor: pointer; font-weight: 800; font-size: .9rem; border-radius: var(--radius-btn, 50px); background: var(--accent, #00d4aa); color: var(--primary, #1F3B4D); }
+
+.s-products { padding: 24px; }
+.s-products h3 { font-size: 1rem; font-weight: 700; color: #1F3B4D; margin-bottom: 14px; }
+.s-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.s-card { border-radius: var(--radius-card, 12px); overflow: hidden; border: 1px solid #eee; background: white; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+.s-card-img { height: 100px; background: #f7f8fa; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
+.s-card-body { padding: 10px; }
+.s-card-cat { font-size: .65rem; font-weight: 700; text-transform: uppercase; color: var(--accent, #00d4aa); letter-spacing: .5px; }
+.s-card-name { font-size: .82rem; font-weight: 700; color: #1F3B4D; margin-top: 2px; }
+.s-card-price { font-size: .95rem; font-weight: 800; color: #1F3B4D; margin-top: 6px; }
+.s-card-btn { width: 100%; margin-top: 8px; padding: 7px; border: none; border-radius: var(--radius-btn, 20px); background: var(--primary, #1F3B4D); color: white; font-size: .75rem; font-weight: 700; cursor: pointer; }
+
+.s-footer { background: var(--primary, #1F3B4D); color: white; padding: 20px 24px; }
+.s-footer-top { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,.1); }
+.s-footer-brand { font-size: .95rem; font-weight: 800; }
+.s-footer-brand span { color: var(--accent, #00d4aa); }
+.s-footer-links { display: flex; gap: 16px; font-size: .75rem; opacity: .6; }
+.s-footer-bottom { margin-top: 12px; font-size: .7rem; opacity: .45; text-align: center; }
+.s-social { display: flex; gap: 8px; }
+.s-social-btn { width: 28px; height: 28px; border-radius: 6px; background: rgba(255,255,255,.1); display: flex; align-items: center; justify-content: center; font-size: .8rem; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ TOP BAR ═══════════════════ -->
+<div class="top-bar">
+  <div class="top-bar-left">
+    <a class="back-link" href="index.html">← Índice</a>
+    <div class="divider-v"></div>
+    <h1>Personalizador de <span>Tienda</span></h1>
+  </div>
+  <div class="top-bar-right">
+    <div class="device-btns">
+      <button class="dev-btn active" onclick="setDevice('desktop')">🖥</button>
+      <button class="dev-btn" onclick="setDevice('tablet')">📱</button>
+      <button class="dev-btn" onclick="setDevice('mobile')">📲</button>
+    </div>
+    <button class="btn-preview" onclick="alert('Vista previa en nueva pestaña')">👁 Vista previa</button>
+    <button class="btn-save" onclick="showSaved()">💾 Guardar cambios</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ LAYOUT ═══════════════════ -->
+<div class="layout">
+
+  <!-- ══════ PANEL IZQUIERDO ══════ -->
+  <div class="control-panel">
+    <div class="panel-tabs">
+      <button class="ptab active" onclick="switchTab(this,'design')">🎨 Diseño</button>
+      <button class="ptab" onclick="switchTab(this,'content')">📝 Contenido</button>
+      <button class="ptab" onclick="switchTab(this,'advanced')">⚙️ Avanzado</button>
+    </div>
+
+    <!-- ════ TAB: DISEÑO ════ -->
+    <div class="panel-body" id="tab-design">
+
+      <!-- IDENTIDAD -->
+      <div class="section">
+        <div class="section-hdr" onclick="toggleSection(this)">
+          <div class="section-hdr-left">
+            <div class="section-icon" style="background:#e0f2fe">🏪</div>
+            <div><h3>Identidad de Marca</h3><p>Logo, nombre y slogan</p></div>
+          </div>
+          <span class="chevron open">▼</span>
+        </div>
+        <div class="section-body">
+          <div class="ctrl-group">
+            <label class="ctrl-label">Logo de la tienda</label>
+            <div class="logo-preview" id="logo-preview">🛍️</div>
+            <div class="upload-zone" onclick="document.getElementById('logo-input').click()">
+              <div class="up-icon">📷</div>
+              <strong>Subir logo</strong>
+              <p>PNG o SVG transparente · Máx 2MB</p>
+            </div>
+            <input id="logo-input" type="file" accept="image/*" style="display:none" onchange="previewLogo(this)" />
+          </div>
+          <div class="ctrl-group">
+            <label class="ctrl-label">Nombre de la tienda</label>
+            <input type="text" id="store-name" value="MiComercio" oninput="updatePreview()" />
+          </div>
+          <div class="ctrl-group">
+            <label class="ctrl-label">Eslogan / tagline</label>
+            <input type="text" id="store-tagline" value="Tu tienda de confianza" oninput="updatePreview()" />
+          </div>
+        </div>
+      </div>
+
+      <!-- COLORES -->
+      <div class="section">
+        <div class="section-hdr" onclick="toggleSection(this)">
+          <div class="section-hdr-left">
+            <div class="section-icon" style="background:#fef9c3">🎨</div>
+            <div><h3>Colores</h3><p>Paleta principal de la tienda</p></div>
+          </div>
+          <span class="chevron open">▼</span>
+        </div>
+        <div class="section-body">
+          <!-- Color primario -->
+          <div class="ctrl-group">
+            <label class="ctrl-label">Color primario <span class="ctrl-hint">(header, botones CTA)</span></label>
+            <div class="color-row">
+              <input type="color" id="color-primary" class="color-swatch" value="#1F3B4D" oninput="updateColors()" />
+              <div class="color-value" id="primary-hex">#1F3B4D</div>
+            </div>
+          </div>
+          <!-- Color acento -->
+          <div class="ctrl-group">
+            <label class="ctrl-label">Color de acento <span class="ctrl-hint">(detalles, badges)</span></label>
+            <div class="color-row">
+              <input type="color" id="color-accent" class="color-swatch" value="#00d4aa" oninput="updateColors()" />
+              <div class="color-value" id="accent-hex">#00d4aa</div>
+            </div>
+          </div>
+          <!-- Paletas predefinidas -->
+          <div class="ctrl-group">
+            <label class="ctrl-label">Paletas predefinidas</label>
+            <div class="palette-grid">
+              <div class="palette-color selected" style="background:#1F3B4D" title="Azul Marino" onclick="setPalette('#1F3B4D','#00d4aa',this)"></div>
+              <div class="palette-color" style="background:#7c3aed" title="Púrpura" onclick="setPalette('#7c3aed','#a78bfa',this)"></div>
+              <div class="palette-color" style="background:#b91c1c" title="Rojo Elegante" onclick="setPalette('#b91c1c','#fca5a5',this)"></div>
+              <div class="palette-color" style="background:#065f46" title="Verde Bosque" onclick="setPalette('#065f46','#6ee7b7',this)"></div>
+              <div class="palette-color" style="background:#1e40af" title="Azul Real" onclick="setPalette('#1e40af','#93c5fd',this)"></div>
+              <div class="palette-color" style="background:#92400e" title="Café Cálido" onclick="setPalette('#92400e','#fbbf24',this)"></div>
+              <div class="palette-color" style="background:#831843" title="Rosa Oscuro" onclick="setPalette('#831843','#f9a8d4',this)"></div>
+              <div class="palette-color" style="background:#134e4a" title="Verde Jade" onclick="setPalette('#134e4a','#5eead4',this)"></div>
+              <div class="palette-color" style="background:#1c1917" title="Negro Minimalista" onclick="setPalette('#1c1917','#d4d4d4',this)"></div>
+              <div class="palette-color" style="background:#0f172a" title="Dark Mode" onclick="setPalette('#0f172a','#38bdf8',this)"></div>
+              <div class="palette-color" style="background:#4a1d96" title="Índigo" onclick="setPalette('#4a1d96','#c4b5fd',this)"></div>
+              <div class="palette-color" style="background:#064e3b" title="Esmeralda" onclick="setPalette('#064e3b','#34d399',this)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TIPOGRAFÍA -->
+      <div class="section">
+        <div class="section-hdr" onclick="toggleSection(this)">
+          <div class="section-hdr-left">
+            <div class="section-icon" style="background:#ede9fe">🔤</div>
+            <div><h3>Tipografía</h3><p>Fuente de la tienda</p></div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="section-body" style="display:none">
+          <div class="font-option selected" onclick="setFont('Segoe UI, sans-serif', this)">
+            <span style="font-family:'Segoe UI'">Segoe UI <small>— Limpia y moderna</small></span>
+            <span class="font-check">✓</span>
+          </div>
+          <div class="font-option" onclick="setFont('Georgia, serif', this)">
+            <span style="font-family:Georgia">Georgia <small>— Elegante y clásica</small></span>
+          </div>
+          <div class="font-option" onclick="setFont('monospace', this)">
+            <span style="font-family:monospace">Courier <small>— Técnica y precisa</small></span>
+          </div>
+          <div class="font-option" onclick="setFont('Arial Rounded MT Bold, sans-serif', this)">
+            <span>Rounded <small>— Amigable y juvenil</small></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESTILO DE COMPONENTES -->
+      <div class="section">
+        <div class="section-hdr" onclick="toggleSection(this)">
+          <div class="section-hdr-left">
+            <div class="section-icon" style="background:#d1fae5">⬛</div>
+            <div><h3>Estilo de Componentes</h3><p>Bordes de botones y tarjetas</p></div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="section-body" style="display:none">
+          <label class="ctrl-label">Estilo de botones</label>
+          <div class="style-grid">
+            <div class="style-opt selected" onclick="setRadius('btn','50px',this)">
+              <span class="preview-btn rounded">Comprar</span>
+              <small>Redondeado</small>
+            </div>
+            <div class="style-opt" onclick="setRadius('btn','8px',this)">
+              <span class="preview-btn soft">Comprar</span>
+              <small>Suave</small>
+            </div>
+            <div class="style-opt" onclick="setRadius('btn','2px',this)">
+              <span class="preview-btn square">Comprar</span>
+              <small>Cuadrado</small>
+            </div>
+            <div class="style-opt" onclick="setRadius('btn','0px',this)">
+              <span class="preview-btn" style="border-radius:0">Comprar</span>
+              <small>Sin borde</small>
+            </div>
+          </div>
+          <label class="ctrl-label" style="margin-top:10px">Estilo de tarjetas</label>
+          <div class="style-grid">
+            <div class="style-opt selected" onclick="setRadius('card','12px',this)">
+              <div style="background:#f0f4f8;border-radius:12px;height:30px"></div>
+              <small>Redondeada</small>
+            </div>
+            <div class="style-opt" onclick="setRadius('card','4px',this)">
+              <div style="background:#f0f4f8;border-radius:4px;height:30px"></div>
+              <small>Sutil</small>
+            </div>
+            <div class="style-opt" onclick="setRadius('card','0px',this)">
+              <div style="background:#f0f4f8;height:30px"></div>
+              <small>Cuadrada</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tab-design -->
+
+    <!-- ════ TAB: CONTENIDO ════ -->
+    <div class="panel-body" id="tab-content" style="display:none">
+
+      <!-- HERO -->
+      <div class="section">
+        <div class="section-hdr" onclick="toggleSection(this)">
+          <div class="section-hdr-left">
+            <div class="section-icon" style="background:#fef9c3">🖼</div>
+            <div><h3>Banner Principal</h3><p>Encabezado de la tienda</p></div>
+          </div>
+          <span class="chevron open">▼</span>
+        </div>
+        <div class="section-body">
+          <div class="ctrl-group">
+            <label class="ctrl-label">Título del hero</label>
+            <input type="text" id="hero-title" value="Descubre tu belleza interior" oninput="updatePreview()" />
+          </div>
+          <div class="ctrl-group">
+            <label class="ctrl-label">Subtítulo</label>
+            <textarea id="hero-subtitle" oninput="updatePreview()">Productos de calidad premium · Envíos rápidos · Precios increíbles</textarea>
+          </div>
+          <div class="ctrl-group">
+            <label class="ctrl-label">Texto del botón CTA</label>
+            <input type="text" id="hero-cta" value="Explorar Productos" oninput="updatePreview()" />
+          </div>
+          <div class="ctrl-group">
+            <label class="ctrl-label">Imagen de fondo (URL)</label>
+            <input type="url" id="hero-bg" placeholder="https://... o dejar vacío para color sólido" oninput="updatePreview()" />
+          </div>
+        </div>
+      </div>
+
+      <!-- CATEGORÍAS -->
+      <div class="section">
+        <div class="section-hdr" onclick="toggleSection(this)">
+          <div class="section-hdr-left">
+            <div class="section-icon" style="background:#dbeafe">🗂</div>
+            <div><h3>Categorías de Navegación</h3><p>Menú horizontal de la tienda</p></div>
+          </div>
+          <span class="chevron open">▼</span>
+        </div>
+        <div class="section-body">
+          <div class="ctrl-group">
+            <label class="ctrl-label">Categorías visibles <span class="ctrl-hint">(separar con coma)</span></label>
+            <textarea id="categories" oninput="updatePreview()">Todos, Cuidado Personal, Cuidado Capilar, Maquillaje, Medicamentos</textarea>
+          </div>
+          <div class="toggle-row">
+            <span>Mostrar búsqueda en navbar</span>
+            <label class="toggle"><input type="checkbox" checked onchange="updatePreview()" /><span class="slider"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- PIE DE PÁGINA -->
+      <div class="section">
+        <div class="section-hdr" onclick="toggleSection(this)">
+          <div class="section-hdr-left">
+            <div class="section-icon" style="background:#ede9fe">🔗</div>
+            <div><h3>Pie de Página</h3><p>Footer e información de contacto</p></div>
+          </div>
+          <span class="chevron open">▼</span>
+        </div>
+        <div class="section-body">
+          <div class="ctrl-group">
+            <label class="ctrl-label">Texto del footer</label>
+            <input type="text" id="footer-text" value="© 2026 MiComercio. Todos los derechos reservados." oninput="updatePreview()" />
+          </div>
+          <div class="ctrl-group">
+            <label class="ctrl-label">Teléfono / WhatsApp</label>
+            <input type="text" id="footer-phone" value="📞 +57 300 123 4567" oninput="updatePreview()" />
+          </div>
+          <div class="toggle-row">
+            <span>Mostrar iconos de redes sociales</span>
+            <label class="toggle"><input type="checkbox" checked onchange="updatePreview()" /><span class="slider"></span></label>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tab-content -->
+
+    <!-- ════ TAB: AVANZADO ════ -->
+    <div class="panel-body" id="tab-advanced" style="display:none">
+      <div class="section">
+        <div class="section-hdr" onclick="toggleSection(this)">
+          <div class="section-hdr-left">
+            <div class="section-icon" style="background:#fef2f2">💻</div>
+            <div><h3>CSS Personalizado</h3><p>Para usuarios avanzados</p></div>
+          </div>
+          <span class="chevron open">▼</span>
+        </div>
+        <div class="section-body">
+          <div class="ctrl-group">
+            <label class="ctrl-label">CSS adicional</label>
+            <textarea style="font-family:monospace;font-size:.78rem;min-height:120px;background:#1e293b;color:#94a3b8;border-color:#334155"
+              placeholder="/* Escribe tu CSS personalizado aquí */
+.s-hero { padding: 60px 24px; }
+.s-card { box-shadow: none; }"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-hdr" onclick="toggleSection(this)">
+          <div class="section-hdr-left">
+            <div class="section-icon" style="background:#d1fae5">🔗</div>
+            <div><h3>Dominio Personalizado</h3><p>URL de la tienda</p></div>
+          </div>
+          <span class="chevron open">▼</span>
+        </div>
+        <div class="section-body">
+          <div class="ctrl-group">
+            <label class="ctrl-label">URL actual</label>
+            <div style="background:#f7f8fa;padding:8px 12px;border-radius:8px;font-size:.8rem;font-family:monospace;color:#888;border:1px solid #eee">
+              comerciosconecta.com/tienda/mi-comercio
+            </div>
+          </div>
+          <div class="ctrl-group">
+            <label class="ctrl-label">Dominio propio (próximamente)</label>
+            <input type="url" placeholder="www.micomercio.com" disabled style="background:#f7f8fa;color:#aaa" />
+          </div>
+        </div>
+      </div>
+    </div><!-- /tab-advanced -->
+
+  </div><!-- /control-panel -->
+
+  <!-- ══════ ÁREA DE PREVIEW ══════ -->
+  <div class="preview-area">
+    <div class="preview-bar">
+      <span>Vista previa en tiempo real</span>
+      <div class="preview-url">comerciosconecta.com/tienda/<strong id="url-slug">mi-comercio</strong></div>
+      <span style="font-size:.72rem;color:#10b981">● Cambios sin guardar</span>
+    </div>
+    <div class="preview-frame-wrap">
+      <div class="preview-frame desktop" id="preview-frame">
+        <!-- Store Preview -->
+        <div id="s-header" class="s-header">
+          <div class="s-logo">
+            <div id="prev-logo">🛍️ <strong id="prev-name">MiComercio</strong></div>
+            <sub id="prev-tagline">Tu tienda de confianza</sub>
+          </div>
+          <div class="s-search">🔍 Buscar productos…</div>
+          <button class="s-cart-btn">🛒 Carrito (0)</button>
+        </div>
+
+        <nav class="s-nav" id="prev-nav">
+          <div class="s-nav-item active">Todos</div>
+          <div class="s-nav-item">Cuidado Personal</div>
+          <div class="s-nav-item">Cuidado Capilar</div>
+          <div class="s-nav-item">Maquillaje</div>
+          <div class="s-nav-item">Medicamentos</div>
+        </nav>
+
+        <div class="s-hero" id="prev-hero">
+          <h2 id="prev-hero-title">Descubre tu belleza interior</h2>
+          <p id="prev-hero-sub">Productos de calidad premium · Envíos rápidos · Precios increíbles</p>
+          <button class="s-hero-btn" id="prev-cta-btn">Explorar Productos</button>
+        </div>
+
+        <div class="s-products">
+          <h3>Productos Destacados</h3>
+          <div class="s-grid">
+            <div class="s-card"><div class="s-card-img">🧴</div><div class="s-card-body"><div class="s-card-cat">Cuidado Personal</div><div class="s-card-name">Crema Hidratante</div><div class="s-card-price">$28.000</div><button class="s-card-btn">🛒 Agregar</button></div></div>
+            <div class="s-card"><div class="s-card-img">🧴</div><div class="s-card-body"><div class="s-card-cat">Capilar</div><div class="s-card-name">Shampoo H&S</div><div class="s-card-price">$33.000</div><button class="s-card-btn">🛒 Agregar</button></div></div>
+            <div class="s-card"><div class="s-card-img">💄</div><div class="s-card-body"><div class="s-card-cat">Maquillaje</div><div class="s-card-name">Labial MAC</div><div class="s-card-price">$45.000</div><button class="s-card-btn">🛒 Agregar</button></div></div>
+            <div class="s-card"><div class="s-card-img">☀️</div><div class="s-card-body"><div class="s-card-cat">Piel</div><div class="s-card-name">Protector Solar</div><div class="s-card-price">$32.000</div><button class="s-card-btn">🛒 Agregar</button></div></div>
+          </div>
+        </div>
+
+        <footer class="s-footer" id="prev-footer">
+          <div class="s-footer-top">
+            <div class="s-footer-brand" id="prev-footer-brand">Mi<span>Comercio</span></div>
+            <div class="s-social">
+              <div class="s-social-btn">📘</div>
+              <div class="s-social-btn">📸</div>
+              <div class="s-social-btn">🐦</div>
+            </div>
+          </div>
+          <div style="font-size:.75rem;opacity:.6;margin-top:10px" id="prev-phone">📞 +57 300 123 4567</div>
+          <div class="s-footer-bottom" id="prev-footer-text">© 2026 MiComercio. Todos los derechos reservados.</div>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /layout -->
+
+<script>
+// ── CSS Variables root (aplicadas al preview)
+const root = document.documentElement;
+
+function updateColors() {
+  const p = document.getElementById('color-primary').value;
+  const a = document.getElementById('color-accent').value;
+  document.getElementById('primary-hex').textContent = p;
+  document.getElementById('accent-hex').textContent = a;
+  root.style.setProperty('--primary', p);
+  root.style.setProperty('--accent', a);
+}
+
+function setPalette(primary, accent, el) {
+  document.getElementById('color-primary').value = primary;
+  document.getElementById('color-accent').value = accent;
+  document.querySelectorAll('.palette-color').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  updateColors();
+}
+
+function updatePreview() {
+  // Nombre & tagline
+  const name = document.getElementById('store-name').value || 'MiComercio';
+  document.getElementById('prev-name').textContent = name;
+  document.getElementById('prev-tagline').textContent = document.getElementById('store-tagline').value;
+  document.getElementById('url-slug').textContent = name.toLowerCase().replace(/\s+/g,'-');
+
+  // Footer brand
+  document.getElementById('prev-footer-brand').innerHTML = name;
+
+  // Hero
+  document.getElementById('prev-hero-title').textContent = document.getElementById('hero-title')?.value || '';
+  document.getElementById('prev-hero-sub').textContent  = document.getElementById('hero-subtitle')?.value || '';
+  document.getElementById('prev-cta-btn').textContent   = document.getElementById('hero-cta')?.value || 'Explorar';
+
+  // Hero BG
+  const heroBg = document.getElementById('hero-bg')?.value;
+  const hero = document.getElementById('prev-hero');
+  if (heroBg) {
+    hero.style.backgroundImage = `linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)), url('${heroBg}')`;
+    hero.style.backgroundSize = 'cover';
+    hero.style.backgroundPosition = 'center';
+  } else {
+    hero.style.backgroundImage = '';
+  }
+
+  // Footer
+  const ft = document.getElementById('footer-text')?.value;
+  const fp = document.getElementById('footer-phone')?.value;
+  if (ft) document.getElementById('prev-footer-text').textContent = ft;
+  if (fp) document.getElementById('prev-phone').textContent = fp;
+
+  // Categories nav
+  const cats = document.getElementById('categories')?.value;
+  if (cats) {
+    const nav = document.getElementById('prev-nav');
+    nav.innerHTML = cats.split(',').map((c,i) =>
+      `<div class="s-nav-item${i===0?' active':''}">${c.trim()}</div>`
+    ).join('');
+  }
+}
+
+function setFont(font, el) {
+  document.querySelectorAll('.font-option').forEach(e => { e.classList.remove('selected'); e.querySelector('.font-check')?.remove(); });
+  el.classList.add('selected');
+  const check = document.createElement('span'); check.className='font-check'; check.textContent='✓';
+  el.appendChild(check);
+  document.getElementById('preview-frame').style.fontFamily = font;
+}
+
+function setRadius(type, radius, el) {
+  const siblings = el.closest('.style-grid').querySelectorAll('.style-opt');
+  siblings.forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  if (type === 'btn') root.style.setProperty('--radius-btn', radius);
+  if (type === 'card') root.style.setProperty('--radius-card', radius);
+}
+
+function toggleSection(hdr) {
+  const body = hdr.nextElementSibling;
+  const chev = hdr.querySelector('.chevron');
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'flex';
+  chev.classList.toggle('open', !open);
+}
+
+function switchTab(btn, tabId) {
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  ['tab-design','tab-content','tab-advanced'].forEach(id => {
+    document.getElementById(id).style.display = (id === 'tab-' + tabId) ? 'block' : 'none';
+  });
+}
+
+function setDevice(d) {
+  document.querySelectorAll('.dev-btn').forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  const frame = document.getElementById('preview-frame');
+  frame.className = `preview-frame ${d}`;
+}
+
+function showSaved() {
+  const btn = document.querySelector('.btn-save');
+  btn.textContent = '✓ Guardado'; btn.style.background = '#10b981';
+  setTimeout(() => { btn.textContent = '💾 Guardar cambios'; btn.style.background=''; }, 2000);
+}
+
+function previewLogo(input) {
+  if (!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.createElement('img');
+    img.src = e.target.result; img.style.cssText = 'max-height:48px;max-width:100%;object-fit:contain';
+    const prev = document.getElementById('logo-preview');
+    prev.innerHTML = ''; prev.appendChild(img);
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+// Inicializar
+updateColors();
+</script>
+</body>
+</html>

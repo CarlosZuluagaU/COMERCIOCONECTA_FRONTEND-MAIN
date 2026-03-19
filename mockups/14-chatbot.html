@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chatbot – ComerciosConecta</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; display: flex; min-height: 100vh; }
+  .back { position: fixed; top: 16px; left: 16px; z-index: 9999; text-decoration: none; color: #1F3B4D; font-size: .78rem; font-weight: 600; background: white; padding: 5px 12px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+
+  /* ── SIDEBAR (igual que los otros mockups) ── */
+  aside { width: 220px; background: linear-gradient(180deg,#1F3B4D,#16303f); color: white; display: flex; flex-direction: column; min-height: 100vh; flex-shrink: 0; }
+  .sb-brand { padding: 28px 20px 20px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .sb-brand h1 { font-size: 1.2rem; font-weight: 800; }
+  .sb-brand h1 span { color: #00d4aa; }
+  .sb-brand p { font-size: .7rem; color: rgba(255,255,255,.4); margin-top: 2px; }
+  nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: .85rem; color: rgba(255,255,255,.7); text-decoration: none; }
+  .nav-item.active { background: rgba(0,212,170,.15); color: #00d4aa; }
+  .sb-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,.08); }
+  .logout { display: flex; align-items: center; gap: 10px; background: #f56565; color: white; border: none; width: 100%; padding: 10px 14px; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; }
+
+  /* ── MAIN CONTENT ── */
+  main { flex: 1; display: flex; flex-direction: column; position: relative; }
+  header { background: white; padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  header h1 { font-size: 1.1rem; color: #1F3B4D; }
+  header p { font-size: .78rem; color: #888; margin-top: 2px; }
+
+  /* Fondo de pantalla (dashboard simulado) */
+  .bg-content { padding: 28px; display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+  .bg-card { background: white; border-radius: 12px; height: 120px; box-shadow: 0 2px 8px rgba(0,0,0,.05); opacity: .5; }
+  .bg-card.wide { grid-column: span 2; height: 200px; }
+  .placement-label {
+    position: fixed; bottom: 110px; right: 32px;
+    background: #1F3B4D; color: white;
+    padding: 8px 16px; border-radius: 8px; font-size: .8rem; font-weight: 600;
+    white-space: nowrap; z-index: 400;
+  }
+  .placement-label::after {
+    content: ''; position: absolute; bottom: -8px; right: 28px;
+    border: 8px solid transparent; border-top-color: #1F3B4D; border-bottom: 0;
+  }
+
+  /* ═══════════════════════════════════════════
+     CHATBOT WIDGET – FAB BUTTON
+  ═══════════════════════════════════════════ */
+  .chat-fab {
+    position: fixed; bottom: 28px; right: 28px; z-index: 500;
+    width: 58px; height: 58px; border-radius: 50%;
+    background: linear-gradient(135deg, #00d4aa, #00a88f);
+    border: none; cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0, 212, 170, .45);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    transition: transform .2s;
+  }
+  .chat-fab:hover { transform: scale(1.08); }
+  .chat-fab .notif-dot {
+    position: absolute; top: 4px; right: 4px;
+    width: 12px; height: 12px; background: #f56565;
+    border-radius: 50%; border: 2px solid white;
+  }
+
+  /* ═══════════════════════════════════════════
+     CHATBOT PANEL
+  ═══════════════════════════════════════════ */
+  .chat-panel {
+    position: fixed; bottom: 100px; right: 28px; z-index: 500;
+    width: 370px; height: 540px;
+    background: white; border-radius: 20px;
+    box-shadow: 0 16px 48px rgba(0,0,0,.18);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    animation: slideUp .25s ease;
+  }
+  @keyframes slideUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+
+  /* Header del chat */
+  .chat-header {
+    background: linear-gradient(135deg, #1F3B4D, #2c5364);
+    color: white; padding: 16px 18px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .bot-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, #00d4aa, #00a88f);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; flex-shrink: 0;
+  }
+  .bot-info { flex: 1; }
+  .bot-info h4 { font-size: .95rem; font-weight: 700; }
+  .bot-info span { font-size: .72rem; opacity: .7; }
+  .online-dot { width: 8px; height: 8px; background: #00d4aa; border-radius: 50%; margin-top: 4px; }
+  .chat-close { background: none; border: none; color: rgba(255,255,255,.7); font-size: 1.1rem; cursor: pointer; }
+  .chat-close:hover { color: white; }
+
+  /* Quick actions */
+  .quick-actions {
+    display: flex; gap: 6px; padding: 10px 14px;
+    border-bottom: 1px solid #f0f0f0; overflow-x: auto;
+  }
+  .quick-btn {
+    padding: 5px 12px; border: 1.5px solid #e0e0e0;
+    border-radius: 20px; font-size: .75rem; color: #555;
+    background: white; white-space: nowrap; cursor: pointer;
+  }
+  .quick-btn:hover { border-color: #00d4aa; color: #00a88f; }
+
+  /* Mensajes */
+  .chat-messages {
+    flex: 1; overflow-y: auto; padding: 16px 14px;
+    display: flex; flex-direction: column; gap: 12px;
+    background: #fafbfc;
+  }
+  .msg { display: flex; gap: 8px; align-items: flex-end; }
+  .msg.bot { flex-direction: row; }
+  .msg.user { flex-direction: row-reverse; }
+  .msg-avatar {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: .85rem;
+  }
+  .msg.bot .msg-avatar { background: linear-gradient(135deg,#1F3B4D,#2c5364); }
+  .msg.user .msg-avatar { background: linear-gradient(135deg,#00d4aa,#00a88f); color: #1F3B4D; }
+  .msg-bubble {
+    max-width: 76%; padding: 10px 13px; border-radius: 14px;
+    font-size: .85rem; line-height: 1.5;
+  }
+  .msg.bot .msg-bubble { background: white; color: #333; border: 1px solid #eee; border-bottom-left-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .msg.user .msg-bubble { background: linear-gradient(135deg,#1F3B4D,#2c5364); color: white; border-bottom-right-radius: 4px; }
+  .msg-time { font-size: .66rem; color: #bbb; margin-top: 3px; text-align: right; }
+  .msg.bot .msg-time { text-align: left; }
+  .typing { display: flex; gap: 4px; padding: 12px 13px; background: white; border: 1px solid #eee; border-radius: 14px; border-bottom-left-radius: 4px; width: fit-content; }
+  .dot { width: 7px; height: 7px; background: #ccc; border-radius: 50%; animation: bounce .8s infinite; }
+  .dot:nth-child(2) { animation-delay: .15s; }
+  .dot:nth-child(3) { animation-delay: .3s; }
+  @keyframes bounce { 0%,60%,100% { transform:translateY(0); } 30% { transform:translateY(-6px); } }
+
+  /* Chips de opciones */
+  .option-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .chip {
+    padding: 5px 12px; background: #f0fdf4; color: #065f46;
+    border: 1px solid #a7f3d0; border-radius: 20px;
+    font-size: .78rem; cursor: pointer;
+  }
+  .chip:hover { background: #00d4aa; color: white; border-color: #00d4aa; }
+
+  /* Input */
+  .chat-input-area {
+    padding: 12px 14px; border-top: 1px solid #eee;
+    display: flex; gap: 8px; align-items: flex-end; background: white;
+  }
+  .chat-input {
+    flex: 1; padding: 10px 14px; border: 1.5px solid #e0e0e0;
+    border-radius: 22px; font-size: .88rem; outline: none;
+    font-family: inherit; resize: none; min-height: 40px; max-height: 100px;
+    transition: border .2s;
+  }
+  .chat-input:focus { border-color: #00d4aa; }
+  .send-btn {
+    width: 40px; height: 40px; background: linear-gradient(135deg,#00d4aa,#00a88f);
+    border: none; border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .send-btn:hover { transform: scale(1.05); }
+
+  /* ── NOTA DE POSICIONAMIENTO ── */
+  .position-note {
+    position: fixed; top: 80px; right: 420px; z-index: 600;
+    background: #fef9c3; border: 1px solid #fbbf24;
+    border-radius: 10px; padding: 14px 18px; max-width: 220px;
+    font-size: .8rem; color: #78350f; line-height: 1.5;
+  }
+  .position-note strong { display: block; margin-bottom: 4px; font-size: .85rem; }
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← Índice</a>
+
+<!-- SIDEBAR -->
+<aside>
+  <div class="sb-brand"><h1>Comercios<span>Conecta</span></h1><p>Suite empresarial</p></div>
+  <nav>
+    <a class="nav-item active" href="03-dashboard.html"><span>🏠</span> Dashboard</a>
+    <a class="nav-item" href="04-products-list.html"><span>📦</span> Productos</a>
+    <a class="nav-item" href="13-ecommerce-orders.html"><span>🛍️</span> E-commerce</a>
+    <a class="nav-item" href="08-clients-list.html"><span>👥</span> Clientes</a>
+    <a class="nav-item" href="06-sales-list.html"><span>🧾</span> Facturación</a>
+    <a class="nav-item" href="10-purchases-history.html"><span>📋</span> Compras</a>
+  </nav>
+  <div class="sb-footer"><button class="logout">🚪 Cerrar sesión</button></div>
+</aside>
+
+<!-- MAIN -->
+<main>
+  <header>
+    <div><h1>🏠 Dashboard</h1><p>Vista previa con chatbot integrado ↘</p></div>
+  </header>
+  <!-- Fondo simulado -->
+  <div class="bg-content">
+    <div class="bg-card"></div><div class="bg-card"></div><div class="bg-card"></div>
+    <div class="bg-card wide"></div><div class="bg-card"></div>
+    <div class="bg-card"></div><div class="bg-card"></div><div class="bg-card"></div>
+  </div>
+</main>
+
+<!-- NOTA DE POSICIONAMIENTO -->
+<div class="position-note">
+  <strong>📍 Posición en la app</strong>
+  El chatbot vive como componente global en <code>app/layout.tsx</code>. Aparece en todas las páginas admin y en la tienda pública, flotando en la esquina inferior derecha.
+</div>
+
+<!-- ETIQUETA DE FLECHA -->
+<div class="placement-label">← El chatbot va aquí</div>
+
+<!-- FAB BUTTON -->
+<button class="chat-fab">
+  🤖
+  <div class="notif-dot"></div>
+</button>
+
+<!-- PANEL DEL CHAT (abierto para el mockup) -->
+<div class="chat-panel">
+  <div class="chat-header">
+    <div class="bot-avatar">🤖</div>
+    <div class="bot-info">
+      <h4>Asistente ComerciosConecta</h4>
+      <span>Responde en segundos · IA</span>
+    </div>
+    <div class="online-dot"></div>
+    <button class="chat-close">✕</button>
+  </div>
+
+  <!-- Acciones rápidas -->
+  <div class="quick-actions">
+    <button class="quick-btn">📦 Ver inventario</button>
+    <button class="quick-btn">🧾 Mis ventas</button>
+    <button class="quick-btn">🛒 Órdenes hoy</button>
+    <button class="quick-btn">💰 Resumen</button>
+  </div>
+
+  <!-- Mensajes -->
+  <div class="chat-messages">
+
+    <!-- Bot saluda -->
+    <div class="msg bot">
+      <div class="msg-avatar">🤖</div>
+      <div>
+        <div class="msg-bubble">
+          ¡Hola! 👋 Soy tu asistente virtual de <strong>ComerciosConecta</strong>. Puedo ayudarte con inventario, ventas, clientes y más.<br/><br/>¿En qué te puedo ayudar hoy?
+        </div>
+        <div class="msg-time">09:00</div>
+        <div class="option-chips">
+          <span class="chip">📦 Productos sin stock</span>
+          <span class="chip">🧾 Estado de ventas</span>
+          <span class="chip">📊 Resumen del día</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usuario pregunta -->
+    <div class="msg user">
+      <div class="msg-avatar">A</div>
+      <div>
+        <div class="msg-bubble">¿Qué productos tienen stock bajo?</div>
+        <div class="msg-time">09:01</div>
+      </div>
+    </div>
+
+    <!-- Bot responde -->
+    <div class="msg bot">
+      <div class="msg-avatar">🤖</div>
+      <div>
+        <div class="msg-bubble">
+          Encontré <strong>3 productos</strong> con stock bajo o agotado:<br/><br/>
+          🔴 <strong>Acetaminofén 500mg</strong> — <em>Sin stock (0 und)</em><br/>
+          🟡 <strong>Labial Matte MAC</strong> — <em>8 und (mínimo: 10)</em><br/>
+          🟡 <strong>Crema Corporal 400ml</strong> — <em>5 und (mínimo: 10)</em>
+        </div>
+        <div class="msg-time">09:01</div>
+        <div class="option-chips">
+          <span class="chip">📋 Crear orden de compra</span>
+          <span class="chip">Ver todos</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usuario -->
+    <div class="msg user">
+      <div class="msg-avatar">A</div>
+      <div>
+        <div class="msg-bubble">¿Cuántas ventas van hoy?</div>
+        <div class="msg-time">09:02</div>
+      </div>
+    </div>
+
+    <!-- Bot responde con resumen -->
+    <div class="msg bot">
+      <div class="msg-avatar">🤖</div>
+      <div>
+        <div class="msg-bubble">
+          📅 Hoy <strong>(10 mar 2026)</strong> llevas:<br/><br/>
+          • <strong>4 ventas</strong> registradas<br/>
+          • <strong>$192.360</strong> en facturación<br/>
+          • <strong>2 ventas</strong> pendientes de facturar con Factus
+        </div>
+        <div class="msg-time">09:02</div>
+      </div>
+    </div>
+
+    <!-- Typing indicator -->
+    <div class="msg bot">
+      <div class="msg-avatar">🤖</div>
+      <div class="typing">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Input -->
+  <div class="chat-input-area">
+    <textarea class="chat-input" rows="1" placeholder="Escribe tu pregunta…"></textarea>
+    <button class="send-btn">➤</button>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,343 +1,204 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { FiTrendingUp, FiUsers, FiShoppingCart, FiPackage, FiCreditCard, FiBarChart2, FiDollarSign, FiCheckCircle, FiTruck } from "react-icons/fi";
 import Sidebar from "./Sidebar";
 import "./dashboard.css";
 
-interface StatsCard {
-  title: string;
-  value: string;
-  change?: string;
-  icon: React.ReactNode;
-  color: string;
-  loading?: boolean;
-}
+const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  const [statsData, setStatsData] = useState({
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
     totalVentas: 0,
     totalOrdenes: 0,
-    totalProductos: 0,
-    ventasPendientes: 0,
-    comprasTotales: 0,
-    proveedoresActivos: 0,
+    ordenesConfirmadas: 0,
     ordenesPendientes: 0,
-    ordenesConfirmadas: 0
+    totalProductos: 0,
+    ventasPorFacturar: 0,
   });
-  const [loading, setLoading] = useState(true);
 
-  // Función para cargar datos del dashboard
-  const fetchDashboardData = async () => {
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : "";
+
+  const fetchStats = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-      
-      // Cargar múltiples endpoints en paralelo
-      const [ordenesRes, productosRes, comprasRes, ventasRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/checkout/all-orders`).catch(() => ({ ok: false })),
-        fetch(`${API_BASE_URL}/productos`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }).catch(() => ({ ok: false })),
-        fetch(`${API_BASE_URL}/purchases`).catch(() => ({ ok: false })),
-        fetch(`${API_BASE_URL}/sales`).catch(() => ({ ok: false }))
+      const headers: any = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const [ordenesRes, productosRes, ventasRes] = await Promise.allSettled([
+        fetch(`${API}/checkout/all-orders`).then(r => r.ok ? r.json() : []),
+        fetch(`${API}/productos`, { headers }).then(r => r.ok ? r.json() : []),
+        fetch(`${API}/ventas`, { headers }).then(r => r.ok ? r.json() : []),
       ]);
 
-      let totalVentas = 0;
-      let totalOrdenes = 0;
-      let totalProductos = 0;
-      let ventasPendientes = 0;
-      let comprasTotales = 0;
-      let ordenesPendientes = 0;
-      let ordenesConfirmadas = 0;
+      const ordenes = ordenesRes.status === "fulfilled" ? ordenesRes.value : [];
+      const productos = productosRes.status === "fulfilled" ? productosRes.value : [];
+      const ventas = ventasRes.status === "fulfilled" ? ventasRes.value : [];
 
-      // Procesar órdenes e-commerce
-      if (ordenesRes.ok) {
-        const ordenesData = await ordenesRes.json();
-        totalOrdenes = ordenesData.length;
-        ordenesPendientes = ordenesData.filter((orden: any) => 
-          orden.status === "CREATED" || orden.status === "Pendiente"
-        ).length;
-        ordenesConfirmadas = ordenesData.filter((orden: any) => 
-          orden.status === "PAID" || orden.status === "APPROVED" || orden.status === "Confirmada"
-        ).length;
-      }
+      const totalVentas = ventas.reduce((acc: number, v: any) => acc + (v.totalFactura || 0), 0);
+      const ventasPorFacturar = ventas.filter((v: any) => v.estado !== "ERROR").length;
+      const ordenesConfirmadas = ordenes.filter((o: any) =>
+        ["PAID", "APPROVED", "Confirmada"].includes(o.status)
+      ).length;
+      const ordenesPendientes = ordenes.filter((o: any) =>
+        ["CREATED", "Pendiente"].includes(o.status)
+      ).length;
 
-      // Procesar productos
-      if (productosRes.ok) {
-        const productosData = await productosRes.json();
-        totalProductos = productosData.length;
-      }
-
-      // Procesar compras
-      if (comprasRes.ok) {
-        const comprasData = await comprasRes.json();
-        comprasTotales = comprasData.length;
-      }
-
-      // Procesar ventas
-      if (ventasRes.ok) {
-        const ventasData = await ventasRes.json();
-        totalVentas = ventasData.reduce((acc: number, venta: any) => acc + (venta.totalFactura || 0), 0);
-        ventasPendientes = ventasData.filter((venta: any) => venta.estado !== 'ERROR').length;
-      }
-
-      setStatsData({
+      setStats({
         totalVentas,
-        totalOrdenes,
-        totalProductos,
-        ventasPendientes,
-        comprasTotales,
-        proveedoresActivos: 0, // Necesitaríamos endpoint de proveedores
+        totalOrdenes: ordenes.length,
+        ordenesConfirmadas,
         ordenesPendientes,
-        ordenesConfirmadas
+        totalProductos: Array.isArray(productos) ? productos.length : 0,
+        ventasPorFacturar,
       });
-
-    } catch (error) {
-      console.error("Error cargando datos del dashboard:", error);
+    } catch (e) {
+      console.error("Error cargando dashboard:", e);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchDashboardData();
-    
-    // Actualizar datos cada 60 segundos
-    const interval = setInterval(fetchDashboardData, 60000);
-    return () => clearInterval(interval);
-  }, []);
+  useEffect(() => { fetchStats(); }, []);
 
-  const statsCards: StatsCard[] = [
-    { 
-      title: "Ventas Totales", 
-      value: loading ? "Cargando..." : `$${statsData.totalVentas.toLocaleString('es-CO', { minimumFractionDigits: 0 })}`,
-      change: "+12.5%", 
-      icon: React.createElement(FiTrendingUp), 
-      color: "#00d4aa",
-      loading
-    },
-    { 
-      title: "Órdenes E-commerce", 
-      value: loading ? "Cargando..." : statsData.totalOrdenes.toString(),
-      change: statsData.totalOrdenes > 0 ? `✓ ${statsData.ordenesConfirmadas} confirmadas` : "",
-      icon: React.createElement(FiShoppingCart), 
-      color: "#1F3B4D",
-      loading
-    },
-    { 
-      title: "Productos en Inventario", 
-      value: loading ? "Cargando..." : statsData.totalProductos.toString(),
-      change: "+2.4%", 
-      icon: React.createElement(FiPackage), 
-      color: "#00a88f",
-      loading
-    },
-    { 
-      title: "Ventas por Facturar", 
-      value: loading ? "Cargando..." : statsData.ventasPendientes.toString(),
-      change: statsData.ventasPendientes > 0 ? "Requieren atención" : "✓ Al día",
-      icon: React.createElement(FiCreditCard), 
-      color: "#2c3e50",
-      loading
-    },
-  ];
-
-  const today = new Date().toLocaleDateString('es-ES', { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  const today = new Date().toLocaleDateString("es-ES", {
+    weekday: "long", year: "numeric", month: "long", day: "numeric",
   });
 
-  return React.createElement(
-    "div",
-    { className: "dashboard-page" },
-    
-    // Sidebar
-    React.createElement(Sidebar, {
-      activeMenu: activeMenu,
-      onMenuToggle: setActiveMenu
-    }),
+  const fmt = (n: number) =>
+    n.toLocaleString("es-CO", { minimumFractionDigits: 0 });
 
-    // Main content
-    React.createElement(
-      "main",
-      { className: "dashboard-main" },
+  return (
+    <div className="dashboard-page">
+      <Sidebar activeMenu={activeMenu} onMenuToggle={setActiveMenu} />
 
-      // Header
-      React.createElement(
-        "header",
-        { className: "dashboard-header" },
-        React.createElement(
-          "div",
-          { className: "header-content" },
-          React.createElement(
-            "div",
-            { className: "welcome-section" },
-            React.createElement("h1", { className: "welcome-title" }, "Bienvenido, ", React.createElement("strong", null, user || "Usuario")),
-            React.createElement("p", { className: "welcome-date" }, today)
-          ),
-          React.createElement(
-            "div",
-            { className: "header-actions" },
-            React.createElement("button", { 
-              className: "btn-notification",
-              onClick: fetchDashboardData,
-              disabled: loading
-            }, loading ? "🔄" : "🔔"),
-            React.createElement("div", { className: "user-avatar" }, 
-              (user || "U").charAt(0).toUpperCase()
-            )
-          )
-        )
-      ),
+      <main className="db-main">
+        {/* HEADER */}
+        <header className="db-header">
+          <div className="db-welcome">
+            <h1>Bienvenido, <strong>{user || "admin"}</strong></h1>
+            <p>{today}</p>
+          </div>
+          <div className="db-header-right">
+            <button className="db-notif-btn" onClick={fetchStats} title="Actualizar">
+              {loading ? "🔄" : "🔔"}
+            </button>
+            <div className="db-avatar">
+              {(user || "U").charAt(0).toUpperCase()}
+            </div>
+          </div>
+        </header>
 
-      // Stats Grid
-      React.createElement(
-        "section",
-        { className: "stats-section" },
-        React.createElement(
-          "div",
-          { className: "stats-grid" },
-          statsCards.map((card, index) =>
-            React.createElement(
-              "div",
-              { 
-                key: index, 
-                className: "stats-card",
-                style: { '--accent-color': card.color } as React.CSSProperties
-              },
-              React.createElement(
-                "div",
-                { className: "stats-content" },
-                React.createElement(
-                  "div",
-                  { className: "stats-info" },
-                  React.createElement("h3", { className: "stats-title" }, card.title),
-                  React.createElement("p", { className: "stats-value" }, card.value),
-                  card.change && React.createElement("p", { 
-                    className: `stats-change ${
-                      card.change.includes('+') || card.change.includes('✓') ? 'positive' : 
-                      card.change.includes('-') ? 'negative' : 'neutral'
-                    }`
-                  }, card.change)
-                ),
-                React.createElement(
-                  "div",
-                  { 
-                    className: "stats-icon",
-                    style: { backgroundColor: `${card.color}15` }
-                  },
-                  React.createElement("span", { 
-                    style: { color: card.color } 
-                  }, card.icon)
-                )
-              )
-            )
-          )
-        )
-      ),
+        {/* STATS */}
+        <div className="db-stats-grid">
+          <div className="db-stat-card" style={{ borderLeftColor: "#00d4aa" }}>
+            <div>
+              <h3>Ventas Totales</h3>
+              <div className="db-stat-val">{loading ? "—" : `$${fmt(stats.totalVentas)}`}</div>
+              <div className="db-stat-change positive">▲ +12.5%</div>
+            </div>
+            <div className="db-stat-icon" style={{ background: "#f0fdf4" }}>📈</div>
+          </div>
 
-      // Main Content Area
-      React.createElement(
-        "section",
-        { className: "content-section" },
-        React.createElement(
-          "div",
-          { className: "content-grid" },
-          
-          // Gráfico placeholder
-          React.createElement(
-            "div",
-            { className: "content-card chart-card" },
-            React.createElement(
-              "div",
-              { className: "card-header" },
-              React.createElement("h3", null, "Resumen General"),
-              React.createElement("button", { 
-                className: "btn-text",
-                onClick: fetchDashboardData
-              }, "Actualizar datos")
-            ),
-            React.createElement(
-              "div",
-              { className: "chart-placeholder" },
-              !loading ? React.createElement(
-                "div",
-                { className: "dashboard-summary" },
-                React.createElement("div", { className: "summary-item" },
-                  React.createElement(FiShoppingCart, { size: 20 }),
-                  React.createElement("span", null, `${statsData.totalOrdenes} órdenes en total`)
-                ),
-                React.createElement("div", { className: "summary-item" },
-                  React.createElement(FiCheckCircle, { size: 20, color: "#10b981" }),
-                  React.createElement("span", null, `${statsData.ordenesConfirmadas} órdenes confirmadas`)
-                ),
-                React.createElement("div", { className: "summary-item" },
-                  React.createElement(FiPackage, { size: 20 }),
-                  React.createElement("span", null, `${statsData.totalProductos} productos en inventario`)
-                ),
-                React.createElement("div", { className: "summary-item" },
-                  React.createElement(FiDollarSign, { size: 20, color: "#00d4aa" }),
-                  React.createElement("span", null, `$${statsData.totalVentas.toLocaleString('es-CO')} en ventas`)
-                )
-              ) : React.createElement(
-                "div",
-                null,
-                React.createElement(FiBarChart2, { size: 48 }),
-                React.createElement("p", null, "Cargando datos...")
-              )
-            )
-          ),
+          <div className="db-stat-card" style={{ borderLeftColor: "#1F3B4D" }}>
+            <div>
+              <h3>Órdenes E-commerce</h3>
+              <div className="db-stat-val">{loading ? "—" : stats.totalOrdenes}</div>
+              <div className="db-stat-change positive">
+                ✓ {stats.ordenesConfirmadas} confirmadas
+              </div>
+            </div>
+            <div className="db-stat-icon" style={{ background: "#e0f2fe" }}>🛒</div>
+          </div>
 
-          // Actividad reciente
-          React.createElement(
-            "div",
-            { className: "content-card activity-card" },
-            React.createElement(
-              "div",
-              { className: "card-header" },
-              React.createElement("h3", null, "Actividad Reciente")
-            ),
-            React.createElement(
-              "div",
-              { className: "activity-list" },
-              React.createElement(
-                "div",
-                { className: "activity-item" },
-                React.createElement("div", { className: "activity-icon" }, React.createElement(FiShoppingCart)),
-                React.createElement("div", { className: "activity-content" },
-                  React.createElement("p", null, `${statsData.ordenesPendientes} órdenes pendientes`),
-                  React.createElement("span", null, "E-commerce")
-                )
-              ),
-              React.createElement(
-                "div",
-                { className: "activity-item" },
-                React.createElement("div", { className: "activity-icon" }, React.createElement(FiCreditCard)),
-                React.createElement("div", { className: "activity-content" },
-                  React.createElement("p", null, `${statsData.ventasPendientes} ventas por facturar`),
-                  React.createElement("span", null, "Sistema de ventas")
-                )
-              ),
-              React.createElement(
-                "div",
-                { className: "activity-item" },
-                React.createElement("div", { className: "activity-icon" }, React.createElement(FiPackage)),
-                React.createElement("div", { className: "activity-content" },
-                  React.createElement("p", null, `${statsData.totalProductos} productos registrados`),
-                  React.createElement("span", null, "Inventario actual")
-                )
-              )
-            )
-          )
-        )
-      )
-    )
+          <div className="db-stat-card" style={{ borderLeftColor: "#00a88f" }}>
+            <div>
+              <h3>Productos en Inventario</h3>
+              <div className="db-stat-val">{loading ? "—" : stats.totalProductos}</div>
+              <div className="db-stat-change positive">▲ +2.4%</div>
+            </div>
+            <div className="db-stat-icon" style={{ background: "#f0fdf4" }}>📦</div>
+          </div>
+
+          <div className="db-stat-card" style={{ borderLeftColor: "#2c3e50" }}>
+            <div>
+              <h3>Ventas por Facturar</h3>
+              <div className="db-stat-val">{loading ? "—" : stats.ventasPorFacturar}</div>
+              <div className="db-stat-change warn">
+                {stats.ventasPorFacturar > 0 ? "⚠ Requieren atención" : "✓ Al día"}
+              </div>
+            </div>
+            <div className="db-stat-icon" style={{ background: "#fef9c3" }}>🧾</div>
+          </div>
+        </div>
+
+        {/* CONTENT ROW */}
+        <div className="db-content-row">
+          {/* Resumen */}
+          <div className="db-card">
+            <div className="db-card-header">
+              <h3>Resumen General</h3>
+              <button className="db-btn-text" onClick={fetchStats}>Actualizar datos</button>
+            </div>
+            <div className="db-summary-item">
+              <div className="db-s-icon">🛒</div>
+              {loading ? "Cargando..." : `${stats.totalOrdenes} órdenes en total`}
+            </div>
+            <div className="db-summary-item">
+              <div className="db-s-icon">✅</div>
+              {loading ? "Cargando..." : `${stats.ordenesConfirmadas} órdenes confirmadas`}
+            </div>
+            <div className="db-summary-item">
+              <div className="db-s-icon">📦</div>
+              {loading ? "Cargando..." : `${stats.totalProductos} productos en inventario`}
+            </div>
+            <div className="db-summary-item">
+              <div className="db-s-icon">💵</div>
+              {loading ? "Cargando..." : `$${fmt(stats.totalVentas)} en ventas`}
+            </div>
+          </div>
+
+          {/* Actividad reciente */}
+          <div className="db-card">
+            <div className="db-card-header">
+              <h3>Actividad Reciente</h3>
+            </div>
+            <div className="db-activity-item">
+              <div className="db-a-icon">🛒</div>
+              <div className="db-a-text">
+                <p>{loading ? "—" : `${stats.ordenesPendientes} órdenes pendientes`}</p>
+                <span>E-commerce</span>
+              </div>
+            </div>
+            <div className="db-activity-item">
+              <div className="db-a-icon">🧾</div>
+              <div className="db-a-text">
+                <p>{loading ? "—" : `${stats.ventasPorFacturar} ventas por facturar`}</p>
+                <span>Sistema de ventas</span>
+              </div>
+            </div>
+            <div className="db-activity-item">
+              <div className="db-a-icon">📦</div>
+              <div className="db-a-text">
+                <p>{loading ? "—" : `${stats.totalProductos} productos registrados`}</p>
+                <span>Inventario actual</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ACCESOS RÁPIDOS */}
+        <div className="db-card db-quick-links">
+          <div className="db-card-header"><h3>Accesos Rápidos</h3></div>
+          <div className="db-quick-grid">
+            <a href="/products/add-product" className="db-quick-btn">➕ Nuevo Producto</a>
+            <a href="/sales/create" className="db-quick-btn">🧾 Nueva Venta</a>
+            <a href="/clients/create-client" className="db-quick-btn">👤 Nuevo Cliente</a>
+            <a href="/ecommerce/orders" className="db-quick-btn">🛒 Ver Órdenes</a>
+          </div>
+        </div>
+      </main>
+    </div>
   );
 }

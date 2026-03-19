@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ComerciosConecta – Carrito y Checkout (HU-14)</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',sans-serif;background:#f4f6f8;min-height:100vh}
+  /* Nav de la tienda pública */
+  .store-nav{background:#1F3B4D;color:#fff;padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between}
+  .store-brand{font-size:18px;font-weight:900;letter-spacing:1px}
+  .store-brand span{color:#00d4aa}
+  .cart-btn{background:#00d4aa;color:#fff;border:none;padding:8px 18px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px}
+  .cart-count{background:#fff;color:#1F3B4D;border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}
+  /* Screens */
+  .screens{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;padding:32px;max-width:1400px;margin:0 auto}
+  .screen{background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);overflow:hidden}
+  .screen-label{background:#1F3B4D;color:#fff;padding:10px 16px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;display:flex;align-items:center;gap:8px}
+  .screen-label .num{background:#00d4aa;color:#fff;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
+  .screen-body{padding:20px}
+  /* SCREEN 1 – Carrito sidebar */
+  .cart-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f0f0f0}
+  .cart-item:last-child{border-bottom:none}
+  .item-img{width:52px;height:52px;border-radius:8px;background:linear-gradient(135deg,#1F3B4D22,#00d4aa22);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+  .item-info{flex:1}
+  .item-name{font-size:13px;font-weight:600;color:#1F3B4D}
+  .item-price{font-size:12px;color:#888;margin-top:2px}
+  .qty-ctrl{display:flex;align-items:center;gap:6px;margin-top:6px}
+  .qty-btn{width:24px;height:24px;border-radius:6px;border:1px solid #ddd;background:#f4f6f8;cursor:pointer;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#1F3B4D}
+  .qty-btn:hover{border-color:#00d4aa;background:#e8fdf6}
+  .qty-num{font-size:13px;font-weight:700;width:20px;text-align:center}
+  .item-subtotal{font-size:13px;font-weight:700;color:#1F3B4D;white-space:nowrap}
+  .remove-btn{color:#ef4444;cursor:pointer;font-size:16px;background:none;border:none}
+  .cart-summary{margin-top:16px;padding-top:16px;border-top:2px solid #f0f0f0}
+  .summary-row{display:flex;justify-content:space-between;font-size:13px;color:#666;margin-bottom:6px}
+  .summary-row.total{font-size:15px;font-weight:800;color:#1F3B4D;margin-top:8px;padding-top:8px;border-top:1px solid #eee}
+  .btn-checkout{width:100%;padding:13px;background:#00d4aa;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-top:14px}
+  .btn-checkout:hover{background:#00b89a}
+  /* SCREEN 2 – Formulario checkout */
+  .checkout-section{margin-bottom:20px}
+  .cs-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#1F3B4D;border-bottom:2px solid #00d4aa;padding-bottom:6px;margin-bottom:14px}
+  .form-group{margin-bottom:12px}
+  .form-group label{font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:5px}
+  .form-group input,.form-group textarea{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;font-family:inherit}
+  .form-group input:focus,.form-group textarea:focus{border-color:#00d4aa}
+  .order-mini{background:#f8f9fa;border-radius:8px;padding:12px}
+  .order-mini-item{display:flex;justify-content:space-between;font-size:12px;color:#666;margin-bottom:4px}
+  .order-mini-total{display:flex;justify-content:space-between;font-size:14px;font-weight:800;color:#1F3B4D;margin-top:8px;padding-top:8px;border-top:1px solid #eee}
+  .shipping-badge{display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:5px 10px;font-size:12px;color:#16a34a;margin-bottom:12px}
+  .btn-confirm{width:100%;padding:13px;background:#1F3B4D;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-top:14px}
+  .btn-confirm:hover{background:#2d5268}
+  /* SCREEN 3 – Confirmación */
+  .confirmation{text-align:center;padding:8px 0}
+  .confirm-icon{font-size:52px;margin-bottom:12px}
+  .confirm-title{font-size:20px;font-weight:800;color:#1F3B4D;margin-bottom:6px}
+  .confirm-sub{font-size:13px;color:#888;margin-bottom:20px}
+  .order-number{background:linear-gradient(135deg,#1F3B4D,#2d5a78);color:#fff;border-radius:12px;padding:16px 20px;margin-bottom:20px}
+  .order-number .label{font-size:11px;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.7px}
+  .order-number .number{font-size:24px;font-weight:800;color:#00d4aa;letter-spacing:2px;margin-top:4px}
+  .order-details{background:#f8f9fa;border-radius:10px;padding:14px;text-align:left;margin-bottom:20px}
+  .detail-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;color:#555}
+  .detail-row:last-child{margin-bottom:0;font-weight:700;color:#1F3B4D;font-size:13px;padding-top:6px;border-top:1px solid #e0e0e0}
+  .btn-back-store{width:100%;padding:11px;background:#00d4aa;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
+  .whatsapp-btn{width:100%;padding:11px;background:#25d366;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px}
+</style>
+</head>
+<body>
+
+<div class="store-nav">
+  <div class="store-brand">Mi Tienda<span>Tech</span></div>
+  <button class="cart-btn">🛒 Carrito <span class="cart-count">3</span></button>
+</div>
+
+<div class="screens">
+
+  <!-- Screen 1: Carrito -->
+  <div class="screen">
+    <div class="screen-label"><span class="num">1</span> Carrito de compras</div>
+    <div class="screen-body">
+
+      <div class="cart-item">
+        <div class="item-img">💻</div>
+        <div class="item-info">
+          <div class="item-name">Laptop Lenovo IdeaPad</div>
+          <div class="item-price">$1.200.000 c/u</div>
+          <div class="qty-ctrl">
+            <button class="qty-btn">−</button>
+            <span class="qty-num">1</span>
+            <button class="qty-btn">+</button>
+          </div>
+        </div>
+        <div>
+          <div class="item-subtotal">$1.200.000</div>
+          <button class="remove-btn">🗑</button>
+        </div>
+      </div>
+
+      <div class="cart-item">
+        <div class="item-img">🖱️</div>
+        <div class="item-info">
+          <div class="item-name">Mouse Inalámbrico Logitech</div>
+          <div class="item-price">$85.000 c/u</div>
+          <div class="qty-ctrl">
+            <button class="qty-btn">−</button>
+            <span class="qty-num">2</span>
+            <button class="qty-btn">+</button>
+          </div>
+        </div>
+        <div>
+          <div class="item-subtotal">$170.000</div>
+          <button class="remove-btn">🗑</button>
+        </div>
+      </div>
+
+      <div class="cart-item">
+        <div class="item-img">🎧</div>
+        <div class="item-info">
+          <div class="item-name">Audífonos Sony WH-1000</div>
+          <div class="item-price">$320.000 c/u</div>
+          <div class="qty-ctrl">
+            <button class="qty-btn">−</button>
+            <span class="qty-num">1</span>
+            <button class="qty-btn">+</button>
+          </div>
+        </div>
+        <div>
+          <div class="item-subtotal">$320.000</div>
+          <button class="remove-btn">🗑</button>
+        </div>
+      </div>
+
+      <div class="cart-summary">
+        <div class="summary-row"><span>Subtotal</span><span>$1.690.000</span></div>
+        <div class="summary-row"><span>Envío</span><span>$15.000</span></div>
+        <div class="summary-row total"><span>Total</span><span>$1.705.000</span></div>
+      </div>
+
+      <button class="btn-checkout">Proceder al pago →</button>
+    </div>
+  </div>
+
+  <!-- Screen 2: Checkout -->
+  <div class="screen">
+    <div class="screen-label"><span class="num">2</span> Datos del pedido</div>
+    <div class="screen-body">
+
+      <div class="checkout-section">
+        <div class="cs-title">Tus datos</div>
+        <div class="form-group">
+          <label>Nombre completo *</label>
+          <input type="text" value="María García López" placeholder="Tu nombre">
+        </div>
+        <div class="form-group">
+          <label>Teléfono *</label>
+          <input type="text" value="+57 310 456 7890" placeholder="+57 300 123 4567">
+        </div>
+      </div>
+
+      <div class="checkout-section">
+        <div class="cs-title">Dirección de entrega</div>
+        <div class="form-group">
+          <label>Dirección *</label>
+          <input type="text" value="Cra 15 #93-47, Apto 301" placeholder="Calle/Carrera...">
+        </div>
+        <div class="form-group">
+          <label>Ciudad</label>
+          <input type="text" value="Bogotá, D.C." placeholder="Ciudad">
+        </div>
+        <div class="form-group">
+          <label>Notas adicionales</label>
+          <textarea rows="2" placeholder="Indicaciones para el domiciliario...">Torre B, portería principal</textarea>
+        </div>
+      </div>
+
+      <div class="checkout-section">
+        <div class="cs-title">Resumen del pedido</div>
+        <div class="shipping-badge">🚚 Costo de envío: $15.000</div>
+        <div class="order-mini">
+          <div class="order-mini-item"><span>1x Laptop Lenovo</span><span>$1.200.000</span></div>
+          <div class="order-mini-item"><span>2x Mouse Logitech</span><span>$170.000</span></div>
+          <div class="order-mini-item"><span>1x Audífonos Sony</span><span>$320.000</span></div>
+          <div class="order-mini-item"><span>Envío</span><span>$15.000</span></div>
+          <div class="order-mini-total"><span>Total a pagar</span><span>$1.705.000</span></div>
+        </div>
+      </div>
+
+      <button class="btn-confirm">✓ Confirmar pedido</button>
+    </div>
+  </div>
+
+  <!-- Screen 3: Confirmación -->
+  <div class="screen">
+    <div class="screen-label"><span class="num">3</span> Pedido confirmado</div>
+    <div class="screen-body">
+      <div class="confirmation">
+        <div class="confirm-icon">🎉</div>
+        <div class="confirm-title">¡Pedido recibido!</div>
+        <div class="confirm-sub">Te contactaremos pronto para coordinar la entrega.</div>
+
+        <div class="order-number">
+          <div class="label">Número de pedido</div>
+          <div class="number">#PED-00047</div>
+        </div>
+
+        <div class="order-details">
+          <div class="detail-row"><span>Cliente</span><span>María García</span></div>
+          <div class="detail-row"><span>Teléfono</span><span>+57 310 456 7890</span></div>
+          <div class="detail-row"><span>Dirección</span><span>Cra 15 #93-47, Apto 301</span></div>
+          <div class="detail-row"><span>Estado</span><span style="color:#f59e0b;font-weight:600">⏳ Pendiente</span></div>
+          <div class="detail-row"><span>Productos (4 items)</span><span>$1.690.000</span></div>
+          <div class="detail-row"><span>Envío</span><span>$15.000</span></div>
+          <div class="detail-row"><span>Total</span><span>$1.705.000</span></div>
+        </div>
+
+        <button class="btn-back-store">← Seguir comprando</button>
+        <button class="whatsapp-btn">💬 Contactar por WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

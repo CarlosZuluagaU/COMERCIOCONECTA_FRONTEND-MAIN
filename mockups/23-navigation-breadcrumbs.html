@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ComerciosConecta – Navegación: Breadcrumbs y Botón Volver (HU-17)</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',sans-serif;background:#f4f6f8;display:flex;min-height:100vh}
+  .sidebar{width:240px;background:#1F3B4D;color:#fff;padding:24px 0;flex-shrink:0;position:relative}
+  .sidebar-brand{padding:0 20px 24px;font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,.1)}
+  .sidebar-brand span{color:#00d4aa}
+  .nav-group{padding:16px 0 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:rgba(255,255,255,.4);padding-left:20px}
+  .nav-item{padding:10px 20px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.7);transition:background .2s;position:relative}
+  .nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+  .nav-item.active{background:rgba(255,255,255,.1);color:#fff;border-left:3px solid #00d4aa;padding-left:17px}
+  .nav-badge{background:#ef4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;margin-left:auto}
+  .nav-sub{padding:7px 20px 7px 42px;font-size:13px;color:rgba(255,255,255,.55);cursor:pointer}
+  .nav-sub:hover{color:#fff}
+  .nav-sub.active{color:#00d4aa;font-weight:600}
+  /* Main */
+  .main{flex:1;display:flex;flex-direction:column;overflow:auto}
+  /* Top navbar */
+  .topbar{background:#fff;padding:0 32px;height:56px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+  .breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px}
+  .breadcrumb a{color:#00d4aa;text-decoration:none;font-weight:500}
+  .breadcrumb a:hover{text-decoration:underline}
+  .breadcrumb .sep{color:#ccc;font-size:16px}
+  .breadcrumb .current{color:#1F3B4D;font-weight:700}
+  .topbar-right{display:flex;align-items:center;gap:14px}
+  .topbar-user{font-size:13px;color:#555;display:flex;align-items:center;gap:8px}
+  .user-avatar{width:32px;height:32px;border-radius:50%;background:#1F3B4D;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .notif-btn{position:relative;cursor:pointer;color:#888;font-size:20px}
+  .notif-dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:#ef4444;border-radius:50%;border:2px solid #fff}
+  /* Content */
+  .content{padding:28px 32px;flex:1}
+  /* Back button */
+  .back-btn{display:inline-flex;align-items:center;gap:8px;color:#1F3B4D;font-size:13px;font-weight:600;cursor:pointer;border:1px solid #ddd;background:#fff;padding:8px 16px;border-radius:8px;text-decoration:none;margin-bottom:20px;transition:border .2s,box-shadow .2s}
+  .back-btn:hover{border-color:#00d4aa;box-shadow:0 2px 8px rgba(0,212,170,.15)}
+  .page-title{font-size:22px;font-weight:800;color:#1F3B4D;margin-bottom:4px}
+  .page-sub{font-size:14px;color:#888;margin-bottom:24px}
+  /* Demo content */
+  .demo-card{background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.06);padding:28px}
+  .section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#1F3B4D;border-bottom:2px solid #00d4aa;padding-bottom:8px;margin-bottom:20px}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+  .form-group label{font-size:13px;font-weight:600;color:#34495e;display:block;margin-bottom:6px}
+  .form-group input,.form-group select{width:100%;padding:10px 13px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none}
+  .form-group input:focus,.form-group select:focus{border-color:#00d4aa}
+  /* Action buttons */
+  .action-row{display:flex;justify-content:space-between;align-items:center;padding-top:20px;border-top:1px solid #f0f0f0;margin-top:8px}
+  .btn-cancel{padding:10px 22px;border:1px solid #ddd;background:#fff;color:#888;border-radius:8px;font-size:14px;cursor:pointer}
+  .btn-save{padding:10px 24px;background:#00d4aa;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer}
+  /* Annotation boxes */
+  .annotation{position:relative;margin-top:24px}
+  .ann-box{border:2px dashed #00d4aa;border-radius:10px;padding:12px 16px;background:#f0fdf9;display:flex;align-items:flex-start;gap:10px}
+  .ann-icon{font-size:18px;flex-shrink:0}
+  .ann-text h4{font-size:13px;font-weight:700;color:#1F3B4D;margin-bottom:3px}
+  .ann-text p{font-size:12px;color:#555}
+  /* Auth guard note */
+  .guard-note{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;margin-top:16px;font-size:13px;color:#92400e;display:flex;align-items:center;gap:10px}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">Comercios<span>Conecta</span></div>
+
+  <div class="nav-group">Principal</div>
+  <div class="nav-item">🏠 Dashboard</div>
+
+  <div class="nav-group">Gestión</div>
+  <div class="nav-item active">📦 Productos
+    <span class="nav-badge"></span>
+  </div>
+  <div class="nav-sub active">→ Editar Producto</div>
+  <div class="nav-item">🧾 Ventas</div>
+  <div class="nav-item">👥 Clientes</div>
+  <div class="nav-item">🛒 Compras</div>
+
+  <div class="nav-group">Tienda</div>
+  <div class="nav-item">🛍️ E-commerce</div>
+  <div class="nav-item">🎨 Apariencia</div>
+
+  <div class="nav-group">Cuenta</div>
+  <div class="nav-item">⚙️ Perfil</div>
+  <div class="nav-item">🚪 Cerrar sesión</div>
+</aside>
+
+<div class="main">
+
+  <!-- Top navbar con breadcrumbs -->
+  <div class="topbar">
+    <div class="breadcrumb">
+      <a href="#">Panel</a>
+      <span class="sep">›</span>
+      <a href="#">Productos</a>
+      <span class="sep">›</span>
+      <span class="current">Editar Producto</span>
+    </div>
+    <div class="topbar-right">
+      <div class="notif-btn">🔔<span class="notif-dot"></span></div>
+      <div class="topbar-user">
+        <div class="user-avatar">A</div>
+        <span>admin@mitienda.com</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Botón Volver -->
+    <a href="#" class="back-btn">← Volver a Productos</a>
+
+    <div class="page-title">Editar Producto</div>
+    <p class="page-sub">Modifica los datos del producto. Los cambios se reflejan en tu tienda al guardar.</p>
+
+    <div class="demo-card">
+      <div class="section-title">Información del producto</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre del producto *</label>
+          <input type="text" value="Laptop Lenovo IdeaPad">
+        </div>
+        <div class="form-group">
+          <label>Precio (COP) *</label>
+          <input type="number" value="1200000">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Categoría</label>
+          <select>
+            <option selected>Computadores</option>
+            <option>Periféricos</option>
+            <option>Audio</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <select>
+            <option selected>Activo</option>
+            <option>Inactivo</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button class="btn-cancel">Cancelar</button>
+        <button class="btn-save">Guardar cambios</button>
+      </div>
+    </div>
+
+    <!-- Anotaciones de diseño -->
+    <div class="ann-box" style="margin-top:24px">
+      <span class="ann-icon">🍞</span>
+      <div class="ann-text">
+        <h4>Breadcrumb (migajas de pan)</h4>
+        <p>Siempre visible en el topbar. Cada elemento es un enlace clickeable excepto el último (página actual). Se genera dinámicamente según la ruta activa de Next.js.</p>
+      </div>
+    </div>
+
+    <div class="ann-box" style="margin-top:12px">
+      <span class="ann-icon">← </span>
+      <div class="ann-text">
+        <h4>Botón "Volver"</h4>
+        <p>Presente en todos los formularios de creación y edición. Usa <code>router.back()</code> de Next.js para regresar sin perder el contexto de navegación.</p>
+      </div>
+    </div>
+
+    <div class="ann-box" style="margin-top:12px">
+      <span class="ann-icon">🔷</span>
+      <div class="ann-text">
+        <h4>Sección activa resaltada en sidebar</h4>
+        <p>El ítem "Productos" y el sub-ítem "Editar Producto" aparecen resaltados. El sidebar también muestra el menú expandido de la sección activa.</p>
+      </div>
+    </div>
+
+    <div class="guard-note">
+      🔒 <strong>Guard de navegación:</strong> Si el usuario no está autenticado (sin token en localStorage), Next.js middleware redirige automáticamente a <code>/login</code> antes de cargar cualquier página del panel.
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
