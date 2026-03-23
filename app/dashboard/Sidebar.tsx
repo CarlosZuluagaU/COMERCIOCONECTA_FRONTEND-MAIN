@@ -129,6 +129,13 @@ export default function Sidebar({ activeMenu, onMenuToggle }: SidebarProps) {
         })}
       </nav>
 
+      <div className="sb-store-section">
+        <p className="sb-store-label">Tu tienda online</p>
+        <a href="/store" target="_blank" className="sb-store-btn">
+          🛍️ Ver mi Tienda
+        </a>
+      </div>
+
       <div className="sb-footer">
         <button className="sb-logout" onClick={handleLogout}>
           🚪 Cerrar sesión

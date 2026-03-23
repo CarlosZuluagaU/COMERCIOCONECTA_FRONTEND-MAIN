@@ -148,14 +148,23 @@ export default function VentasPage() {
               </p>
             </div>
 
-            <button
-              className="btn-secondary ventas-btn-refresh"
-              onClick={fetchVentas}
-              disabled={refreshing}
-            >
-              <FiRefreshCw className={refreshing ? "spin" : ""} />
-              {refreshing ? "Actualizando..." : "Actualizar"}
-            </button>
+            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+              <button
+                className="btn-secondary ventas-btn-refresh"
+                onClick={fetchVentas}
+                disabled={refreshing}
+              >
+                <FiRefreshCw className={refreshing ? "spin" : ""} />
+                {refreshing ? "Actualizando..." : "Actualizar"}
+              </button>
+              <button
+                className="btn-primary"
+                onClick={() => router.push("/sales/create")}
+                style={{ display: "flex", alignItems: "center", gap: "6px" }}
+              >
+                ＋ Nueva Venta
+              </button>
+            </div>
           </div>
         </header>
 

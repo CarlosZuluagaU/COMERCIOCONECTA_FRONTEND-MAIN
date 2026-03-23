@@ -8,6 +8,8 @@ interface AuthContextType {
   user: string | null;
   token: string | null;
   googleUser: GoogleUser | null;
+  comercioId: number | null;
+  authLoaded: boolean;
   login: (email: string, password: string) => Promise<void>;
   loginWithGoogle: (googleIdToken: string) => Promise<{ isNew: boolean }>;
   logout: () => void;
@@ -26,23 +28,47 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [googleUser, setGoogleUser] = useState<GoogleUser | null>(null);
+  const [comercioId, setComercioId] = useState<number | null>(null);
+  const [authLoaded, setAuthLoaded] = useState(false);
 
   useEffect(() => {
     const st = localStorage.getItem("token");
     const su = localStorage.getItem("user");
     const sg = localStorage.getItem("googleUser");
+    const sc = localStorage.getItem("comercioId");
     if (st) setToken(st);
     if (su) setUser(su);
     if (sg) { try { setGoogleUser(JSON.parse(sg)); } catch { /**/ } }
+    if (sc) {
+      setComercioId(Number(sc));
+      setAuthLoaded(true);
+    } else if (st) {
+      // Tiene token pero no comercioId (ej: registro viejo) — recuperarlo del backend
+      fetch(`${API_BASE_URL}/auth/me`, { headers: { Authorization: `Bearer ${st}` } })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data?.comercioId) {
+            const cid = Number(data.comercioId);
+            localStorage.setItem("comercioId", String(cid));
+            setComercioId(cid);
+          }
+        })
+        .catch(() => {})
+        .finally(() => setAuthLoaded(true));
+    } else {
+      setAuthLoaded(true);
+    }
   }, []);
 
   const login = async (email: string, password: string) => {
     const res = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
-    const { accessToken, refreshToken } = res.data;
+    const { accessToken, refreshToken, comercioId: cid, nombre } = res.data;
     localStorage.setItem("token", accessToken);
     localStorage.setItem("refreshToken", refreshToken);
-    localStorage.setItem("user", email);
-    setToken(accessToken); setUser(email);
+    localStorage.setItem("user", nombre || email);
+    if (cid != null) localStorage.setItem("comercioId", String(cid));
+    setToken(accessToken); setUser(nombre || email);
+    if (cid != null) setComercioId(cid);
   };
 
   const loginWithGoogle = async (googleIdToken: string): Promise<{ isNew: boolean }> => {
@@ -72,12 +98,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
-    ["token","refreshToken","user","googleUser"].forEach(k => localStorage.removeItem(k));
-    setToken(null); setUser(null); setGoogleUser(null);
+    ["token","refreshToken","user","googleUser","comercioId","storeConfig"].forEach(k => localStorage.removeItem(k));
+    setToken(null); setUser(null); setGoogleUser(null); setComercioId(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, googleUser, login, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, token, googleUser, comercioId, authLoaded, login, loginWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );

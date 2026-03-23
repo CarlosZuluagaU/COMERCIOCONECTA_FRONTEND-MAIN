@@ -103,6 +103,41 @@
   border-top: 1px solid rgba(255,255,255,.08);
 }
 
+.sb-store-section {
+  padding: 14px 12px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.sb-store-label {
+  font-size: .68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: rgba(255,255,255,.35);
+  margin: 0 0 8px 2px;
+}
+
+.sb-store-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #00d4aa, #00a88f);
+  color: #1F3B4D;
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  font-size: .88rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity .2s, transform .15s;
+  font-family: inherit;
+  box-shadow: 0 4px 12px rgba(0,212,170,.25);
+}
+.sb-store-btn:hover { opacity: .92; transform: translateY(-1px); text-decoration: none; }
+
 .sb-logout {
   display: flex;
   align-items: center;

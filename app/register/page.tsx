@@ -71,10 +71,11 @@ export default function RegisterPage() {
         telefono: formData.telefono || "N/A",
       };
       const res = await axios.post(`${API_BASE_URL}/auth/register`, payload);
-      const { accessToken, refreshToken } = res.data;
+      const { accessToken, refreshToken, comercioId: cid, nombre } = res.data;
       localStorage.setItem("token", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
-      localStorage.setItem("user", formData.email);
+      localStorage.setItem("user", nombre || formData.nombre || formData.email);
+      if (cid != null) localStorage.setItem("comercioId", String(cid));
       setSuccess("¡Cuenta creada! Redirigiendo...");
       setTimeout(() => { window.location.href = "/dashboard"; }, 1200);
     } catch (err: any) {

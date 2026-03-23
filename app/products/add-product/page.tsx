@@ -1,506 +1,297 @@
 "use client";
-import React, { useState, ChangeEvent, useEffect } from "react"; // Agregado useEffect
-import { useAuth } from "../../context/AuthContext"; 
+import React, { useState, ChangeEvent, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../context/AuthContext";
 import { FiSave } from "react-icons/fi";
 import Sidebar from "../../dashboard/Sidebar";
 import "../../dashboard/dashboard.css";
+import "../../dashboard/admin.css";
 
-// Interface para el proveedor
-interface Proveedor {
-  id: string;
-  nombre: string;
-  contacto: string;
-  telefono: string;
-  email: string;
-  direccion: string;
-  tipo: "Cosméticos" | "Farmacéutico" | "General";
-  estado: "Activo" | "Inactivo";
-  productos: string[];
-}
+interface Proveedor { id: string; nombre: string; tipo: string; estado: "Activo" | "Inactivo"; }
 
-interface Producto {
-  id: string;
-  nombre: string;
-  referencia: string;
-  precioCompra: number;
-  precioVenta: number;
-  iva: number;
-  categoria: string;
-  marca: string;
-  almacenamiento: string;
-  estado: "Activo" | "Inactivo";
-  stock: number;
-  stockMinimo: number;
-  proveedor: string;
-}
+const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
+const CATEGORIAS = [
+  "Medicamentos","Cuidado Personal","Cosméticos","Maquillaje",
+  "Suplementos","Cuidado Capilar","Higiene","Accesorios",
+];
+const MARCAS = ["Nivea","L'Oréal","Dove","Head & Shoulders","MAC","Maybelline","Bayer","Pfizer","Genérico"];
+const ALMACENAMIENTOS = [
+  "Temperatura ambiente","Refrigerado (2-8°C)","Protegido de la luz","Ambiente seco","Congelado",
+];
+
+const INITIAL = {
+  nombre: "", referencia: "", precioCompra: 0, precioVenta: 0,
+  iva: 19, categoria: "", marca: "", almacenamiento: "",
+  estado: "Activo", stock: 0, stockMinimo: 5, proveedor: "", descripcion: "",
+};
 
 export default function AgregarProductoPage() {
-  const { user, token } = useAuth();
+  const { token } = useAuth();
+  const router = useRouter();
   const [activeMenu, setActiveMenu] = useState<string | null>("Productos");
-  const [proveedores, setProveedores] = useState<Proveedor[]>([]); // Estado para proveedores
-  const [loading, setLoading] = useState(false); // Estado para loading
+  const [proveedores, setProveedores] = useState<Proveedor[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({ ...INITIAL });
+  const [imagenUrl, setImagenUrl] = useState<string>("");
+  const [imagenNombre, setImagenNombre] = useState<string>("");
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  const [formData, setFormData] = useState<Omit<Producto, "id">>({
-    nombre: "",
-    referencia: "",
-    precioCompra: 0,
-    precioVenta: 0,
-    iva: 19,
-    categoria: "",
-    marca: "",
-    almacenamiento: "",
-    estado: "Activo",
-    stock: 0,
-    stockMinimo: 5,
-    proveedor: "",
-  });
-
-  // ===== Fetch proveedores seguro =====
-  const fetchProveedores = async () => {
-    if (!token) {
-      console.log("No hay token disponible");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/proveedores`, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        console.error("Error en la solicitud:", response.status, response.statusText);
-        setProveedores([]);
-        return;
-      }
-
-      const text = await response.text();
-      const data: Proveedor[] = text ? JSON.parse(text) : [];
-      setProveedores(data);
-    } catch (error) {
-      console.error("Error cargando proveedores:", error);
-      setProveedores([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Cargar proveedores al montar el componente o cuando cambie el token
   useEffect(() => {
-    fetchProveedores();
+    if (!token) return;
+    fetch(`${API}/proveedores`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : [])
+      .then(setProveedores)
+      .catch(() => setProveedores([]));
   }, [token]);
 
-  const categorias = [
-    "Medicamentos",
-    "Cuidado Personal",
-    "Cosméticos",
-    "Maquillaje",
-    "Suplementos",
-    "Cuidado Capilar",
-    "Higiene",
-    "Accesorios",
-  ];
+  // Parse Colombian number format: "824.950" → 824950, "1.234.567" → 1234567
+  const parseNum = (v: string) => {
+    const clean = v.replace(/\./g, "").replace(",", ".");
+    return Number(clean);
+  };
 
-  const marcas = [
-    "Nivea",
-    "L'Oréal",
-    "Dove",
-    "Head & Shoulders",
-    "MAC",
-    "Maybelline",
-    "Bayer",
-    "Pfizer",
-    "Genérico",
-  ];
-
-  const condicionesAlmacenamiento = [
-    "Temperatura ambiente",
-    "Refrigerado (2-8°C)",
-    "Protegido de la luz",
-    "Ambiente seco",
-    "Congelado",
-  ];
-
-  // Ya no necesitas el array estático de proveedores
-  // const proveedores = [...]
-
-  const handleFormChange =
-    (field: keyof Omit<Producto, "id">) =>
-    (event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-      const value = event.target.value;
-      setFormData((prev) => ({
+  const handleChange =
+    (field: string) =>
+    (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+      const v = e.target.value;
+      setForm(prev => ({
         ...prev,
-        [field]:
-          field.includes("precio") || field.includes("iva") || field.includes("stock")
-            ? Number(value)
-            : value,
+        [field]: ["precioCompra","precioVenta","iva","stock","stockMinimo"].includes(field)
+          ? parseNum(v) : v,
       }));
     };
 
-  const handleEstadoChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    setFormData((prev) => ({
-      ...prev,
-      estado: event.target.value as "Activo" | "Inactivo",
-    }));
+  const handlePrecioCompra = (e: ChangeEvent<HTMLInputElement>) => {
+    const pc = parseNum(e.target.value);
+    const pv = Math.round(pc * (1 + form.iva / 100) * 1.4);
+    setForm(prev => ({ ...prev, precioCompra: pc, precioVenta: pv }));
   };
 
-  const calcularPrecioVenta = (precioCompra: number) => {
-    const precioConIva = precioCompra * (1 + formData.iva / 100);
-    const margen = precioConIva * 0.4; // 40% de margen
-    return precioConIva + margen;
+  // Convert uploaded image to base64 and preview
+  const handleImageFile = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { alert("La imagen no puede superar 2 MB"); return; }
+    setImagenNombre(file.name);
+    const reader = new FileReader();
+    reader.onload = ev => setImagenUrl(ev.target?.result as string);
+    reader.readAsDataURL(file);
   };
 
-  const handlePrecioCompraChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const precioCompra = Number(event.target.value);
-    setFormData((prev) => ({
-      ...prev,
-      precioCompra,
-      precioVenta: calcularPrecioVenta(precioCompra),
-    }));
-  };
-
-  const guardarProducto = async () => {
-    // Validaciones básicas
-    if (!formData.nombre || !formData.referencia || !formData.categoria) {
-      alert("Por favor complete los campos obligatorios");
-      return;
+  const guardar = async () => {
+    if (!form.nombre || !form.referencia || !form.categoria) {
+      alert("Complete los campos obligatorios (Nombre, Referencia, Categoría)"); return;
     }
-
-    if (formData.precioCompra <= 0 || formData.precioVenta <= 0) {
-      alert("Los precios deben ser mayores a cero");
-      return;
-    }
-
-    if (formData.precioVenta <= formData.precioCompra) {
-      alert("El precio de venta debe ser mayor al precio de compra");
-      return;
-    }
-
-    // Validar que el proveedor seleccionado exista en la lista
-    if (formData.proveedor && !proveedores.some(p => p.nombre === formData.proveedor)) {
-      alert("Por favor seleccione un proveedor válido de la lista");
-      return;
-    }
-
+    if (form.precioCompra <= 0) { alert("El precio de compra debe ser mayor a 0"); return; }
+    if (form.precioVenta <= form.precioCompra) { alert("El precio de venta debe ser mayor al de compra"); return; }
+    setSaving(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/productos`, {
+      const res = await fetch(`${API}/productos`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ ...form, imagenUrl }),
       });
-
-      if (!response.ok) {
-        throw new Error("Error al guardar el producto");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Error al guardar");
       }
-
-      const nuevoProducto = await response.json();
-
-      alert(`Producto "${nuevoProducto.nombre}" guardado exitosamente`);
-      console.log("Producto guardado en backend:", nuevoProducto);
-
-      // Resetear formulario
-      setFormData({
-        nombre: "",
-        referencia: "",
-        precioCompra: 0,
-        precioVenta: 0,
-        iva: 19,
-        categoria: "",
-        marca: "",
-        almacenamiento: "",
-        estado: "Activo",
-        stock: 0,
-        stockMinimo: 5,
-        proveedor: "",
-      });
-    } catch (error) {
-      console.error(error);
-      alert("Hubo un error al guardar el producto");
+      router.push("/products/product-list");
+    } catch (e: any) {
+      alert(e.message || "Error al guardar el producto");
+    } finally {
+      setSaving(false);
     }
   };
 
-  // Función para limpiar formulario
-  const limpiarFormulario = () => {
-    setFormData({
-      nombre: "",
-      referencia: "",
-      precioCompra: 0,
-      precioVenta: 0,
-      iva: 19,
-      categoria: "",
-      marca: "",
-      almacenamiento: "",
-      estado: "Activo",
-      stock: 0,
-      stockMinimo: 5,
-      proveedor: "",
-    });
-  };
+  const limpiar = () => { setForm({ ...INITIAL }); setImagenUrl(""); setImagenNombre(""); };
+
+  const canSave = !!form.nombre && !!form.referencia && !!form.categoria && form.precioCompra > 0;
+  const valorIva = +(form.precioCompra * form.iva / 100).toFixed(2);
 
   return (
     <div className="dashboard-page">
       <Sidebar activeMenu={activeMenu} onMenuToggle={setActiveMenu} />
-
       <main className="dashboard-main">
-        {/* Header */}
-        <header className="dashboard-header">
-          <div className="header-content">
-            <div className="welcome-section">
-              <h1 className="welcome-title">Agregar Producto</h1>
-              <p className="welcome-date">Registre nuevos productos en el inventario</p>
-            </div>
-          </div>
+
+        <header className="adm-header">
+          <h1>📦 Agregar Producto</h1>
+          <button className="adm-btn-secondary" style={{ width: "auto" }} onClick={() => router.push("/products/product-list")}>
+            ← Volver
+          </button>
         </header>
 
-        {/* Formulario de producto */}
-        <section className="content-section">
-          <div className="content-card">
-            <div className="card-header">
-              <h3>Información del Producto</h3>
-              <span className="form-subtitle">Complete todos los campos requeridos</span>
+        <div className="adm-content">
+          <div className="adm-form-layout">
+
+            {/* ── LEFT COLUMN ── */}
+            <div className="adm-form-left">
+
+              {/* Información General */}
+              <div className="adm-fcard">
+                <h3>Información General</h3>
+                <div className="adm-row">
+                  <div className="adm-field">
+                    <label>Nombre *</label>
+                    <input value={form.nombre} onChange={handleChange("nombre")} placeholder="Ej: Crema Hidratante" />
+                  </div>
+                  <div className="adm-field">
+                    <label>Referencia *</label>
+                    <input value={form.referencia} onChange={handleChange("referencia")} placeholder="Ej: NIV-001" />
+                  </div>
+                </div>
+                <div className="adm-row">
+                  <div className="adm-field">
+                    <label>Marca</label>
+                    <select value={form.marca} onChange={handleChange("marca")}>
+                      <option value="">Seleccionar marca</option>
+                      {MARCAS.map(m => <option key={m}>{m}</option>)}
+                    </select>
+                  </div>
+                  <div className="adm-field">
+                    <label>Categoría *</label>
+                    <select value={form.categoria} onChange={handleChange("categoria")}>
+                      <option value="">Seleccionar categoría</option>
+                      {CATEGORIAS.map(c => <option key={c}>{c}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="adm-row">
+                  <div className="adm-field">
+                    <label>Estado</label>
+                    <select value={form.estado} onChange={handleChange("estado")}>
+                      <option value="Activo">Activo</option>
+                      <option value="Inactivo">Inactivo</option>
+                    </select>
+                  </div>
+                  <div className="adm-field">
+                    <label>Almacenamiento</label>
+                    <select value={form.almacenamiento} onChange={handleChange("almacenamiento")}>
+                      <option value="">Seleccionar condición</option>
+                      {ALMACENAMIENTOS.map(a => <option key={a}>{a}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="adm-row">
+                  <div className="adm-field adm-field-full">
+                    <label>Descripción</label>
+                    <textarea value={form.descripcion} onChange={handleChange("descripcion")} placeholder="Descripción del producto…" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Precios & Inventario */}
+              <div className="adm-fcard">
+                <h3>Precios e Inventario</h3>
+                <div className="adm-row">
+                  <div className="adm-field">
+                    <label>Precio de Compra *</label>
+                    <input type="number" value={form.precioCompra} onChange={handlePrecioCompra} min="0" step="0.01" />
+                  </div>
+                  <div className="adm-field">
+                    <label>Precio de Venta *</label>
+                    <input type="number" value={form.precioVenta} onChange={handleChange("precioVenta")} min="0" step="0.01" />
+                  </div>
+                </div>
+                <div className="adm-row">
+                  <div className="adm-field">
+                    <label>IVA (%)</label>
+                    <input type="number" value={form.iva} onChange={handleChange("iva")} min="0" max="100" />
+                  </div>
+                  <div className="adm-field">
+                    <label>Proveedor</label>
+                    <select value={form.proveedor} onChange={handleChange("proveedor")}>
+                      <option value="">Seleccionar proveedor</option>
+                      {proveedores.filter(p => p.estado === "Activo").map(p => (
+                        <option key={p.id} value={p.nombre}>{p.nombre} – {p.tipo}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="adm-row">
+                  <div className="adm-field">
+                    <label>Stock Inicial</label>
+                    <input type="number" value={form.stock} onChange={handleChange("stock")} min="0" />
+                  </div>
+                  <div className="adm-field">
+                    <label>Stock Mínimo</label>
+                    <input type="number" value={form.stockMinimo} onChange={handleChange("stockMinimo")} min="0" />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="form-container">
-              <div className="form-grid">
-                {/* Nombre */}
-                <div className="form-group">
-                  <label>Nombre del Producto *</label>
-                  <input
-                    type="text"
-                    value={formData.nombre}
-                    onChange={handleFormChange("nombre")}
-                    className="form-input"
-                    placeholder="Ej: Crema Hidratante Nivea"
-                  />
-                </div>
-                {/* Referencia */}
-                <div className="form-group">
-                  <label>Referencia *</label>
-                  <input
-                    type="text"
-                    value={formData.referencia}
-                    onChange={handleFormChange("referencia")}
-                    className="form-input"
-                    placeholder="Ej: NIV-CREM-001"
-                  />
-                </div>
-                {/* Categoría */}
-                <div className="form-group">
-                  <label>Categoría *</label>
-                  <select
-                    value={formData.categoria}
-                    onChange={handleFormChange("categoria")}
-                    className="form-input"
-                  >
-                    <option value="">Seleccionar categoría</option>
-                    {categorias.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {/* Marca */}
-                <div className="form-group">
-                  <label>Marca</label>
-                  <select
-                    value={formData.marca}
-                    onChange={handleFormChange("marca")}
-                    className="form-input"
-                  >
-                    <option value="">Seleccionar marca</option>
-                    {marcas.map((marca) => (
-                      <option key={marca} value={marca}>
-                        {marca}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            {/* ── RIGHT SIDEBAR ── */}
+            <div>
+              <div className="adm-fcard" style={{ marginBottom: 0 }}>
+                <h3>Imagen del Producto</h3>
 
-                {/* Precio compra */}
-                <div className="form-group">
-                  <label>Precio de Compra *</label>
-                  <input
-                    type="number"
-                    value={formData.precioCompra}
-                    onChange={handlePrecioCompraChange}
-                    className="form-input"
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
-                {/* IVA */}
-                <div className="form-group">
-                  <label>IVA (%) *</label>
-                  <input
-                    type="number"
-                    value={formData.iva}
-                    onChange={handleFormChange("iva")}
-                    className="form-input"
-                    placeholder="19"
-                    min="0"
-                    max="100"
-                    step="0.1"
-                  />
-                </div>
-                {/* Precio venta */}
-                <div className="form-group">
-                  <label>Precio de Venta *</label>
-                  <input
-                    type="number"
-                    value={formData.precioVenta.toFixed(2)}
-                    onChange={handleFormChange("precioVenta")}
-                    className="form-input"
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
-
-                {/* Stock inicial */}
-                <div className="form-group">
-                  <label>Stock Inicial</label>
-                  <input
-                    type="number"
-                    value={formData.stock}
-                    onChange={handleFormChange("stock")}
-                    className="form-input"
-                    placeholder="0"
-                    min="0"
-                  />
-                </div>
-                {/* Stock mínimo */}
-                <div className="form-group">
-                  <label>Stock Mínimo</label>
-                  <input
-                    type="number"
-                    value={formData.stockMinimo}
-                    onChange={handleFormChange("stockMinimo")}
-                    className="form-input"
-                    placeholder="5"
-                    min="0"
-                  />
-                </div>
-
-                {/* Proveedor */}
-                <div className="form-group">
-                  <label>Proveedor</label>
-                  <select
-                    value={formData.proveedor}
-                    onChange={handleFormChange("proveedor")}
-                    className="form-input"
-                    disabled={loading || !token}
-                  >
-                    <option value="">Seleccionar proveedor</option>
-                    {loading ? (
-                      <option value="" disabled>Cargando proveedores...</option>
-                    ) : proveedores.length === 0 ? (
-                      <option value="" disabled>No hay proveedores disponibles</option>
-                    ) : (
-                      proveedores
-                        .filter(proveedor => proveedor.estado === "Activo") // Opcional: solo proveedores activos
-                        .map((proveedor) => (
-                          <option key={proveedor.id} value={proveedor.nombre}>
-                            {proveedor.nombre} - {proveedor.tipo}
-                          </option>
-                        ))
-                    )}
-                  </select>
-                  {loading && (
-                    <p className="form-help">Cargando lista de proveedores...</p>
-                  )}
-                  {!token && (
-                    <p className="form-help error">No hay token de autenticación</p>
-                  )}
-                </div>
-
-                {/* Condiciones de almacenamiento */}
-                <div className="form-group">
-                  <label>Condiciones de Almacenamiento</label>
-                  <select
-                    value={formData.almacenamiento}
-                    onChange={handleFormChange("almacenamiento")}
-                    className="form-input"
-                  >
-                    <option value="">Seleccionar condición</option>
-                    {condicionesAlmacenamiento.map((cond) => (
-                      <option key={cond} value={cond}>
-                        {cond}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Estado */}
-                <div className="form-group">
-                  <label>Estado</label>
-                  <select
-                    value={formData.estado}
-                    onChange={handleEstadoChange}
-                    className="form-input"
-                  >
-                    <option value="Activo">Activo</option>
-                    <option value="Inactivo">Inactivo</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Resumen de precios */}
-              <div className="price-summary">
-                <h4>Resumen de Precios</h4>
-                <div className="summary-grid">
-                  <div className="summary-item">
-                    <span>Precio Compra:</span>
-                    <span>${formData.precioCompra.toFixed(2)}</span>
+                {/* Preview or upload zone */}
+                {imagenUrl ? (
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ position: "relative", borderRadius: 8, overflow: "hidden", border: "1px solid #eee", background: "#f7f8fa" }}>
+                      <img
+                        src={imagenUrl}
+                        alt="preview"
+                        style={{ width: "100%", height: 160, objectFit: "contain", display: "block" }}
+                      />
+                      <button
+                        onClick={() => { setImagenUrl(""); setImagenNombre(""); }}
+                        style={{ position: "absolute", top: 8, right: 8, background: "#ef4444", color: "white", border: "2px solid white", borderRadius: "50%", width: 26, height: 26, cursor: "pointer", fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 6px rgba(0,0,0,.3)", zIndex: 2 }}
+                      >✕</button>
+                    </div>
+                    <div style={{ fontSize: ".72rem", color: "#888", marginTop: 6, textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {imagenNombre}
+                    </div>
                   </div>
-                  <div className="summary-item">
-                    <span>IVA:</span>
-                    <span>{formData.iva}%</span>
+                ) : (
+                  <div
+                    className="adm-img-upload"
+                    onClick={() => fileRef.current?.click()}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <span style={{ fontSize: "2rem" }}>🖼️</span>
+                    <span>Haz clic para subir imagen</span>
+                    <span style={{ fontSize: ".75rem" }}>PNG, JPG, WEBP – máx 2 MB</span>
                   </div>
-                  <div className="summary-item">
-                    <span>Valor IVA:</span>
-                    <span>${(formData.precioCompra * formData.iva / 100).toFixed(2)}</span>
-                  </div>
-                  <div className="summary-item total">
-                    <span>Precio Venta:</span>
-                    <span>${formData.precioVenta.toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
+                )}
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  style={{ display: "none" }}
+                  onChange={handleImageFile}
+                />
 
-              {/* Botones */}
-              <div className="form-actions">
-                <button
-                  onClick={limpiarFormulario}
-                  className="btn-secondary"
-                >
+                {/* Price summary */}
+                <div style={{ background: "#f7f8fa", borderRadius: 8, padding: "14px 16px", marginBottom: 16, marginTop: 12 }}>
+                  <div style={{ fontSize: ".78rem", fontWeight: 700, color: "#1F3B4D", marginBottom: 10 }}>Resumen de Precios</div>
+                  {[
+                    ["Precio Compra", `$${form.precioCompra.toLocaleString("es-CO")}`],
+                    ["IVA", `${form.iva}%`],
+                    ["Valor IVA", `$${valorIva.toLocaleString("es-CO")}`],
+                    ["Precio Venta", `$${form.precioVenta.toLocaleString("es-CO")}`],
+                  ].map(([k, v]) => (
+                    <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: ".83rem", marginBottom: 6 }}>
+                      <span style={{ color: "#666" }}>{k}</span>
+                      <strong style={{ color: "#1F3B4D" }}>{v}</strong>
+                    </div>
+                  ))}
+                </div>
+
+                <button className="adm-btn-full" onClick={guardar} disabled={!canSave || saving}>
+                  <FiSave style={{ marginRight: 6 }} />
+                  {saving ? "Guardando…" : "Guardar Producto"}
+                </button>
+                <button className="adm-btn-full-sec" onClick={limpiar} style={{ marginTop: 8 }}>
                   Limpiar Formulario
                 </button>
-                <button
-                  onClick={guardarProducto}
-                  className="btn-primary large"
-                  disabled={
-                    !formData.nombre ||
-                    !formData.referencia ||
-                    !formData.categoria ||
-                    formData.precioCompra <= 0
-                  }
-                >
-                  <FiSave style={{ marginRight: "8px" }} />
-                  Guardar Producto
-                </button>
               </div>
             </div>
+
           </div>
-        </section>
+        </div>
       </main>
     </div>
   );

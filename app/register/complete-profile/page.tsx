@@ -8,7 +8,7 @@ import "./complete-profile.css";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
 export default function CompleteProfilePage() {
-  const { googleUser } = useAuth();
+  const { googleUser, authLoaded } = useAuth();
   const [formData, setFormData] = useState({
     nombre: "",
     nit: "",
@@ -18,11 +18,15 @@ export default function CompleteProfilePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Wait for auth to load from localStorage before checking googleUser.
+  // Without this wait, the page would see googleUser=null on first render
+  // (before the AuthContext useEffect runs) and redirect immediately.
   useEffect(() => {
+    if (!authLoaded) return;
     if (!googleUser) {
       window.location.href = "/login";
     }
-  }, [googleUser]);
+  }, [googleUser, authLoaded]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -35,22 +39,33 @@ export default function CompleteProfilePage() {
     setLoading(true);
     setError(null);
     try {
-      await axios.post(`${API_BASE_URL}/comercios`, {
-        nombre: formData.nombre,
+      // Register creates both the user account and comercio, and returns tokens
+      const googlePassword = `google_${googleUser.sub}`;
+      const res = await axios.post(`${API_BASE_URL}/auth/register`, {
+        nombre: googleUser.name,
+        email: googleUser.email,
+        password: googlePassword,
+        comercioNombre: formData.nombre,
         nit: formData.nit,
         direccion: formData.direccion,
-        telefono: formData.telefono,
-        email: googleUser.email,
+        telefono: formData.telefono || "N/A",
       });
+      const { accessToken, refreshToken, comercioId: cid, nombre } = res.data;
+      localStorage.setItem("token", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      localStorage.setItem("user", nombre || googleUser.name || googleUser.email);
+      if (cid != null) localStorage.setItem("comercioId", String(cid));
+
       window.location.href = "/dashboard";
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Error al registrar el comercio");
+      setError(err?.response?.data?.message || "Error al registrar la cuenta");
     } finally {
       setLoading(false);
     }
   };
 
-  if (!googleUser) return null;
+  // Show nothing while auth is loading to avoid flash redirect
+  if (!authLoaded || !googleUser) return null;
 
   return (
     <div className="register-page">
@@ -64,7 +79,9 @@ export default function CompleteProfilePage() {
             )}
           </div>
           <div>
-            <h2 className="register-title" style={{ marginBottom: 4 }}>¡Hola, {googleUser.name.split(" ")[0]}!</h2>
+            <h2 className="register-title" style={{ marginBottom: 4 }}>
+              ¡Hola, {googleUser.name.split(" ")[0]}!
+            </h2>
             <p className="subtitle-text">Ya casi terminamos. Cuéntanos sobre tu comercio.</p>
           </div>
         </div>
@@ -123,7 +140,6 @@ export default function CompleteProfilePage() {
                   value={formData.telefono}
                   onChange={handleChange}
                   placeholder="+57 300 123 4567"
-                  required
                 />
               </div>
             </div>

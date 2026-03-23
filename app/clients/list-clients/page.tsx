@@ -3,9 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { FiEye, FiEdit, FiTrash2, FiUsers } from "react-icons/fi";
+import { FiEdit, FiTrash2, FiUsers, FiSearch } from "react-icons/fi";
 import Sidebar from "../../dashboard/Sidebar";
 import "../../dashboard/dashboard.css";
+import "../../dashboard/admin.css";
 
 interface Cliente {
   id: number;
@@ -21,150 +22,155 @@ export default function ListadoClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeMenu, setActiveMenu] = useState<string | null>("Clientes");
+  const [busqueda, setBusqueda] = useState("");
+  const [filtroTipo, setFiltroTipo] = useState("");
   const router = useRouter();
-
-  //  Leer la variable de entorno definida en .env.local
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  //  Cargar clientes desde el backend
   useEffect(() => {
-    if (!API_BASE_URL) {
-      console.error("⚠️ No se encontró NEXT_PUBLIC_API_BASE_URL en las variables de entorno");
-      return;
-    }
-
+    if (!API_BASE_URL) return;
     axios
       .get(`${API_BASE_URL}/clientes`)
-      .then((res) => {
-        setClientes(res.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error al cargar clientes:", err);
-        setLoading(false);
-      });
+      .then((res) => { setClientes(res.data); setLoading(false); })
+      .catch(() => setLoading(false));
   }, [API_BASE_URL]);
 
-  // 🔹 Eliminar cliente
   const eliminarCliente = (id: number) => {
     if (confirm("¿Está seguro de eliminar este cliente?")) {
       axios
         .delete(`${API_BASE_URL}/clientes/${id}`)
-        .then(() => {
-          alert("Cliente eliminado correctamente");
-          setClientes((prev) => prev.filter((c) => c.id !== id));
-        })
-        .catch((err) => {
-          console.error("Error al eliminar cliente:", err);
-          alert("No se pudo eliminar el cliente");
-        });
+        .then(() => { alert("Cliente eliminado"); setClientes((prev) => prev.filter((c) => c.id !== id)); })
+        .catch(() => alert("No se pudo eliminar el cliente"));
     }
   };
 
-  // 🔹 Editar cliente
-  const editarCliente = (cliente: Cliente) => {
-    router.push(`/clientes/${cliente.id}/editar`);
-  };
+  const getTipo = (tipoDoc: string) =>
+    tipoDoc === "NIT" ? "Jurídica" : "Natural";
 
-  // 🔹 Ver detalle del cliente
-  const verDetalle = (cliente: Cliente) => {
-    router.push(`/clientes/${cliente.id}`);
-  };
+  const clientesFiltrados = clientes.filter((c) => {
+    const q = busqueda.toLowerCase();
+    const matchQ =
+      c.nombres.toLowerCase().includes(q) ||
+      c.numeroDocumento.includes(q) ||
+      c.correo.toLowerCase().includes(q);
+    const matchTipo = !filtroTipo || getTipo(c.tipoDocumento) === filtroTipo;
+    return matchQ && matchTipo;
+  });
 
   return (
     <div className="dashboard-page">
       <Sidebar activeMenu={activeMenu} onMenuToggle={setActiveMenu} />
-
       <main className="dashboard-main">
-        {/* 🔹 Encabezado */}
-        <header className="dashboard-header">
-          <div className="header-content">
-            <div className="welcome-section">
-              <h1 className="welcome-title">Listado de Clientes</h1>
-              <p className="welcome-date">Gestión y control de clientes registrados</p>
-            </div>
-          </div>
+
+        {/* Header */}
+        <header className="adm-header">
+          <h1>👥 Clientes</h1>
+          <button className="adm-btn-primary" onClick={() => router.push("/clients/create-client")}>
+            ＋ Agregar Cliente
+          </button>
         </header>
 
-        {/* 🔹 Contenido principal */}
-        <section className="content-section">
-          <div className="content-card">
-            <div className="card-header">
-              <h3>Clientes Registrados ({clientes.length})</h3>
-              <button
-                onClick={() => router.push("/clientes/registro")}
-                className="btn-primary"
-              >
-                + Nuevo Cliente
-              </button>
-            </div>
+        <div className="adm-content">
 
-            <div className="table-container">
-              {loading ? (
-                <p>Cargando clientes...</p>
-              ) : clientes.length > 0 ? (
-                <table className="data-table">
+          {/* Filters */}
+          <div className="adm-filters">
+            <div className="adm-search">
+              <FiSearch color="#aaa" />
+              <input
+                placeholder="Buscar por nombre, documento o correo…"
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+              />
+            </div>
+            <select className="adm-fsel" value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value)}>
+              <option value="">Todos los tipos</option>
+              <option value="Natural">Persona Natural</option>
+              <option value="Jurídica">Persona Jurídica</option>
+            </select>
+          </div>
+
+          {/* Table */}
+          <div className="adm-card">
+            {loading ? (
+              <div className="adm-loading">Cargando clientes...</div>
+            ) : clientesFiltrados.length > 0 ? (
+              <>
+                <table className="adm-table">
                   <thead>
                     <tr>
-                      <th>ID</th>
+                      <th>Cliente</th>
                       <th>Tipo Doc.</th>
-                      <th>Número</th>
-                      <th>Nombre</th>
+                      <th>Documento</th>
                       <th>Correo</th>
                       <th>Teléfono</th>
-                      <th>Dirección</th>
+                      <th>Tipo</th>
                       <th>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {clientes.map((cliente) => (
-                      <tr key={cliente.id}>
-                        <td>{cliente.id}</td>
-                        <td>{cliente.tipoDocumento}</td>
-                        <td>{cliente.numeroDocumento}</td>
-                        <td>{cliente.nombres}</td>
-                        <td>{cliente.correo}</td>
-                        <td>{cliente.telefono}</td>
-                        <td>{cliente.direccion || "—"}</td>
-                        <td>
-                          <div className="action-buttons">
-                            <button
-                              onClick={() => editarCliente(cliente)}
-                              className="btn-primary"
-                              title="Editar cliente"
-                            >
-                              <FiEdit />
-                            </button>
-                            <button
-                              onClick={() => eliminarCliente(cliente.id)}
-                              className="btn-danger"
-                              title="Eliminar cliente"
-                            >
-                              <FiTrash2 />
-                            </button>
-                            <button
-                              onClick={() => verDetalle(cliente)}
-                              className="btn-secondary"
-                              title="Ver detalle"
-                            >
-                              <FiEye />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                    {clientesFiltrados.map((c) => {
+                      const tipo = getTipo(c.tipoDocumento);
+                      return (
+                        <tr key={c.id}>
+                          <td>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <div className="adm-avatar">
+                                {c.nombres.charAt(0).toUpperCase()}
+                              </div>
+                              <strong>{c.nombres}</strong>
+                            </div>
+                          </td>
+                          <td>{c.tipoDocumento}</td>
+                          <td>{c.numeroDocumento}</td>
+                          <td>{c.correo}</td>
+                          <td>{c.telefono}</td>
+                          <td>
+                            <span className={`adm-badge ${tipo === "Jurídica" ? "adm-blue" : "adm-purple"}`}>
+                              {tipo}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="adm-actions">
+                              <button
+                                className="adm-ibtn adm-ibtn-edit"
+                                onClick={() => router.push(`/clients/${c.id}/editar`)}
+                                title="Editar"
+                              >
+                                <FiEdit /> Editar
+                              </button>
+                              <button
+                                className="adm-ibtn adm-ibtn-del"
+                                onClick={() => eliminarCliente(c.id)}
+                                title="Eliminar"
+                              >
+                                <FiTrash2 /> Eliminar
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
-              ) : (
-                <div className="empty-state">
-                  <FiUsers size={48} />
-                  <p>No se encontraron clientes</p>
-                  <span>No hay clientes registrados en el sistema</span>
+                <div className="adm-pagination">
+                  <span>Mostrando {clientesFiltrados.length} de {clientes.length} clientes</span>
+                  <div className="adm-page-btns">
+                    <button disabled>‹</button>
+                    <button className="active">1</button>
+                    <button disabled>›</button>
+                  </div>
                 </div>
-              )}
-            </div>
+              </>
+            ) : (
+              <div className="adm-empty">
+                <FiUsers size={48} />
+                <p>No se encontraron clientes</p>
+                <span>Intenta con otro filtro o agrega nuevos clientes</span>
+              </div>
+            )}
           </div>
-        </section>
+
+        </div>
       </main>
     </div>
   );

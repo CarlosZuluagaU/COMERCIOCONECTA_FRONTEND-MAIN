@@ -1,11 +1,16 @@
 /* styles/globals.css */
 
+:root {
+  /* Alias so any code using --font-geist-sans also gets Jakarta Sans */
+  --font-geist-sans: var(--font-jakarta), 'Segoe UI', system-ui, sans-serif;
+  --font-geist-mono: 'Courier New', Courier, monospace;
+}
+
 html, body, #__next {
   height: 100%;
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f9f9f9; /* blanco suave */
-  
+  font-family: var(--font-jakarta), 'Segoe UI', system-ui, sans-serif;
+  background-color: #f9f9f9;
 }
 
 a {

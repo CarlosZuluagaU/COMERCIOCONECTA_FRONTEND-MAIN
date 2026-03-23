@@ -1,14 +1,27 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useRouter } from "next/navigation";
 import Sidebar from "./Sidebar";
 import "./dashboard.css";
+import "./db-stats.css";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const router = useRouter();
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalVentas: 0,
@@ -84,8 +97,34 @@ export default function DashboardPage() {
             <button className="db-notif-btn" onClick={fetchStats} title="Actualizar">
               {loading ? "🔄" : "🔔"}
             </button>
-            <div className="db-avatar">
-              {(user || "U").charAt(0).toUpperCase()}
+            <div className="db-avatar-wrap" ref={menuRef}>
+              <div className="db-avatar" onClick={() => setMenuOpen(o => !o)} style={{ cursor: "pointer" }}>
+                {(user || "U").charAt(0).toUpperCase()}
+              </div>
+              {menuOpen && (
+                <div className="db-avatar-menu">
+                  <div className="db-avatar-menu-header">
+                    <div className="db-avatar-menu-mini">
+                      {(user || "U").charAt(0).toUpperCase()}
+                    </div>
+                    <div className="db-avatar-menu-info">
+                      <div className="db-avatar-menu-name">{user || "Usuario"}</div>
+                      <div className="db-avatar-menu-role">Administrador</div>
+                    </div>
+                  </div>
+                  <div className="db-avatar-menu-body">
+                    <button className="db-avatar-menu-item" onClick={() => { setMenuOpen(false); router.push("/profile"); }}>
+                      <span className="db-avatar-menu-item-icon">👤</span>
+                      Editar perfil
+                    </button>
+                    <div className="db-avatar-menu-divider" />
+                    <button className="db-avatar-menu-item db-avatar-menu-logout" onClick={() => { setMenuOpen(false); logout(); router.push("/login"); }}>
+                      <span className="db-avatar-menu-item-icon">🚪</span>
+                      Cerrar sesión
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -188,16 +227,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* ACCESOS RÁPIDOS */}
-        <div className="db-card db-quick-links">
-          <div className="db-card-header"><h3>Accesos Rápidos</h3></div>
-          <div className="db-quick-grid">
-            <a href="/products/add-product" className="db-quick-btn">➕ Nuevo Producto</a>
-            <a href="/sales/create" className="db-quick-btn">🧾 Nueva Venta</a>
-            <a href="/clients/create-client" className="db-quick-btn">👤 Nuevo Cliente</a>
-            <a href="/ecommerce/orders" className="db-quick-btn">🛒 Ver Órdenes</a>
-          </div>
-        </div>
       </main>
     </div>
   );
