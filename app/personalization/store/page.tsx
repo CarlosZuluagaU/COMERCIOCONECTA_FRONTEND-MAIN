@@ -411,7 +411,7 @@ export default function StoreCustomizerPage() {
                       <div className="cust-color-value">{cfg.colorBoton}</div>
                     </div>
                     <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                      {[[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#10b981","Verde"],["#7c3aed","Morado"],["#dc2626","Rojo"],["#000000","Negro"]].map(([c,l]) => (
+                      {([[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#10b981","Verde"],["#7c3aed","Morado"],["#dc2626","Rojo"],["#000000","Negro"]] as [string,string][]).map(([c,l]) => (
                         <div key={c} onClick={() => update({ colorBoton: c })}
                           style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
                             background:c, color: c==="#ffffff"?"#333":"#fff",
@@ -429,7 +429,7 @@ export default function StoreCustomizerPage() {
                       <div className="cust-color-value">{cfg.colorBotonCta}</div>
                     </div>
                     <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                      {[[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#10b981","Verde"],["#f59e0b","Amarillo"],["#7c3aed","Morado"],["#000000","Negro"]].map(([c,l]) => (
+                      {([[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#10b981","Verde"],["#f59e0b","Amarillo"],["#7c3aed","Morado"],["#000000","Negro"]] as [string,string][]).map(([c,l]) => (
                         <div key={c} onClick={() => update({ colorBotonCta: c })}
                           style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
                             background:c, color: c==="#ffffff"?"#333":"#fff",
@@ -450,7 +450,7 @@ export default function StoreCustomizerPage() {
                       <div className="cust-color-value">{cfg.colorBanner}</div>
                     </div>
                     <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                      {[[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#7c3aed","Morado"],["#b91c1c","Rojo"],["#065f46","Verde"],["#0f172a","Oscuro"]].map(([c,l]) => (
+                      {([[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#7c3aed","Morado"],["#b91c1c","Rojo"],["#065f46","Verde"],["#0f172a","Oscuro"]] as [string,string][]).map(([c,l]) => (
                         <div key={c} onClick={() => update({ colorBanner: c })}
                           style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
                             background:c, color:"#fff",
@@ -526,7 +526,7 @@ export default function StoreCustomizerPage() {
                       <div className="cust-color-value">{cfg.colorTextoBoton}</div>
                     </div>
                     <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
-                      {[["#ffffff","Blanco"],["#000000","Negro"],[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"]].map(([color,label]) => (
+                      {([["#ffffff","Blanco"],["#000000","Negro"],[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"]] as [string,string][]).map(([color,label]) => (
                         <div key={color} onClick={() => update({ colorTextoBoton: color })}
                           style={{ cursor: "pointer", padding: "5px 10px", borderRadius: 6, fontSize: ".72rem", fontWeight: 700,
                             background: color, color: color === "#ffffff" ? "#333" : "#fff",
