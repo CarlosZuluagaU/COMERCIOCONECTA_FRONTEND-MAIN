@@ -2,256 +2,199 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../../../dashboard/Sidebar";
 import "../../../dashboard/dashboard.css";
+import "../../../dashboard/admin.css";
+import "../../../products/product-list/product-list.css";
 import { useParams, useRouter } from "next/navigation";
 import { FiArrowLeft, FiCheckCircle } from "react-icons/fi";
-import "./Bill.css";
+
+function fmt(n: number) {
+  return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 0 }).format(n);
+}
 
 export default function FacturarVentaPage() {
-  const { id } = useParams() as { id: string };
-  const router = useRouter();
+  const { id }  = useParams() as { id: string };
+  const router  = useRouter();
 
-  const [venta, setVenta] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [venta, setVenta]         = useState<any>(null);
+  const [loading, setLoading]     = useState(true);
   const [facturando, setFacturando] = useState(false);
   const [respuesta, setRespuesta] = useState<any>(null);
-
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  // ============================
-  //   Cargar Venta
-  // ============================
   useEffect(() => {
-    const fetchVenta = async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}/ventas/${id}`);
-        if (!res.ok) throw new Error("Error obteniendo venta");
-
-        const data = await res.json();
-        setVenta(data);
-      } catch (error: any) {
-        alert(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchVenta();
+    fetch(`${API_BASE_URL}/ventas/${id}`)
+      .then(r => { if (!r.ok) throw new Error("Error obteniendo venta"); return r.json(); })
+      .then(setVenta)
+      .catch(e => alert(e.message))
+      .finally(() => setLoading(false));
   }, [id, API_BASE_URL]);
 
-  // ============================
-  //   Facturar venta
-  // ============================
   const facturar = async () => {
-    if (!confirm("¿Deseas facturar esta venta?")) return;
-
+    if (!confirm("¿Confirmas la facturación electrónica de esta venta?")) return;
     setFacturando(true);
-
     try {
-      const res = await fetch(`${API_BASE_URL}/ventas/${id}/facturar`, {
-        method: "POST"
-      });
-
-      // SIEMPRE leer como texto para evitar errores de parseo
+      const res  = await fetch(`${API_BASE_URL}/ventas/${id}/facturar`, { method: "POST" });
       const text = await res.text();
       let data: any = null;
-
-      // Intentar parsear la respuesta a JSON
-      try {
-        data = JSON.parse(text);
-      } catch (e) {
-        console.error("Respuesta no es JSON válido:", text);
-        alert("El servidor respondió con un formato no válido:\n" + text);
-        setFacturando(false);
+      try { data = JSON.parse(text); } catch {
+        alert("Respuesta inválida del servidor:\n" + text);
         return;
       }
-
-      // Si el backend devolvió error (pero bien formateado en JSON)
-      if (!res.ok) {
-        alert(data.message || "Error facturando");
-        setFacturando(false);
-        return;
-      }
-
-      // Éxito
+      if (!res.ok) { alert(data.message || "Error facturando"); return; }
       setRespuesta(data);
-      alert("Venta facturada correctamente");
-
-      setTimeout(() => router.push(`/ventas/${id}`), 1200);
-
-    } catch (error: any) {
-      alert("Error inesperado: " + error.message);
+      alert("✅ Venta facturada correctamente");
+      setTimeout(() => router.push("/sales"), 1200);
+    } catch (e: any) {
+      alert("Error inesperado: " + e.message);
     } finally {
       setFacturando(false);
     }
   };
 
-  if (loading)
+  if (loading) {
     return (
-      <div className="bill-loading">
-        <div className="bill-loading-spinner"></div>
-        <h3>Cargando venta...</h3>
+      <div className="dashboard-page">
+        <Sidebar activeMenu="Ventas" onMenuToggle={() => {}} />
+        <main className="dashboard-main">
+          <div style={{ padding: 60, textAlign: "center", color: "#aaa" }}>Cargando venta...</div>
+        </main>
       </div>
     );
+  }
 
-  if (!venta)
+  if (!venta) {
     return (
-      <div className="bill-error">
-        <h3>No se encontró la venta</h3>
+      <div className="dashboard-page">
+        <Sidebar activeMenu="Ventas" onMenuToggle={() => {}} />
+        <main className="dashboard-main">
+          <div style={{ padding: 60, textAlign: "center", color: "#aaa" }}>No se encontró la venta.</div>
+        </main>
       </div>
     );
+  }
 
-  // ======================================
-  //   Calcular subtotal e IVA dinámicamente
-  // ======================================
-  const subtotalCalculado = venta.items.reduce(
-    (acc: number, it: any) =>
-      acc + it.precioTotal / (1 + it.porcentajeIva / 100),
-    0
-  );
-
-  const ivaCalculado = venta.totalFactura - subtotalCalculado;
+  const subtotal = venta.items.reduce((acc: number, it: any) => acc + it.precioTotal / (1 + it.porcentajeIva / 100), 0);
+  const iva      = venta.totalFactura - subtotal;
 
   return (
-    <div className="dashboard-page bill-page">
+    <div className="dashboard-page">
       <Sidebar activeMenu="Ventas" onMenuToggle={() => {}} />
-
       <main className="dashboard-main">
-        {/* ================= HEADER ================= */}
-        <header className="dashboard-header bill-header">
-          <div className="header-content">
-            <div className="welcome-section">
-              <h1 className="welcome-title">
-                Facturar Venta #{venta.id}
-              </h1>
-              <p className="welcome-date">
-                Confirma antes de enviar la DIAN
-              </p>
-            </div>
 
-            <button
-              className="btn-secondary bill-btn-volver"
-              onClick={() => router.push(`/sales`)}
-            >
-              <FiArrowLeft /> Volver
-            </button>
-          </div>
+        {/* Header */}
+        <header className="pl-header">
+          <h1>🧾 Facturar Venta #{venta.id}</h1>
+          <button
+            className="pl-btn-add"
+            style={{ background: "white", color: "#1F3B4D", border: "1.5px solid #e0e0e0" }}
+            onClick={() => router.push("/sales")}
+          >
+            <FiArrowLeft /> Volver
+          </button>
         </header>
 
-        {/* ================= CONTENT ================= */}
-        <section className="content-section bill-content-section">
-          <div className="content-card bill-content-card">
-            {/* --------- INFO GENERAL --------- */}
-            <div className="card-header bill-card-header">
-              <h3>Resumen de Venta</h3>
+        <div className="adm-content">
+
+          {/* Info cliente + Totales */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+
+            <div className="pl-table-wrap" style={{ padding: "20px 24px" }}>
+              <div style={{ fontSize: ".74rem", fontWeight: 700, color: "#aaa", textTransform: "uppercase", letterSpacing: ".5px", marginBottom: 14, borderBottom: "2px solid #00d4aa", paddingBottom: 8 }}>
+                Datos del Cliente
+              </div>
+              {[
+                ["Cliente",   venta.nombreCliente],
+                ["Documento", venta.numeroDocumentoCliente],
+                ["Estado",    venta.estado],
+                ["ID Venta",  `#${venta.id}`],
+                ["Fecha",     new Date(venta.createdAt).toLocaleString("es-CO")],
+              ].map(([k, v]) => (
+                <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: "1px solid #f5f5f5", fontSize: ".87rem" }}>
+                  <span style={{ color: "#888", fontWeight: 600 }}>{k}</span>
+                  <span style={{ color: "#1F3B4D", fontWeight: 500 }}>{v}</span>
+                </div>
+              ))}
             </div>
 
-            <div className="grid-2 bill-grid-2">
-              <div className="info-box bill-info-box">
-                <h4>Datos del Cliente</h4>
-                <p>
-                  <b>Nombre:</b> {venta.nombreCliente}
-                </p>
-                <p>
-                  <b>Documento:</b> {venta.numeroDocumentoCliente}
-                </p>
+            <div className="pl-table-wrap" style={{ padding: "20px 24px" }}>
+              <div style={{ fontSize: ".74rem", fontWeight: 700, color: "#aaa", textTransform: "uppercase", letterSpacing: ".5px", marginBottom: 14, borderBottom: "2px solid #00d4aa", paddingBottom: 8 }}>
+                Totales
+              </div>
+              {[["Subtotal", fmt(subtotal)], ["IVA", fmt(iva)]].map(([k, v]) => (
+                <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: "1px solid #f5f5f5", fontSize: ".87rem" }}>
+                  <span style={{ color: "#888", fontWeight: 600 }}>{k}</span>
+                  <span style={{ color: "#1F3B4D" }}>{v}</span>
+                </div>
+              ))}
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0 0", fontSize: "1rem", fontWeight: 800 }}>
+                <span style={{ color: "#1F3B4D" }}>Total Factura</span>
+                <span style={{ color: "#00a88f" }}>{fmt(venta.totalFactura)}</span>
               </div>
 
-              <div className="info-box bill-totales">
-                <h4>Totales</h4>
-                <p>
-                  <b>Subtotal:</b> ${subtotalCalculado.toLocaleString()}
-                </p>
-                <p>
-                  <b>IVA:</b> ${ivaCalculado.toLocaleString()}
-                </p>
-                <p>
-                  <b>Total:</b> ${venta.totalFactura.toLocaleString()}
-                </p>
-              </div>
-            </div>
-
-            {/* --------- INFO EXTRA DEL JSON --------- */}
-            <div className="card-header bill-card-header">
-              <h3>Información Adicional</h3>
-            </div>
-
-            <div className="info-box bill-info-box">
-              <p>
-                <b>ID:</b> {venta.id}
-              </p>
-              <p>
-                <b>UUID:</b> {venta.uuid}
-              </p>
-              <p>
-                <b>Estado:</b> {venta.estado}
-              </p>
-              
-              <p>
-                <b>Fecha creación:</b>{" "}
-                {new Date(venta.createdAt).toLocaleString()}
-              </p>
-            </div>
-
-            {/* -------- ITEMS -------- */}
-            <div className="card-header bill-card-header">
-              <h3>Items</h3>
-            </div>
-
-            <div className="table-container bill-table-container">
-              <table className="data-table bill-data-table">
-                <thead>
-                  <tr>
-                    <th>Código</th>
-                    <th>Descripción</th>
-                    <th>Cant.</th>
-                    <th>V. Unitario</th>
-                    <th>IVA %</th>
-                    <th>Total</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {venta.items?.map((item: any, i: number) => {
-                    const valorUnitario = item.precioTotal / item.cantidad;
-
-                    return (
-                      <tr key={i}>
-                        <td>{item.codigoProducto}</td>
-                        <td>{item.nombre}</td>
-                        <td>{item.cantidad}</td>
-                        <td>${valorUnitario.toLocaleString()}</td>
-                        <td>{item.porcentajeIva}%</td>
-                        <td>${item.precioTotal.toLocaleString()}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {/* -------- BOTÓN -------- */}
-            <div className="bill-acciones">
+              {/* Botón facturar */}
               <button
-                className="bill-btn-facturar"
                 onClick={facturar}
                 disabled={facturando}
+                style={{
+                  marginTop: 20, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  width: "100%", padding: "13px",
+                  background: facturando ? "#ccc" : "linear-gradient(135deg,#00d4aa,#00a88f)",
+                  color: "white", border: "none", borderRadius: 10,
+                  fontSize: "1rem", fontWeight: 700, cursor: facturando ? "not-allowed" : "pointer",
+                  fontFamily: "inherit",
+                }}
               >
                 <FiCheckCircle />
-                {facturando ? "Facturando..." : "Facturar electrónicamente"}
+                {facturando ? "Facturando…" : "Facturar electrónicamente"}
               </button>
             </div>
-
-            {/* -------- RESPUESTA FACTUS -------- */}
-            {respuesta && (
-              <div className="bill-respuesta">
-                <h3>Respuesta de Factus</h3>
-                <pre>
-                  {JSON.stringify(respuesta, null, 2)}
-                </pre>
-              </div>
-            )}
           </div>
-        </section>
+
+          {/* Items */}
+          <div className="pl-table-wrap">
+            <div style={{ padding: "14px 18px", borderBottom: "1px solid #f5f5f5", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontWeight: 700, fontSize: ".9rem", color: "#1F3B4D" }}>Items de la Venta</span>
+              <span className="pl-badge pl-gray">{venta.items?.length || 0} items</span>
+            </div>
+            <table className="pl-table">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Descripción</th>
+                  <th>Cant.</th>
+                  <th>V. Unitario</th>
+                  <th>IVA %</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {venta.items?.map((item: any, i: number) => (
+                  <tr key={i}>
+                    <td>{item.codigoProducto}</td>
+                    <td>{item.nombre}</td>
+                    <td>{item.cantidad}</td>
+                    <td>{fmt(item.precioTotal / item.cantidad)}</td>
+                    <td>{item.porcentajeIva}%</td>
+                    <td><strong>{fmt(item.precioTotal)}</strong></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Respuesta Factus */}
+          {respuesta && (
+            <div className="pl-table-wrap" style={{ padding: "20px 24px" }}>
+              <div style={{ fontSize: ".74rem", fontWeight: 700, color: "#aaa", textTransform: "uppercase", letterSpacing: ".5px", marginBottom: 12, borderBottom: "2px solid #00d4aa", paddingBottom: 8 }}>
+                Respuesta de Factus
+              </div>
+              <pre style={{ fontSize: ".78rem", color: "#555", overflow: "auto", background: "#f7f8fa", padding: 12, borderRadius: 8 }}>
+                {JSON.stringify(respuesta, null, 2)}
+              </pre>
+            </div>
+          )}
+
+        </div>
       </main>
     </div>
   );

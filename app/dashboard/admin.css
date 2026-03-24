@@ -1,5 +1,8 @@
 /* ===== ADMIN PAGES SHARED STYLES ===== */
 
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.spin { animation: spin .8s linear infinite; }
+
 /* Page header */
 .adm-header {
   background: white;
@@ -361,6 +364,7 @@
 }
 
 /* Customer info cell */
+.adm-customer { display: flex; align-items: center; gap: 10px; }
 .adm-customer strong { display: block; font-size: .88rem; }
 .adm-customer span { font-size: .75rem; color: #888; display: block; margin-top: 1px; }
 

@@ -1,383 +1,173 @@
 "use client";
-import React from "react";
-import { useRouter } from "next/navigation";
-import { FiCheck, FiShoppingBag, FiTruck, FiMail, FiHome, FiDownload } from "react-icons/fi";
+import React, { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import "../store.css";
 
-interface Pedido {
-  id: string;
-  fecha: string;
-  estado: string;
+interface ConfirmedOrder {
+  orderId: number;
+  orderNumber: string;
+  customerName: string;
+  customerCity: string;
   total: number;
-  items: Array<{
-    producto: {
-      id: string;
-      nombre: string;
-      precio: number;
-      imagen: string;
-    };
-    cantidad: number;
-  }>;
-  envio: {
-    direccion: string;
-    ciudad: string;
-    codigoPostal: string;
-    metodo: string;
-    tiempoEstimado: string;
-  };
-  pago: {
-    metodo: string;
-    ultimosDigitos?: string;
-    email: string;
-  };
+}
+
+function formatPrecio(p: number) {
+  return new Intl.NumberFormat("es-CO", {
+    style: "currency", currency: "COP", minimumFractionDigits: 0,
+  }).format(p);
 }
 
 export default function OrderConfirmationPage() {
-  const router = useRouter();
+  const router       = useRouter();
+  const searchParams = useSearchParams();
+  const [order, setOrder]         = useState<ConfirmedOrder | null>(null);
+  const [loading, setLoading]     = useState(true);
+  const [countdown, setCountdown] = useState(5);
 
-  // Datos de ejemplo del pedido confirmado
-  const pedido: Pedido = {
-    id: "ORD-00125",
-    fecha: new Date().toISOString(),
-    estado: "Confirmado",
-    total: 156.80,
-    items: [
-      {
-        producto: {
-          id: "1",
-          nombre: "Crema Hidratante Nivea",
-          precio: 15.99,
-          imagen: "/api/placeholder/80/80"
-        },
-        cantidad: 2
-      },
-      {
-        producto: {
-          id: "2",
-          nombre: "Shampoo Head & Shoulders", 
-          precio: 22.50,
-          imagen: "/api/placeholder/80/80"
-        },
-        cantidad: 1
-      }
-    ],
-    envio: {
-      direccion: "Calle 123 #45-67",
-      ciudad: "Bogotá",
-      codigoPostal: "110111",
-      metodo: "Estándar",
-      tiempoEstimado: "3-5 días hábiles"
-    },
-    pago: {
-      metodo: "Tarjeta de Crédito",
-      ultimosDigitos: "3456",
-      email: "cliente@email.com"
-    }
-  };
+  const wompiStatus = (searchParams.get("status") || "").toUpperCase();
+  const isPaid   = wompiStatus === "APPROVED" || wompiStatus === "PAID";
+  const isFailed = wompiStatus === "DECLINED" || wompiStatus === "ERROR" || wompiStatus === "VOIDED";
 
-  const continuarComprando = () => {
-    router.push("/store");
-  };
+  const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
-  const verHistorial = () => {
-    router.push("/store/orders");
-  };
+  useEffect(() => {
+    const run = async () => {
+      try {
+        const raw = localStorage.getItem("pendingOrder");
+        if (!raw) { setLoading(false); return; }
+        const pending = JSON.parse(raw);
 
-  const descargarFactura = () => {
-    alert("Descargando factura...");
-    // En una app real, aquí se generaría el PDF
-  };
+        if (isPaid) {
+          // Pago aprobado → crear el pedido ahora
+          localStorage.removeItem("pendingOrder");
+          const res = await fetch(`${API}/checkout/confirm-order`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(pending),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setOrder({
+              orderId:      data.orderId,
+              orderNumber:  data.orderNumber,
+              customerName: pending.customerName,
+              customerCity: pending.customerCity,
+              total:        pending.totalInCents / 100,
+            });
+          }
+        } else if (isFailed) {
+          // Pago rechazado → NO crear pedido, solo limpiar
+          localStorage.removeItem("pendingOrder");
+        }
+        // Si wompiStatus está vacío (llegó sin parámetros), no hacer nada
+      } catch {}
+      finally { setLoading(false); }
+    };
+    run();
+  }, []);
 
-  return React.createElement(
-    "div",
-    { className: "store-page" },
+  // Cuenta regresiva y redirección automática si pago falló
+  useEffect(() => {
+    if (!isFailed) return;
+    if (countdown <= 0) { router.push("/store"); return; }
+    const t = setTimeout(() => setCountdown(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [isFailed, countdown, router]);
 
-    // Header
-    React.createElement(
-      "header",
-      { className: "store-header" },
-      React.createElement(
-        "div",
-        { className: "container" },
-        React.createElement(
-          "div",
-          { className: "header-content" },
-          React.createElement(
-            "div",
-            { className: "logo" },
-            React.createElement("h1", null, "ComerciosConecta"),
-            React.createElement("span", { className: "store-subtitle" }, "Confirmación de Pedido")
-          ),
-          React.createElement("div", { className: "header-actions" })
-        )
-      )
-    ),
+  if (loading) {
+    return (
+      <div className="store-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "#f4f6f8" }}>
+        <div style={{ textAlign: "center", color: "#888" }}>
+          <div style={{ fontSize: "2rem", marginBottom: 12 }}>⏳</div>
+          <p>Procesando tu pedido…</p>
+        </div>
+      </div>
+    );
+  }
 
-    // Contenido principal
-    React.createElement(
-      "div",
-      { className: "container" },
-      React.createElement(
-        "div",
-        { className: "confirmation-layout" },
-        
-        // Tarjeta de confirmación
-        React.createElement(
-          "div",
-          { className: "confirmation-card" },
-          React.createElement(
-            "div",
-            { className: "confirmation-header" },
-            React.createElement(
-              "div",
-              { className: "success-icon" },
-              React.createElement(FiCheck)
-            ),
-            React.createElement("h1", null, "¡Pedido Confirmado!"),
-            React.createElement("p", null, "Gracias por tu compra. Tu pedido ha sido procesado exitosamente."),
-            React.createElement(
-              "div",
-              { className: "order-number" },
-              React.createElement("strong", null, "Número de orden:"),
-              React.createElement("span", null, pedido.id)
-            )
-          ),
+  // Pago rechazado
+  if (isFailed) {
+    return (
+      <div className="store-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "#f4f6f8" }}>
+        <div className="co-panel" style={{ maxWidth: 420 }}>
+          <div className="co-body co-confirmation" style={{ textAlign: "center" }}>
+            <div style={{ fontSize: "3.5rem", marginBottom: 12 }}>❌</div>
+            <h2 style={{ fontSize: "1.3rem", fontWeight: 800, color: "#1F3B4D", marginBottom: 8 }}>
+              Pago rechazado
+            </h2>
+            <p style={{ color: "#888", fontSize: ".9rem", marginBottom: 20 }}>
+              Tu pago no fue procesado. No se creó ningún pedido y no se realizó ningún cobro.
+            </p>
+            <div style={{
+              background: "#fef2f2", border: "1px solid #fecaca",
+              borderRadius: 10, padding: "14px 18px", marginBottom: 20,
+            }}>
+              <div style={{ fontSize: ".78rem", color: "#dc2626", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".5px", marginBottom: 4 }}>
+                Motivo
+              </div>
+              <div style={{ fontSize: ".88rem", color: "#b91c1c" }}>
+                {wompiStatus === "DECLINED" ? "Pago declinado por el banco" :
+                 wompiStatus === "VOIDED"   ? "Transacción anulada" :
+                                              "Error en el procesamiento del pago"}
+              </div>
+            </div>
+            <p style={{ fontSize: ".82rem", color: "#aaa", marginBottom: 16 }}>
+              Volviendo a la tienda en <strong style={{ color: "#1F3B4D" }}>{countdown}s</strong>…
+            </p>
+            <button className="co-btn-primary" onClick={() => router.push("/store")}>
+              ← Volver a la tienda ahora
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-          // Resumen rápido
-          React.createElement(
-            "div",
-            { className: "quick-summary" },
-            React.createElement(
-              "div",
-              { className: "summary-item" },
-              React.createElement(FiShoppingBag),
-              React.createElement(
-                "div",
-                null,
-                React.createElement("span", null, "Total"),
-                React.createElement("strong", null, `$${pedido.total.toFixed(2)}`)
-              )
-            ),
-            React.createElement(
-              "div",
-              { className: "summary-item" },
-              React.createElement(FiTruck),
-              React.createElement(
-                "div",
-                null,
-                React.createElement("span", null, "Envío"),
-                React.createElement("strong", null, pedido.envio.tiempoEstimado)
-              )
-            ),
-            React.createElement(
-              "div",
-              { className: "summary-item" },
-              React.createElement(FiMail),
-              React.createElement(
-                "div",
-                null,
-                React.createElement("span", null, "Email"),
-                React.createElement("strong", null, pedido.pago.email)
-              )
-            )
-          )
-        ),
+  // Pago aprobado
+  return (
+    <div className="store-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "#f4f6f8" }}>
+      <div className="co-panel" style={{ maxWidth: 440 }}>
+        <div className="co-body co-confirmation">
+          <div className="co-confirm-icon">🎉</div>
+          <h2 className="co-confirm-title">¡Pedido confirmado!</h2>
+          <p className="co-confirm-sub">
+            Tu pago fue aprobado. Te contactaremos pronto para coordinar la entrega.
+          </p>
 
-        // Detalles del pedido
-        React.createElement(
-          "div",
-          { className: "order-details" },
-          React.createElement(
-            "div",
-            { className: "details-section" },
-            React.createElement("h2", null, "Detalles del Pedido"),
-            React.createElement(
-              "div",
-              { className: "order-items" },
-              pedido.items.map(item =>
-                React.createElement(
-                  "div",
-                  { key: item.producto.id, className: "order-item-confirm" },
-                  React.createElement("img", {
-                    src: item.producto.imagen,
-                    alt: item.producto.nombre
-                  }),
-                  React.createElement(
-                    "div",
-                    { className: "item-info-confirm" },
-                    React.createElement("h4", null, item.producto.nombre),
-                    React.createElement("span", null, `Cantidad: ${item.cantidad}`)
-                  ),
-                  React.createElement(
-                    "span",
-                    { className: "item-price-confirm" },
-                    `$${(item.producto.precio * item.cantidad).toFixed(2)}`
-                  )
-                )
-              )
-            )
-          ),
+          {order && (
+            <>
+              <div className="co-order-number">
+                <div className="co-order-label">Número de orden</div>
+                <div className="co-order-val">{order.orderNumber}</div>
+              </div>
+              <div className="co-order-details">
+                <div className="co-detail-row">
+                  <span>Cliente</span>
+                  <span>{order.customerName}</span>
+                </div>
+                {order.customerCity && (
+                  <div className="co-detail-row">
+                    <span>Ciudad</span>
+                    <span>{order.customerCity}</span>
+                  </div>
+                )}
+                <div className="co-detail-row">
+                  <span>Estado</span>
+                  <span style={{ color: "#10b981", fontWeight: 700 }}>✅ Pago aprobado</span>
+                </div>
+                <div className="co-detail-row co-detail-total">
+                  <span>Total</span>
+                  <span>{formatPrecio(order.total)}</span>
+                </div>
+              </div>
+            </>
+          )}
 
-          // Información de envío y pago
-          React.createElement(
-            "div",
-            { className: "info-grid" },
-            React.createElement(
-              "div",
-              { className: "info-card" },
-              React.createElement(
-                "div",
-                { className: "info-header" },
-                React.createElement(FiHome),
-                React.createElement("h3", null, "Dirección de Envío")
-              ),
-              React.createElement(
-                "div",
-                { className: "info-content" },
-                React.createElement("p", null, pedido.envio.direccion),
-                React.createElement("p", null, `${pedido.envio.ciudad}, ${pedido.envio.codigoPostal}`),
-                React.createElement("p", null, `Método: ${pedido.envio.metodo}`)
-              )
-            ),
-            React.createElement(
-              "div",
-              { className: "info-card" },
-              React.createElement(
-                "div",
-                { className: "info-header" },
-                React.createElement(FiShoppingBag),
-                React.createElement("h3", null, "Información de Pago")
-              ),
-              React.createElement(
-                "div",
-                { className: "info-content" },
-                React.createElement("p", null, pedido.pago.metodo),
-                pedido.pago.ultimosDigitos && React.createElement("p", null, `Terminada en: ${pedido.pago.ultimosDigitos}`),
-                React.createElement("p", null, `Email: ${pedido.pago.email}`),
-                React.createElement("p", null, `Total: $${pedido.total.toFixed(2)}`)
-              )
-            )
-          )
-        ),
-
-        // Siguientes pasos
-        React.createElement(
-          "div",
-          { className: "next-steps" },
-          React.createElement("h2", null, "¿Qué sigue?"),
-          React.createElement(
-            "div",
-            { className: "steps-timeline" },
-            React.createElement(
-              "div",
-              { className: "step active" },
-              React.createElement("div", { className: "step-number" }, "1"),
-              React.createElement(
-                "div",
-                { className: "step-content" },
-                React.createElement("strong", null, "Pedido Confirmado"),
-                React.createElement("span", null, "Hemos recibido tu pedido exitosamente")
-              )
-            ),
-            React.createElement(
-              "div",
-              { className: "step" },
-              React.createElement("div", { className: "step-number" }, "2"),
-              React.createElement(
-                "div",
-                { className: "step-content" },
-                React.createElement("strong", null, "Preparando Envío"),
-                React.createElement("span", null, "Estamos preparando tu pedido para el envío")
-              )
-            ),
-            React.createElement(
-              "div",
-              { className: "step" },
-              React.createElement("div", { className: "step-number" }, "3"),
-              React.createElement(
-                "div",
-                { className: "step-content" },
-                React.createElement("strong", null, "En Camino"),
-                React.createElement("span", null, "Tu pedido ha sido enviado")
-              )
-            ),
-            React.createElement(
-              "div",
-              { className: "step" },
-              React.createElement("div", { className: "step-number" }, "4"),
-              React.createElement(
-                "div",
-                { className: "step-content" },
-                React.createElement("strong", null, "Entregado"),
-                React.createElement("span", null, "¡Tu pedido ha llegado!")
-              )
-            )
-          )
-        ),
-
-        // Acciones
-        React.createElement(
-          "div",
-          { className: "confirmation-actions" },
-          React.createElement(
-            "button",
-            {
-              className: "btn-primary",
-              onClick: continuarComprando
-            },
-            "Seguir Comprando"
-          ),
-          React.createElement(
-            "button",
-            {
-              className: "btn-secondary",
-              onClick: verHistorial
-            },
-            "Ver Historial de Pedidos"
-          ),
-          React.createElement(
-            "button",
-            {
-              className: "btn-outline",
-              onClick: descargarFactura
-            },
-            React.createElement(FiDownload, { style: { marginRight: "8px" } }),
-            "Descargar Factura"
-          )
-        ),
-
-        // Información adicional
-        React.createElement(
-          "div",
-          { className: "additional-info" },
-          React.createElement("h3", null, "¿Necesitas ayuda?"),
-          React.createElement("p", null, 
-            "Si tienes alguna pregunta sobre tu pedido, no dudes en contactarnos:"
-          ),
-          React.createElement(
-            "div",
-            { className: "contact-options" },
-            React.createElement(
-              "div",
-              { className: "contact-option" },
-              React.createElement("strong", null, "Email:"),
-              React.createElement("span", null, "soporte@comerciosconecta.com")
-            ),
-            React.createElement(
-              "div",
-              { className: "contact-option" },
-              React.createElement("strong", null, "Teléfono:"),
-              React.createElement("span", null, "+57 1 234 5678")
-            ),
-            React.createElement(
-              "div",
-              { className: "contact-option" },
-              React.createElement("strong", null, "Horario:"),
-              React.createElement("span", null, "Lun-Vie: 8:00 AM - 6:00 PM")
-            )
-          )
-        )
-      )
-    )
+          <button className="co-btn-primary" onClick={() => router.push("/store")}>
+            ← Seguir comprando
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

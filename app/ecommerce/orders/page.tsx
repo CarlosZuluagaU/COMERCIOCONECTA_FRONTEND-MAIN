@@ -1,19 +1,16 @@
 "use client";
 import React, { useState, ChangeEvent, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
-import {
-  FiEye, FiSearch, FiShoppingBag, FiRefreshCw,
-  FiPackage, FiTruck, FiCheckCircle,
-} from "react-icons/fi";
+import { FiShoppingBag, FiRefreshCw, FiX, FiTruck, FiEye } from "react-icons/fi";
 import Sidebar from "../../dashboard/Sidebar";
 import "../../dashboard/dashboard.css";
 import "../../dashboard/admin.css";
+import "../../products/product-list/product-list.css";
 
 interface OrdenItem {
   productoId: number;
   nombre: string;
   cantidad: number;
-  priceInCents: number;
   priceInPesos: number;
   subtotalInCents: number;
 }
@@ -41,11 +38,9 @@ interface OrdenDisplay {
   email: string;
   telefono: string;
   fecha: string;
-  fechaCompleta: string;
   total: number;
   estado: string;
   items: number;
-  metodoPago: string;
   productos: OrdenItem[];
 }
 
@@ -62,13 +57,19 @@ const mapEstado = (s: string): string => {
   }
 };
 
-const estadoConfig: Record<string, { cls: string; icon: React.ReactNode; label: string }> = {
-  Pendiente:  { cls: "adm-badge adm-purple", icon: <FiPackage />,      label: "📄 PENDIENTE" },
-  Pagada:     { cls: "adm-badge adm-green",  icon: <FiCheckCircle />,  label: "✅ PAGADA" },
-  Enviada:    { cls: "adm-badge adm-blue",   icon: <FiTruck />,        label: "🚚 ENVIADA" },
-  Entregada:  { cls: "adm-badge adm-green",  icon: <FiCheckCircle />,  label: "✅ ENTREGADA" },
-  Cancelada:  { cls: "adm-badge adm-red",    icon: <FiPackage />,      label: "✕ CANCELADA" },
+const estadoBadge: Record<string, string> = {
+  Pendiente: "pl-badge pl-gray",
+  Pagada:    "pl-badge pl-green",
+  Enviada:   "pl-badge pl-yellow",
+  Entregada: "pl-badge pl-green",
+  Cancelada: "pl-badge pl-red",
 };
+
+const PAGE_SIZE = 10;
+
+function formatPesos(n: number) {
+  return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 0 }).format(n);
+}
 
 export default function OrdenesEcommercePage() {
   const { user } = useAuth();
@@ -79,6 +80,10 @@ export default function OrdenesEcommercePage() {
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [enviando, setEnviando]     = useState<number | null>(null);
+  const [pagina, setPagina]         = useState(1);
+  const [detalle, setDetalle]       = useState<OrdenDisplay | null>(null);
+  const [cambiandoEstado, setCambiandoEstado] = useState(false);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
@@ -97,12 +102,13 @@ export default function OrdenesEcommercePage() {
           cliente: o.customerName,
           email: o.customerEmail,
           telefono: o.customerPhone,
-          fecha: new Date(o.createdAt).toLocaleDateString("es-CO"),
-          fechaCompleta: o.createdAt,
+          fecha: new Date(o.createdAt).toLocaleString("es-CO", {
+            day: "2-digit", month: "2-digit", year: "numeric",
+            hour: "2-digit", minute: "2-digit",
+          }),
           total: o.totalInPesos,
           estado: mapEstado(o.status),
           items: o.itemsCount,
-          metodoPago: o.status === "PAID" ? "Wompi" : "Wompi",
           productos: o.items || [],
         }))
       );
@@ -126,9 +132,41 @@ export default function OrdenesEcommercePage() {
     return matchQ && matchE;
   });
 
-  const verDetalle = (o: OrdenDisplay) => {
-    const txt = `Orden: ${o.id}\nCliente: ${o.cliente}\nEmail: ${o.email}\nTotal: $${o.total.toLocaleString("es-CO")}\nEstado: ${o.estado}\nItems: ${o.items}\n\nProductos:\n${o.productos.map((p) => `  • ${p.cantidad}x ${p.nombre}`).join("\n")}`;
-    alert(txt);
+  const totalPaginas = Math.max(1, Math.ceil(ordenesFiltradas.length / PAGE_SIZE));
+  const paginaActual = Math.min(pagina, totalPaginas);
+  const paginadas    = ordenesFiltradas.slice((paginaActual - 1) * PAGE_SIZE, paginaActual * PAGE_SIZE);
+
+  const cambiarEstado = async (o: OrdenDisplay, nuevoStatus: string) => {
+    setCambiandoEstado(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/checkout/orders/${o.orderId}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nuevoStatus }),
+      });
+      if (!res.ok) throw new Error(`Error ${res.status}`);
+      setDetalle(null);
+      await fetchOrdenes();
+    } catch (e: any) {
+      alert("Error al cambiar estado: " + (e.message || "intenta de nuevo"));
+    } finally {
+      setCambiandoEstado(false);
+    }
+  };
+
+  const enviarPedido = async (o: OrdenDisplay) => {
+    if (!confirm(`¿Confirmas el envío de ${o.id}?\nEsto registrará la venta en facturación.`)) return;
+    setEnviando(o.orderId);
+    try {
+      const res = await fetch(`${API_BASE_URL}/checkout/orders/${o.orderId}/ship`, { method: "PUT" });
+      if (!res.ok) throw new Error(`Error ${res.status}`);
+      setDetalle(null);
+      await fetchOrdenes();
+    } catch (e: any) {
+      alert("Error al enviar: " + (e.message || "intenta de nuevo"));
+    } finally {
+      setEnviando(null);
+    }
   };
 
   if (loading && !refreshing) {
@@ -136,7 +174,7 @@ export default function OrdenesEcommercePage() {
       <div className="dashboard-page">
         <Sidebar activeMenu={activeMenu} onMenuToggle={setActiveMenu} />
         <main className="dashboard-main">
-          <div className="adm-loading">Cargando órdenes...</div>
+          <div style={{ padding: 60, textAlign: "center", color: "#aaa" }}>Cargando órdenes...</div>
         </main>
       </div>
     );
@@ -147,150 +185,316 @@ export default function OrdenesEcommercePage() {
       <Sidebar activeMenu={activeMenu} onMenuToggle={setActiveMenu} />
       <main className="dashboard-main">
 
-        {/* Header */}
-        <header className="adm-header">
-          <div>
-            <h1>🛍️ Órdenes E-commerce</h1>
-            <p className="adm-header-sub">Gestión de pedidos de la tienda online</p>
+        {/* ── FLOATING DETAIL PANEL ── */}
+        {detalle && (
+          <div
+            onClick={() => setDetalle(null)}
+            style={{
+              position: "fixed", inset: 0, background: "rgba(0,0,0,.45)",
+              zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+          >
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                background: "white", borderRadius: 16, width: "100%", maxWidth: 420,
+                boxShadow: "0 20px 60px rgba(0,0,0,.25)", overflow: "hidden",
+              }}
+            >
+              {/* Panel header */}
+              <div style={{
+                background: "#1F3B4D", color: "white",
+                padding: "18px 22px", display: "flex", alignItems: "center", justifyContent: "space-between",
+              }}>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: "1rem" }}>{detalle.id}</div>
+                  <div style={{ fontSize: ".75rem", opacity: .7, marginTop: 2 }}>{detalle.fecha}</div>
+                </div>
+                <button
+                  onClick={() => setDetalle(null)}
+                  style={{
+                    background: "rgba(255,255,255,.15)", border: "none", borderRadius: 8,
+                    color: "white", padding: "6px 10px", cursor: "pointer", display: "flex", alignItems: "center",
+                  }}
+                >
+                  <FiX size={18} />
+                </button>
+              </div>
+
+              {/* Panel body */}
+              <div style={{ padding: "20px 22px" }}>
+
+                {/* Cliente */}
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 12,
+                  background: "#f7f8fa", borderRadius: 10, padding: "12px 14px", marginBottom: 16,
+                }}>
+                  <div style={{
+                    width: 42, height: 42, borderRadius: "50%",
+                    background: "linear-gradient(135deg,#00d4aa,#00a88f)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: "white", fontWeight: 800, fontSize: "1.1rem", flexShrink: 0,
+                  }}>
+                    {(detalle.cliente || "?").charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <strong style={{ display: "block", fontSize: ".9rem", color: "#1F3B4D" }}>{detalle.cliente}</strong>
+                    <span style={{ fontSize: ".78rem", color: "#888" }}>{detalle.email}</span>
+                    {detalle.telefono && (
+                      <span style={{ fontSize: ".78rem", color: "#888", display: "block" }}>{detalle.telefono}</span>
+                    )}
+                  </div>
+                  <span
+                    className={estadoBadge[detalle.estado] || "pl-badge pl-gray"}
+                    style={{ marginLeft: "auto" }}
+                  >
+                    {detalle.estado}
+                  </span>
+                </div>
+
+                {/* Productos */}
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: ".74rem", fontWeight: 700, color: "#aaa", textTransform: "uppercase", letterSpacing: ".5px", marginBottom: 8 }}>
+                    Productos ({detalle.items})
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {detalle.productos.map((p, i) => (
+                      <div key={i} style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        padding: "8px 12px", background: "#f7f8fa", borderRadius: 8,
+                      }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <div style={{
+                            width: 28, height: 28, background: "#e0f2fe", borderRadius: 6,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            fontSize: ".75rem", fontWeight: 700, color: "#0369a1",
+                          }}>
+                            {p.cantidad}x
+                          </div>
+                          <span style={{ fontSize: ".86rem", color: "#333" }}>{p.nombre}</span>
+                        </div>
+                        <strong style={{ fontSize: ".86rem", color: "#1F3B4D" }}>
+                          {formatPesos(p.priceInPesos * p.cantidad)}
+                        </strong>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Total */}
+                <div style={{
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  borderTop: "2px solid #00d4aa", paddingTop: 12, marginBottom: 16,
+                }}>
+                  <span style={{ fontWeight: 700, color: "#1F3B4D" }}>Total</span>
+                  <strong style={{ fontSize: "1.15rem", color: "#00a88f" }}>{formatPesos(detalle.total)}</strong>
+                </div>
+
+                {/* Acciones manuales */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 10 }}>
+                  {detalle.estado === "Pendiente" && (
+                    <button
+                      onClick={() => cambiarEstado(detalle, "PAID")}
+                      disabled={cambiandoEstado}
+                      style={{
+                        display: "block", width: "100%", padding: "9px",
+                        background: "#d1fae5", color: "#065f46",
+                        border: "1.5px solid #6ee7b7", borderRadius: 8,
+                        fontSize: ".85rem", fontWeight: 600, cursor: "pointer",
+                        fontFamily: "inherit",
+                      }}
+                    >
+                      {cambiandoEstado ? "Actualizando…" : "✅ Marcar como Pagada"}
+                    </button>
+                  )}
+                  {detalle.estado !== "Cancelada" && detalle.estado !== "Enviada" && detalle.estado !== "Entregada" && (
+                    <button
+                      onClick={() => { if (confirm(`¿Cancelar la orden ${detalle.id}?`)) cambiarEstado(detalle, "FAILED"); }}
+                      disabled={cambiandoEstado}
+                      style={{
+                        display: "block", width: "100%", padding: "9px",
+                        background: "white", color: "#dc2626",
+                        border: "1.5px solid #fecaca", borderRadius: 8,
+                        fontSize: ".85rem", fontWeight: 600, cursor: "pointer",
+                        fontFamily: "inherit",
+                      }}
+                    >
+                      {cambiandoEstado ? "Cancelando…" : "✕ Cancelar orden"}
+                    </button>
+                  )}
+                </div>
+
+                {/* Actions */}
+                {detalle.estado === "Pagada" ? (
+                  <button
+                    onClick={() => enviarPedido(detalle)}
+                    disabled={enviando === detalle.orderId}
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                      width: "100%", padding: "13px", background: "linear-gradient(135deg,#00d4aa,#00a88f)",
+                      color: "white", border: "none", borderRadius: 10,
+                      fontSize: "1rem", fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+                    }}
+                  >
+                    <FiTruck />
+                    {enviando === detalle.orderId ? "Enviando…" : "Enviar Pedido"}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setDetalle(null)}
+                    style={{
+                      display: "block", width: "100%", padding: "11px",
+                      background: "white", color: "#1F3B4D", border: "1.5px solid #e0e0e0",
+                      borderRadius: 10, fontSize: ".9rem", fontWeight: 600,
+                      cursor: "pointer", fontFamily: "inherit",
+                    }}
+                  >
+                    Cerrar
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
+        )}
+
+        {/* ── HEADER ── */}
+        <header className="pl-header">
+          <h1>🛍️ Pedidos</h1>
           <button
-            className="adm-btn-secondary"
+            className="pl-btn-add"
             onClick={fetchOrdenes}
             disabled={refreshing}
+            style={{ background: refreshing ? "#ccc" : undefined }}
           >
-            <FiRefreshCw className={refreshing ? "spin" : ""} />
+            <FiRefreshCw className={refreshing ? "spin" : ""} style={{ marginTop: 1 }} />
             {refreshing ? "Actualizando…" : "Actualizar"}
           </button>
         </header>
 
         <div className="adm-content">
 
-          {/* Error */}
           {error && (
             <div style={{
               padding: "12px 16px", background: "#fef2f2", border: "1px solid #fecaca",
               borderRadius: 8, color: "#dc2626", display: "flex", alignItems: "center", gap: 8,
             }}>
-              <FiPackage />
               <span>{error}</span>
-              <button
-                onClick={fetchOrdenes}
-                style={{ marginLeft: "auto", padding: "4px 12px", background: "#dc2626", color: "white", border: "none", borderRadius: 4, cursor: "pointer" }}
-              >
+              <button onClick={fetchOrdenes} style={{
+                marginLeft: "auto", padding: "4px 12px", background: "#dc2626",
+                color: "white", border: "none", borderRadius: 4, cursor: "pointer",
+              }}>
                 Reintentar
               </button>
             </div>
           )}
 
-          {/* Stats */}
-          <div className="adm-stats-4">
-            <div className="adm-stat" style={{ "--sc": "#8b5cf6" } as React.CSSProperties}>
-              <h4>Total Órdenes</h4>
-              <div className="adm-val">{ordenes.length}</div>
-            </div>
-            <div className="adm-stat" style={{ "--sc": "#10b981" } as React.CSSProperties}>
-              <h4>Pagadas</h4>
-              <div className="adm-val">{ordenes.filter((o) => o.estado === "Pagada").length}</div>
-            </div>
-            <div className="adm-stat" style={{ "--sc": "#3b82f6" } as React.CSSProperties}>
-              <h4>Enviadas</h4>
-              <div className="adm-val">{ordenes.filter((o) => o.estado === "Enviada").length}</div>
-            </div>
-            <div className="adm-stat" style={{ "--sc": "#f59e0b" } as React.CSSProperties}>
-              <h4>Pendientes</h4>
-              <div className="adm-val">{ordenes.filter((o) => o.estado === "Pendiente").length}</div>
-            </div>
-          </div>
-
           {/* Filters */}
-          <div className="adm-filters">
-            <div className="adm-search">
-              <FiSearch color="#aaa" />
+          <div className="pl-toolbar">
+            <div className="pl-search-wrap">
+              <span>🔍</span>
               <input
+                className="pl-search-input"
                 placeholder="Buscar por ID, cliente, email…"
                 value={busqueda}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => setBusqueda(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => { setBusqueda(e.target.value); setPagina(1); }}
               />
             </div>
-            <select
-              className="adm-fsel"
-              value={filtroEstado}
-              onChange={(e) => setFiltroEstado(e.target.value)}
-            >
+            <select className="pl-sel" value={filtroEstado}
+              onChange={e => { setFiltroEstado(e.target.value); setPagina(1); }}>
               <option value="">Todos los estados</option>
-              <option value="Pagada">PAID – Pagada</option>
-              <option value="Pendiente">CREATED – Pendiente</option>
-              <option value="Enviada">SHIPPED – Enviada</option>
-              <option value="Cancelada">CANCELLED – Cancelada</option>
+              <option value="Pagada">Pagada</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Enviada">Enviada</option>
+              <option value="Cancelada">Cancelada</option>
             </select>
-            <input type="date" className="adm-date" />
           </div>
 
           {/* Table */}
-          <div className="adm-card">
+          <div className="pl-table-wrap">
             {ordenesFiltradas.length > 0 ? (
               <>
-                <table className="adm-table">
+                <table className="pl-table">
                   <thead>
                     <tr>
-                      <th>Orden ID</th>
+                      <th>Orden</th>
                       <th>Cliente</th>
                       <th>Fecha</th>
                       <th>Items</th>
                       <th>Total</th>
                       <th>Estado</th>
-                      <th>Método Pago</th>
                       <th>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {ordenesFiltradas.map((o) => {
-                      const cfg = estadoConfig[o.estado] || estadoConfig["Pendiente"];
-                      return (
-                        <tr key={o.id}>
-                          <td><strong>{o.id}</strong></td>
-                          <td>
-                            <div className="adm-customer">
-                              <strong>{o.cliente}</strong>
-                              <span>{o.email}</span>
+                    {paginadas.map((o) => (
+                      <tr key={o.id}>
+                        <td><strong>{o.id}</strong></td>
+                        <td>
+                          <div className="pl-product-cell">
+                            <div className="pl-thumb-empty" style={{ fontSize: ".85rem", fontWeight: 700 }}>
+                              {(o.cliente || "?").charAt(0).toUpperCase()}
                             </div>
-                          </td>
-                          <td>{o.fecha}</td>
-                          <td>{o.items} items</td>
-                          <td><strong>${o.total.toLocaleString("es-CO")}</strong></td>
-                          <td><span className={cfg.cls}>{cfg.label}</span></td>
-                          <td>{o.metodoPago}</td>
-                          <td>
-                            <div className="adm-actions">
-                              <button className="adm-ibtn adm-ibtn-view" onClick={() => verDetalle(o)}>
-                                <FiEye /> Ver
+                            <div>
+                              <strong style={{ display: "block", fontSize: ".88rem" }}>{o.cliente}</strong>
+                              <span style={{ fontSize: ".75rem", color: "#888" }}>{o.email}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ fontSize: ".84rem" }}>{o.fecha}</td>
+                        <td>{o.items} items</td>
+                        <td><strong>{formatPesos(o.total)}</strong></td>
+                        <td>
+                          <span className={estadoBadge[o.estado] || "pl-badge pl-gray"}>
+                            {o.estado}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="pl-actions">
+                            <button
+                              className="pl-act-btn pl-act-edit"
+                              onClick={() => setDetalle(o)}
+                              style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
+                            >
+                              <FiEye size={13} /> Ver
+                            </button>
+                            {(o.estado === "Pagada" || o.estado === "Pendiente") && (
+                              <button
+                                className="pl-act-btn"
+                                style={{ background: "#d1fae5", color: "#065f46", display: "inline-flex", alignItems: "center", gap: 4 }}
+                                onClick={() => enviarPedido(o)}
+                                disabled={enviando === o.orderId}
+                              >
+                                <FiTruck size={13} />
+                                {enviando === o.orderId ? "Enviando…" : "Enviar"}
                               </button>
-                              {o.estado === "Pagada" && (
-                                <button className="adm-ibtn adm-ibtn-ok">
-                                  <FiTruck /> Enviar
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
-                <div className="adm-pagination">
-                  <span>Mostrando {ordenesFiltradas.length} de {ordenes.length} órdenes</span>
-                  <div className="adm-page-btns">
-                    <button disabled>‹</button>
-                    <button className="active">1</button>
-                    <button disabled>›</button>
+                <div className="pl-pagination">
+                  <span>Mostrando {paginadas.length} de {ordenesFiltradas.length} órdenes</span>
+                  <div className="pl-page-btns">
+                    <button disabled={paginaActual === 1} onClick={() => setPagina(p => p - 1)}>‹</button>
+                    {Array.from({ length: totalPaginas }, (_, i) => (
+                      <button key={i + 1} className={paginaActual === i + 1 ? "active" : ""}
+                        onClick={() => setPagina(i + 1)}>{i + 1}</button>
+                    ))}
+                    <button disabled={paginaActual === totalPaginas} onClick={() => setPagina(p => p + 1)}>›</button>
                   </div>
                 </div>
               </>
             ) : (
-              <div className="adm-empty">
+              <div style={{ padding: "40px 20px", textAlign: "center", color: "#aaa" }}>
                 <FiShoppingBag size={48} />
-                <p>{error ? "Error al cargar órdenes" : "No se encontraron órdenes"}</p>
-                <span>{error || "No hay órdenes que coincidan con los filtros aplicados"}</span>
+                <p style={{ marginTop: 12, fontSize: ".95rem", color: "#555" }}>
+                  {error ? "Error al cargar órdenes" : "No se encontraron órdenes"}
+                </p>
+                <span style={{ fontSize: ".82rem" }}>
+                  {error || "No hay órdenes que coincidan con los filtros"}
+                </span>
               </div>
             )}
           </div>
