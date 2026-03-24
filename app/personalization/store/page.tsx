@@ -72,6 +72,9 @@ interface Config {
   colorTexto: string;
   colorTextoSecundario: string;
   colorTextoBoton: string;
+  colorBoton: string;
+  colorBotonCta: string;
+  colorBanner: string;
   fontFamily: string;
   buttonRadius: string;
   cardRadius: string;
@@ -98,6 +101,9 @@ const DEFAULT_CFG: Config = {
   colorTexto:           "#1F3B4D",
   colorTextoSecundario: "#666666",
   colorTextoBoton:      "#ffffff",
+  colorBoton:           "#1F3B4D",
+  colorBotonCta:        "#00d4aa",
+  colorBanner:          "#1F3B4D",
   fontFamily:           "'Segoe UI', system-ui, sans-serif",
   buttonRadius:         "50px",
   cardRadius:           "12px",
@@ -183,6 +189,9 @@ export default function StoreCustomizerPage() {
           colorTexto:           data.colorTexto           || DEFAULT_CFG.colorTexto,
           colorTextoSecundario: data.colorTextoSecundario || DEFAULT_CFG.colorTextoSecundario,
           colorTextoBoton:      data.colorTextoBoton      || DEFAULT_CFG.colorTextoBoton,
+          colorBoton:           data.colorBoton           || DEFAULT_CFG.colorBoton,
+          colorBotonCta:        data.colorBotonCta        || DEFAULT_CFG.colorBotonCta,
+          colorBanner:          data.colorBanner          || DEFAULT_CFG.colorBanner,
           fontFamily:           data.fontFamily           || DEFAULT_CFG.fontFamily,
           buttonRadius:         data.buttonRadius         || DEFAULT_CFG.buttonRadius,
           cardRadius:           data.cardRadius           || DEFAULT_CFG.cardRadius,
@@ -252,6 +261,9 @@ export default function StoreCustomizerPage() {
     "--sp-texto":        cfg.colorTexto,
     "--sp-texto-sec":    cfg.colorTextoSecundario,
     "--sp-texto-btn":    cfg.colorTextoBoton,
+    "--sp-btn":          cfg.colorBoton,
+    "--sp-btn-cta":      cfg.colorBotonCta,
+    "--sp-banner":       cfg.colorBanner,
     fontFamily:          cfg.fontFamily,
   } as React.CSSProperties;
 
@@ -381,9 +393,77 @@ export default function StoreCustomizerPage() {
                           className={`cust-palette-color${cfg.colorPrimario === pal.p ? " selected" : ""}`}
                           style={{ background: pal.p }}
                           title={pal.p}
-                          onClick={() => update({ colorPrimario: pal.p, colorAcento: pal.a })}
+                          onClick={() => update({ colorPrimario: pal.p, colorAcento: pal.a, colorBoton: pal.p, colorBotonCta: pal.a, colorBanner: pal.p })}
                         />
                       ))}
+                    </div>
+                  </div>
+                </Section>
+
+                <Section icon="🔘" bg="#d1fae5" title="Colores de Botones" subtitle="Color de fondo de cada tipo de botón">
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Botón "Agregar al carrito" <span className="cust-ctrl-hint">(tarjetas de producto)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorBoton}
+                        onChange={e => update({ colorBoton: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorBoton}</div>
+                    </div>
+                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {[[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#10b981","Verde"],["#7c3aed","Morado"],["#dc2626","Rojo"],["#000000","Negro"]].map(([c,l]) => (
+                        <div key={c} onClick={() => update({ colorBoton: c })}
+                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                            background:c, color: c==="#ffffff"?"#333":"#fff",
+                            border: cfg.colorBoton===c?"2px solid #333":"2px solid transparent" }}>{l}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Botón CTA <span className="cust-ctrl-hint">(Explorar, Pagar, Confirmar)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorBotonCta}
+                        onChange={e => update({ colorBotonCta: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorBotonCta}</div>
+                    </div>
+                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {[[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#10b981","Verde"],["#f59e0b","Amarillo"],["#7c3aed","Morado"],["#000000","Negro"]].map(([c,l]) => (
+                        <div key={c} onClick={() => update({ colorBotonCta: c })}
+                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                            background:c, color: c==="#ffffff"?"#333":"#fff",
+                            border: cfg.colorBotonCta===c?"2px solid #333":"2px solid transparent" }}>{l}</div>
+                      ))}
+                    </div>
+                  </div>
+                </Section>
+
+                <Section icon="🖼" bg="#fce7f3" title="Color del Banner" subtitle="Fondo del hero / portada de la tienda">
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Color del banner <span className="cust-ctrl-hint">(sección principal de la tienda)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorBanner}
+                        onChange={e => update({ colorBanner: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorBanner}</div>
+                    </div>
+                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {[[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#7c3aed","Morado"],["#b91c1c","Rojo"],["#065f46","Verde"],["#0f172a","Oscuro"]].map(([c,l]) => (
+                        <div key={c} onClick={() => update({ colorBanner: c })}
+                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                            background:c, color:"#fff",
+                            border: cfg.colorBanner===c?"2px solid #333":"2px solid transparent" }}>{l}</div>
+                      ))}
+                    </div>
+                    <div style={{
+                      marginTop: 10, borderRadius: 8, height: 40,
+                      background: `linear-gradient(135deg, ${cfg.colorBanner} 0%, ${cfg.colorBanner} 60%, ${cfg.colorBotonCta} 100%)`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: ".75rem", fontWeight: 700, color: "white",
+                    }}>
+                      Vista previa del banner
                     </div>
                   </div>
                 </Section>
