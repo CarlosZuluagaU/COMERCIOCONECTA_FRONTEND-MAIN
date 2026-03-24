@@ -84,6 +84,8 @@ export default function OrdenesEcommercePage() {
   const [pagina, setPagina]         = useState(1);
   const [detalle, setDetalle]       = useState<OrdenDisplay | null>(null);
   const [cambiandoEstado, setCambiandoEstado] = useState(false);
+  const [lowStock, setLowStock]     = useState<{nombre:string; stock:number; stockMinimo:number; proveedor:string}[]>([]);
+  const [showLowStock, setShowLowStock] = useState(false);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
@@ -120,7 +122,22 @@ export default function OrdenesEcommercePage() {
     }
   };
 
-  useEffect(() => { fetchOrdenes(); }, []);
+  const fetchLowStock = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/productos/low-stock`);
+      if (res.ok) {
+        const data = await res.json();
+        setLowStock(data.map((p: any) => ({
+          nombre: p.nombre,
+          stock: p.stock,
+          stockMinimo: p.stockMinimo,
+          proveedor: p.proveedor || "Sin proveedor",
+        })));
+      }
+    } catch {}
+  };
+
+  useEffect(() => { fetchOrdenes(); fetchLowStock(); }, []);
 
   const ordenesFiltradas = ordenes.filter((o) => {
     const q = busqueda.toLowerCase();
@@ -184,6 +201,50 @@ export default function OrdenesEcommercePage() {
     <div className="dashboard-page">
       <Sidebar activeMenu={activeMenu} onMenuToggle={setActiveMenu} />
       <main className="dashboard-main">
+
+        {/* ── ALERTA STOCK BAJO ── */}
+        {lowStock.length > 0 && (
+          <div style={{
+            background: "#fff7ed", border: "1px solid #fed7aa", borderRadius: 10,
+            padding: "12px 18px", marginBottom: 16, display: "flex",
+            alignItems: "flex-start", gap: 12,
+          }}>
+            <span style={{ fontSize: "1.3rem", marginTop: 1 }}>⚠️</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700, color: "#c2410c", fontSize: ".92rem" }}>
+                {lowStock.length} producto{lowStock.length > 1 ? "s" : ""} con stock bajo — debes pedir a tu proveedor
+              </div>
+              {showLowStock && (
+                <table style={{ width: "100%", marginTop: 10, fontSize: ".82rem", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr style={{ color: "#9a3412", textAlign: "left" }}>
+                      <th style={{ paddingBottom: 4, paddingRight: 16 }}>Producto</th>
+                      <th style={{ paddingBottom: 4, paddingRight: 16 }}>Stock actual</th>
+                      <th style={{ paddingBottom: 4, paddingRight: 16 }}>Stock mínimo</th>
+                      <th style={{ paddingBottom: 4 }}>Proveedor</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {lowStock.map((p, i) => (
+                      <tr key={i} style={{ borderTop: "1px solid #fed7aa" }}>
+                        <td style={{ padding: "4px 16px 4px 0", color: "#1F3B4D", fontWeight: 600 }}>{p.nombre}</td>
+                        <td style={{ padding: "4px 16px 4px 0", color: "#dc2626", fontWeight: 700 }}>{p.stock}</td>
+                        <td style={{ padding: "4px 16px 4px 0", color: "#666" }}>{p.stockMinimo}</td>
+                        <td style={{ padding: "4px 0", color: "#666" }}>{p.proveedor}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+            <button
+              onClick={() => setShowLowStock(v => !v)}
+              style={{ background: "none", border: "none", cursor: "pointer", color: "#c2410c", fontSize: ".82rem", fontWeight: 600, whiteSpace: "nowrap" }}
+            >
+              {showLowStock ? "Ocultar" : "Ver detalle"}
+            </button>
+          </div>
+        )}
 
         {/* ── FLOATING DETAIL PANEL ── */}
         {detalle && (

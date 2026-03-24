@@ -6,6 +6,7 @@ import "../store.css";
 interface ConfirmedOrder {
   orderId: number;
   orderNumber: string;
+  wompiRef: string;
   customerName: string;
   customerCity: string;
   total: number;
@@ -24,7 +25,8 @@ export default function OrderConfirmationPage() {
   const [loading, setLoading]     = useState(true);
   const [countdown, setCountdown] = useState(5);
 
-  const wompiStatus = (searchParams.get("status") || "").toUpperCase();
+  const wompiStatus   = (searchParams.get("status") || "").toUpperCase();
+  const wompiId       = searchParams.get("id") || "";
   const isPaid   = wompiStatus === "APPROVED" || wompiStatus === "PAID";
   const isFailed = wompiStatus === "DECLINED" || wompiStatus === "ERROR" || wompiStatus === "VOIDED";
 
@@ -50,6 +52,7 @@ export default function OrderConfirmationPage() {
             setOrder({
               orderId:      data.orderId,
               orderNumber:  data.orderNumber,
+              wompiRef:     wompiId,
               customerName: pending.customerName,
               customerCity: pending.customerCity,
               total:        pending.totalInCents / 100,
@@ -140,6 +143,12 @@ export default function OrderConfirmationPage() {
                 <div className="co-order-label">Número de orden</div>
                 <div className="co-order-val">{order.orderNumber}</div>
               </div>
+              {order.wompiRef && (
+                <div className="co-order-number" style={{ marginTop: 8, background: "#f0fdf4", borderColor: "#86efac" }}>
+                  <div className="co-order-label">Referencia de pago</div>
+                  <div className="co-order-val" style={{ fontSize: ".85rem", letterSpacing: ".5px" }}>{order.wompiRef}</div>
+                </div>
+              )}
               <div className="co-order-details">
                 <div className="co-detail-row">
                   <span>Cliente</span>
