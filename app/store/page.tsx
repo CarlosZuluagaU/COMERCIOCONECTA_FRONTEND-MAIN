@@ -18,15 +18,23 @@ function loadGoogleFont(family: string | null) {
   document.head.appendChild(link);
 }
 const FONT_GOOGLE_MAP: Record<string, string> = {
-  "'Inter', sans-serif": "Inter",
-  "'Poppins', sans-serif": "Poppins",
-  "'Montserrat', sans-serif": "Montserrat",
-  "'Lato', sans-serif": "Lato",
-  "'Roboto', sans-serif": "Roboto",
-  "'Nunito', sans-serif": "Nunito",
-  "'Raleway', sans-serif": "Raleway",
-  "'Playfair Display', serif": "Playfair+Display",
-  "'Merriweather', serif": "Merriweather",
+  "'Inter', sans-serif":          "Inter",
+  "'Poppins', sans-serif":        "Poppins",
+  "'Montserrat', sans-serif":     "Montserrat",
+  "'Lato', sans-serif":           "Lato",
+  "'Roboto', sans-serif":         "Roboto",
+  "'DM Sans', sans-serif":        "DM+Sans",
+  "'Outfit', sans-serif":         "Outfit",
+  "'Nunito', sans-serif":         "Nunito",
+  "'Quicksand', sans-serif":      "Quicksand",
+  "'Raleway', sans-serif":        "Raleway",
+  "'Oswald', sans-serif":         "Oswald",
+  "'Ubuntu', sans-serif":         "Ubuntu",
+  "'Josefin Sans', sans-serif":   "Josefin+Sans",
+  "'Cabin', sans-serif":          "Cabin",
+  "'Playfair Display', serif":    "Playfair+Display",
+  "'Merriweather', serif":        "Merriweather",
+  "'Lora', serif":                "Lora",
 };
 
 interface Producto {

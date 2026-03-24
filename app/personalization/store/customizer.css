@@ -527,7 +527,7 @@
   font-family: inherit;
   cursor: pointer;
   background: var(--sp-accent, #00d4aa);
-  color: var(--sp-primary, #1F3B4D);
+  color: var(--sp-texto-btn, var(--sp-primary, #1F3B4D));
   flex-shrink: 0;
   white-space: nowrap;
   width: auto;
@@ -544,7 +544,7 @@
 .sp-nav-item {
   padding: 10px 14px;
   font-size: .8rem;
-  color: #666;
+  color: var(--sp-texto-sec, #666);
   border-bottom: 2px solid transparent;
   white-space: nowrap;
   cursor: pointer;
@@ -575,11 +575,11 @@
   font-family: inherit;
   border-radius: var(--sp-radius-btn, 50px);
   background: var(--sp-accent, #00d4aa);
-  color: var(--sp-primary, #1F3B4D);
+  color: var(--sp-texto-btn, var(--sp-primary, #1F3B4D));
 }
 
 .sp-products { padding: 18px 24px; }
-.sp-products h3 { font-size: .95rem; font-weight: 700; color: #1F3B4D; margin-bottom: 10px; font-family: inherit; }
+.sp-products h3 { font-size: .95rem; font-weight: 700; color: var(--sp-texto, var(--sp-primary, #1F3B4D)); margin-bottom: 10px; font-family: inherit; }
 .sp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .sp-card {
   border-radius: var(--sp-radius-card, 12px);
@@ -598,8 +598,8 @@
 }
 .sp-card-body { padding: 10px; }
 .sp-card-cat { font-size: .65rem; font-weight: 700; text-transform: uppercase; color: var(--sp-accent, #00d4aa); letter-spacing: .5px; }
-.sp-card-name { font-size: .82rem; font-weight: 700; color: #1F3B4D; margin-top: 2px; }
-.sp-card-price { font-size: .95rem; font-weight: 800; color: #1F3B4D; margin-top: 6px; }
+.sp-card-name { font-size: .82rem; font-weight: 700; color: var(--sp-texto, var(--sp-primary, #1F3B4D)); margin-top: 2px; }
+.sp-card-price { font-size: .95rem; font-weight: 800; color: var(--sp-texto, var(--sp-primary, #1F3B4D)); margin-top: 6px; }
 .sp-card-btn {
   width: 100%;
   margin-top: 8px;
@@ -607,7 +607,7 @@
   border: none;
   border-radius: var(--sp-radius-btn, 20px);
   background: var(--sp-primary, #1F3B4D);
-  color: white;
+  color: var(--sp-texto-btn, white);
   font-size: .75rem;
   font-weight: 700;
   font-family: inherit;

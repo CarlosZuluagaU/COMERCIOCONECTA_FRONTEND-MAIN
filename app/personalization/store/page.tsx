@@ -24,18 +24,29 @@ const PALETTES = [
 ];
 
 const FONTS = [
-  { label: "Segoe UI",         css: "'Segoe UI', system-ui, sans-serif",            desc: "Limpia y moderna",       google: null },
-  { label: "Inter",            css: "'Inter', sans-serif",                          desc: "Minimalista y técnica",  google: "Inter" },
-  { label: "Poppins",          css: "'Poppins', sans-serif",                        desc: "Geométrica y amigable",  google: "Poppins" },
-  { label: "Montserrat",       css: "'Montserrat', sans-serif",                     desc: "Elegante y profesional", google: "Montserrat" },
-  { label: "Lato",             css: "'Lato', sans-serif",                           desc: "Neutra y versátil",      google: "Lato" },
-  { label: "Roboto",           css: "'Roboto', sans-serif",                         desc: "Técnica y legible",      google: "Roboto" },
-  { label: "Nunito",           css: "'Nunito', sans-serif",                         desc: "Redondeada y juvenil",   google: "Nunito" },
-  { label: "Raleway",          css: "'Raleway', sans-serif",                        desc: "Artística y original",   google: "Raleway" },
-  { label: "Playfair Display", css: "'Playfair Display', serif",                    desc: "Lujosa y editorial",     google: "Playfair+Display" },
-  { label: "Merriweather",     css: "'Merriweather', serif",                        desc: "Clásica y legible",      google: "Merriweather" },
-  { label: "Georgia",          css: "Georgia, serif",                               desc: "Serif clásica",          google: null },
-  { label: "Courier New",      css: "'Courier New', monospace",                     desc: "Técnica / código",       google: null },
+  // Sans-serif modernas
+  { label: "Segoe UI",         css: "'Segoe UI', system-ui, sans-serif",   desc: "Limpia y moderna",        google: null },
+  { label: "Inter",            css: "'Inter', sans-serif",                 desc: "Minimalista y técnica",   google: "Inter" },
+  { label: "Poppins",          css: "'Poppins', sans-serif",               desc: "Geométrica y amigable",   google: "Poppins" },
+  { label: "Montserrat",       css: "'Montserrat', sans-serif",            desc: "Elegante y profesional",  google: "Montserrat" },
+  { label: "Lato",             css: "'Lato', sans-serif",                  desc: "Neutra y versátil",       google: "Lato" },
+  { label: "Roboto",           css: "'Roboto', sans-serif",                desc: "Técnica y legible",       google: "Roboto" },
+  { label: "DM Sans",          css: "'DM Sans', sans-serif",               desc: "Moderna y compacta",      google: "DM+Sans" },
+  { label: "Outfit",           css: "'Outfit', sans-serif",                desc: "Fresca y contemporánea",  google: "Outfit" },
+  { label: "Nunito",           css: "'Nunito', sans-serif",                desc: "Redondeada y juvenil",    google: "Nunito" },
+  { label: "Quicksand",        css: "'Quicksand', sans-serif",             desc: "Suave y amigable",        google: "Quicksand" },
+  { label: "Raleway",          css: "'Raleway', sans-serif",               desc: "Artística y original",    google: "Raleway" },
+  { label: "Oswald",           css: "'Oswald', sans-serif",                desc: "Compacta y llamativa",    google: "Oswald" },
+  { label: "Ubuntu",           css: "'Ubuntu', sans-serif",                desc: "Humanista y legible",     google: "Ubuntu" },
+  { label: "Josefin Sans",     css: "'Josefin Sans', sans-serif",          desc: "Geométrica y delgada",    google: "Josefin+Sans" },
+  { label: "Cabin",            css: "'Cabin', sans-serif",                 desc: "Humanista y cálida",      google: "Cabin" },
+  // Serif
+  { label: "Playfair Display", css: "'Playfair Display', serif",           desc: "Lujosa y editorial",      google: "Playfair+Display" },
+  { label: "Merriweather",     css: "'Merriweather', serif",               desc: "Clásica y legible",       google: "Merriweather" },
+  { label: "Lora",             css: "'Lora', serif",                       desc: "Elegante y literaria",    google: "Lora" },
+  { label: "Georgia",          css: "Georgia, serif",                      desc: "Serif clásica",           google: null },
+  // Monospace
+  { label: "Courier New",      css: "'Courier New', monospace",            desc: "Técnica / código",        google: null },
 ];
 
 function loadGoogleFont(family: string | null) {
@@ -395,11 +406,11 @@ export default function StoreCustomizerPage() {
                     </select>
                     <div style={{
                       fontFamily: cfg.fontFamily,
-                      marginTop: 8, padding: "10px 14px",
+                      marginTop: 8, padding: "8px 12px",
                       background: "#f4f6f8", borderRadius: 8,
-                      fontSize: "1.1rem", fontWeight: 700, color: cfg.colorPrimario,
+                      fontSize: ".82rem", fontWeight: 600, color: cfg.colorPrimario,
                     }}>
-                      Vista previa: La tienda se verá así
+                      Aa Bb — La tienda se verá con esta fuente
                     </div>
                   </div>
                 </Section>
