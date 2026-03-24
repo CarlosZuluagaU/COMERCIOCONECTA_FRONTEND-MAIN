@@ -8,6 +8,27 @@ import "./store.css";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
+function loadGoogleFont(family: string | null) {
+  if (!family) return;
+  const id = `gfont-${family}`;
+  if (document.getElementById(id)) return;
+  const link = document.createElement("link");
+  link.id = id; link.rel = "stylesheet";
+  link.href = `https://fonts.googleapis.com/css2?family=${family}:wght@400;600;700;800&display=swap`;
+  document.head.appendChild(link);
+}
+const FONT_GOOGLE_MAP: Record<string, string> = {
+  "'Inter', sans-serif": "Inter",
+  "'Poppins', sans-serif": "Poppins",
+  "'Montserrat', sans-serif": "Montserrat",
+  "'Lato', sans-serif": "Lato",
+  "'Roboto', sans-serif": "Roboto",
+  "'Nunito', sans-serif": "Nunito",
+  "'Raleway', sans-serif": "Raleway",
+  "'Playfair Display', serif": "Playfair+Display",
+  "'Merriweather', serif": "Merriweather",
+};
+
 interface Producto {
   id: string;
   nombre: string;
@@ -35,13 +56,26 @@ export default function TiendaPage() {
     const root = document.documentElement;
     root.style.removeProperty("--sp-primary");
     root.style.removeProperty("--sp-accent");
-    root.style.removeProperty("font-family");
+    root.style.removeProperty("--sp-font");
+    root.style.removeProperty("--sp-radius-btn");
+    root.style.removeProperty("--sp-radius-card");
+    root.style.removeProperty("--sp-texto");
+    root.style.removeProperty("--sp-texto-sec");
+    root.style.removeProperty("--sp-texto-btn");
 
     const apply = (cfg: any) => {
       if (!cfg) return;
-      if (cfg.colorPrimario) root.style.setProperty("--sp-primary", cfg.colorPrimario);
-      if (cfg.colorAcento)   root.style.setProperty("--sp-accent",  cfg.colorAcento);
-      if (cfg.fontFamily)    root.style.setProperty("font-family",  cfg.fontFamily);
+      if (cfg.colorPrimario)            root.style.setProperty("--sp-primary",     cfg.colorPrimario);
+      if (cfg.colorAcento)              root.style.setProperty("--sp-accent",       cfg.colorAcento);
+      if (cfg.fontFamily) {
+        root.style.setProperty("--sp-font", cfg.fontFamily);
+        loadGoogleFont(FONT_GOOGLE_MAP[cfg.fontFamily] || null);
+      }
+      if (cfg.buttonRadius)             root.style.setProperty("--sp-radius-btn",   cfg.buttonRadius);
+      if (cfg.cardRadius)               root.style.setProperty("--sp-radius-card",  cfg.cardRadius);
+      if (cfg.colorTexto)               root.style.setProperty("--sp-texto",        cfg.colorTexto);
+      if (cfg.colorTextoSecundario)     root.style.setProperty("--sp-texto-sec",    cfg.colorTextoSecundario);
+      if (cfg.colorTextoBoton)          root.style.setProperty("--sp-texto-btn",    cfg.colorTextoBoton);
       setStoreCfg({
         nombre:         cfg.nombre         || "ComerciosConecta",
         tagline:        cfg.tagline        || "Tu tienda de confianza",
@@ -158,7 +192,10 @@ export default function TiendaPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ totalInCents }),
       });
-      if (!linkRes.ok) throw new Error("Error creando link de pago");
+      if (!linkRes.ok) {
+        const errData = await linkRes.json().catch(() => ({}));
+        throw new Error(errData.error || `Error creando link de pago (HTTP ${linkRes.status})`);
+      }
       const { payment_url } = await linkRes.json();
 
       // 2) Guardar todos los datos del pedido en localStorage

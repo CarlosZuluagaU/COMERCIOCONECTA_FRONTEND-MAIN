@@ -24,11 +24,30 @@ const PALETTES = [
 ];
 
 const FONTS = [
-  { label: "Segoe UI", css: "'Segoe UI', sans-serif", desc: "Limpia y moderna" },
-  { label: "Georgia",  css: "Georgia, serif",         desc: "Elegante y clásica" },
-  { label: "Courier",  css: "monospace",               desc: "Técnica y precisa" },
-  { label: "Rounded",  css: "'Arial Rounded MT Bold', sans-serif", desc: "Amigable y juvenil" },
+  { label: "Segoe UI",         css: "'Segoe UI', system-ui, sans-serif",            desc: "Limpia y moderna",       google: null },
+  { label: "Inter",            css: "'Inter', sans-serif",                          desc: "Minimalista y técnica",  google: "Inter" },
+  { label: "Poppins",          css: "'Poppins', sans-serif",                        desc: "Geométrica y amigable",  google: "Poppins" },
+  { label: "Montserrat",       css: "'Montserrat', sans-serif",                     desc: "Elegante y profesional", google: "Montserrat" },
+  { label: "Lato",             css: "'Lato', sans-serif",                           desc: "Neutra y versátil",      google: "Lato" },
+  { label: "Roboto",           css: "'Roboto', sans-serif",                         desc: "Técnica y legible",      google: "Roboto" },
+  { label: "Nunito",           css: "'Nunito', sans-serif",                         desc: "Redondeada y juvenil",   google: "Nunito" },
+  { label: "Raleway",          css: "'Raleway', sans-serif",                        desc: "Artística y original",   google: "Raleway" },
+  { label: "Playfair Display", css: "'Playfair Display', serif",                    desc: "Lujosa y editorial",     google: "Playfair+Display" },
+  { label: "Merriweather",     css: "'Merriweather', serif",                        desc: "Clásica y legible",      google: "Merriweather" },
+  { label: "Georgia",          css: "Georgia, serif",                               desc: "Serif clásica",          google: null },
+  { label: "Courier New",      css: "'Courier New', monospace",                     desc: "Técnica / código",       google: null },
 ];
+
+function loadGoogleFont(family: string | null) {
+  if (!family) return;
+  const id = `gfont-${family}`;
+  if (document.getElementById(id)) return;
+  const link = document.createElement("link");
+  link.id = id;
+  link.rel = "stylesheet";
+  link.href = `https://fonts.googleapis.com/css2?family=${family}:wght@400;600;700;800&display=swap`;
+  document.head.appendChild(link);
+}
 
 type DeviceMode = "desktop" | "tablet" | "mobile";
 type TabId = "design" | "content" | "advanced";
@@ -39,6 +58,9 @@ interface Config {
   logoUrl: string;
   colorPrimario: string;
   colorAcento: string;
+  colorTexto: string;
+  colorTextoSecundario: string;
+  colorTextoBoton: string;
   fontFamily: string;
   buttonRadius: string;
   cardRadius: string;
@@ -57,14 +79,17 @@ interface Config {
 }
 
 const DEFAULT_CFG: Config = {
-  nombre:         "MiComercio",
-  tagline:        "Tu tienda de confianza",
-  logoUrl:        "",
-  colorPrimario:  "#1F3B4D",
-  colorAcento:    "#00d4aa",
-  fontFamily:     "'Segoe UI', sans-serif",
-  buttonRadius:   "50px",
-  cardRadius:     "12px",
+  nombre:               "MiComercio",
+  tagline:              "Tu tienda de confianza",
+  logoUrl:              "",
+  colorPrimario:        "#1F3B4D",
+  colorAcento:          "#00d4aa",
+  colorTexto:           "#1F3B4D",
+  colorTextoSecundario: "#666666",
+  colorTextoBoton:      "#ffffff",
+  fontFamily:           "'Segoe UI', system-ui, sans-serif",
+  buttonRadius:         "50px",
+  cardRadius:           "12px",
   heroTitle:      "Descubre tu belleza interior",
   heroSubtitle:   "Productos de calidad premium · Envíos rápidos · Precios increíbles",
   heroCta:        "Explorar Productos",
@@ -136,15 +161,20 @@ export default function StoreCustomizerPage() {
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data) return;
+        const fontEntry = FONTS.find(f => f.css === (data.fontFamily || DEFAULT_CFG.fontFamily));
+        if (fontEntry?.google) loadGoogleFont(fontEntry.google);
         setCfg({
-          nombre:         data.nombre         || DEFAULT_CFG.nombre,
-          tagline:        data.tagline        || DEFAULT_CFG.tagline,
-          logoUrl:        data.logoUrl        || "",
-          colorPrimario:  data.colorPrimario  || DEFAULT_CFG.colorPrimario,
-          colorAcento:    data.colorAcento    || DEFAULT_CFG.colorAcento,
-          fontFamily:     data.fontFamily     || DEFAULT_CFG.fontFamily,
-          buttonRadius:   data.buttonRadius   || DEFAULT_CFG.buttonRadius,
-          cardRadius:     data.cardRadius     || DEFAULT_CFG.cardRadius,
+          nombre:               data.nombre               || DEFAULT_CFG.nombre,
+          tagline:              data.tagline              || DEFAULT_CFG.tagline,
+          logoUrl:              data.logoUrl              || "",
+          colorPrimario:        data.colorPrimario        || DEFAULT_CFG.colorPrimario,
+          colorAcento:          data.colorAcento          || DEFAULT_CFG.colorAcento,
+          colorTexto:           data.colorTexto           || DEFAULT_CFG.colorTexto,
+          colorTextoSecundario: data.colorTextoSecundario || DEFAULT_CFG.colorTextoSecundario,
+          colorTextoBoton:      data.colorTextoBoton      || DEFAULT_CFG.colorTextoBoton,
+          fontFamily:           data.fontFamily           || DEFAULT_CFG.fontFamily,
+          buttonRadius:         data.buttonRadius         || DEFAULT_CFG.buttonRadius,
+          cardRadius:           data.cardRadius           || DEFAULT_CFG.cardRadius,
           heroTitle:      data.heroTitle      || DEFAULT_CFG.heroTitle,
           heroSubtitle:   data.heroSubtitle   || DEFAULT_CFG.heroSubtitle,
           heroCta:        data.heroCta        || DEFAULT_CFG.heroCta,
@@ -203,11 +233,15 @@ export default function StoreCustomizerPage() {
   const slug = cfg.nombre.toLowerCase().replace(/\s+/g, "-");
 
   const previewStyle: React.CSSProperties = {
-    "--sp-primary":     cfg.colorPrimario,
-    "--sp-accent":      cfg.colorAcento,
-    "--sp-radius-btn":  cfg.buttonRadius,
-    "--sp-radius-card": cfg.cardRadius,
-    fontFamily:         cfg.fontFamily,
+    "--sp-primary":      cfg.colorPrimario,
+    "--sp-accent":       cfg.colorAcento,
+    "--sp-font":         cfg.fontFamily,
+    "--sp-radius-btn":   cfg.buttonRadius,
+    "--sp-radius-card":  cfg.cardRadius,
+    "--sp-texto":        cfg.colorTexto,
+    "--sp-texto-sec":    cfg.colorTextoSecundario,
+    "--sp-texto-btn":    cfg.colorTextoBoton,
+    fontFamily:          cfg.fontFamily,
   } as React.CSSProperties;
 
   return (
@@ -344,18 +378,73 @@ export default function StoreCustomizerPage() {
                 </Section>
 
                 <Section icon="🔤" bg="#ede9fe" title="Tipografía" subtitle="Fuente de la tienda">
-                  {FONTS.map(f => (
-                    <div
-                      key={f.css}
-                      className={`cust-font-option${cfg.fontFamily === f.css ? " selected" : ""}`}
-                      onClick={() => update({ fontFamily: f.css })}
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">Fuente</label>
+                    <select
+                      className="cust-input"
+                      value={cfg.fontFamily}
+                      onChange={e => {
+                        const selected = FONTS.find(f => f.css === e.target.value);
+                        if (selected?.google) loadGoogleFont(selected.google);
+                        update({ fontFamily: e.target.value });
+                      }}
                     >
-                      <span style={{ fontFamily: f.css }}>
-                        {f.label} <small>— {f.desc}</small>
-                      </span>
-                      {cfg.fontFamily === f.css && <span className="cust-font-check">✓</span>}
+                      {FONTS.map(f => (
+                        <option key={f.css} value={f.css}>{f.label} — {f.desc}</option>
+                      ))}
+                    </select>
+                    <div style={{
+                      fontFamily: cfg.fontFamily,
+                      marginTop: 8, padding: "10px 14px",
+                      background: "#f4f6f8", borderRadius: 8,
+                      fontSize: "1.1rem", fontWeight: 700, color: cfg.colorPrimario,
+                    }}>
+                      Vista previa: La tienda se verá así
                     </div>
-                  ))}
+                  </div>
+                </Section>
+
+                <Section icon="🖋" bg="#fce7f3" title="Colores de Texto" subtitle="Color de títulos, descripciones y botones">
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Texto principal <span className="cust-ctrl-hint">(títulos, precios)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorTexto}
+                        onChange={e => update({ colorTexto: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorTexto}</div>
+                    </div>
+                  </div>
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Texto secundario <span className="cust-ctrl-hint">(marca, descripción)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorTextoSecundario}
+                        onChange={e => update({ colorTextoSecundario: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorTextoSecundario}</div>
+                    </div>
+                  </div>
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Texto en botones <span className="cust-ctrl-hint">(letras dentro de botones)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorTextoBoton}
+                        onChange={e => update({ colorTextoBoton: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorTextoBoton}</div>
+                    </div>
+                    <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
+                      {[["#ffffff","Blanco"],["#000000","Negro"],[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"]].map(([color,label]) => (
+                        <div key={color} onClick={() => update({ colorTextoBoton: color })}
+                          style={{ cursor: "pointer", padding: "5px 10px", borderRadius: 6, fontSize: ".72rem", fontWeight: 700,
+                            background: color, color: color === "#ffffff" ? "#333" : "#fff",
+                            border: cfg.colorTextoBoton === color ? "2px solid #333" : "2px solid transparent" }}>
+                          {label}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </Section>
 
                 <Section icon="⬛" bg="#d1fae5" title="Estilo de Componentes" subtitle="Bordes de botones y tarjetas">
