@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import "../store.css";
 
@@ -18,7 +18,7 @@ function formatPrecio(p: number) {
   }).format(p);
 }
 
-export default function OrderConfirmationPage() {
+function OrderConfirmationContent() {
   const router       = useRouter();
   const searchParams = useSearchParams();
   const [order, setOrder]         = useState<ConfirmedOrder | null>(null);
@@ -234,5 +234,20 @@ export default function OrderConfirmationPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OrderConfirmationPage() {
+  return (
+    <Suspense fallback={
+      <div className="store-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "#f4f6f8" }}>
+        <div style={{ textAlign: "center", color: "#888" }}>
+          <div style={{ fontSize: "2rem", marginBottom: 12 }}>⏳</div>
+          <p>Cargando…</p>
+        </div>
+      </div>
+    }>
+      <OrderConfirmationContent />
+    </Suspense>
   );
 }
