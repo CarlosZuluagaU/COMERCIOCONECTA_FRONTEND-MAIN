@@ -216,7 +216,10 @@ export default function TiendaPage() {
       const linkRes = await fetch(`${API}/checkout/initiate-payment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ totalInCents }),
+        body: JSON.stringify({
+          totalInCents,
+          redirectUrl: `${window.location.origin}/store/order-confirmation`,
+        }),
       });
       if (!linkRes.ok) {
         const errData = await linkRes.json().catch(() => ({}));
