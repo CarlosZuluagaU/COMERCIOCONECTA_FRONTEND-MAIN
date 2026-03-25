@@ -232,7 +232,7 @@ export default function TiendaPage() {
         customerPhone:   cliente.telefono,
         customerAddress: cliente.direccion,
         customerCity:    cliente.ciudad,
-        comercioId:      authComercioId || null,
+        comercioId:      authComercioId ?? 1,
         totalInCents,
         items: carrito.map(i => ({
           productoId:      Number(i.producto.id),
