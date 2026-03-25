@@ -15,6 +15,8 @@
   --sp-banner-sec:       #00d4aa;
   --sp-footer-texto:     #ffffff;
   --sp-iconos-sociales:  #ffffff;
+  --sp-nombre:           #ffffff;
+  --sp-tagline:          rgba(255,255,255,0.6);
 }
 
 /* ─── STORE PAGE ─────────────────────────────────────── */
@@ -71,9 +73,9 @@
 
 /* Logo */
 .store-logo { flex-shrink: 0; line-height: 1; }
-.store-logo h1 { font-size: 1.25rem; font-weight: 800; color: white; white-space: nowrap; line-height: 1.2; }
+.store-logo h1 { font-size: 1.25rem; font-weight: 800; color: var(--sp-nombre, white); white-space: nowrap; line-height: 1.2; }
 .store-logo h1 span { color: var(--sp-accent); }
-.store-logo sub { font-size: .65rem; color: rgba(255,255,255,.5); display: block; margin-top: 1px; line-height: 1; font-weight: 400; }
+.store-logo sub { font-size: .65rem; color: var(--sp-tagline, rgba(255,255,255,.5)); display: block; margin-top: 1px; line-height: 1; font-weight: 400; }
 
 /* Search */
 .store-search {
@@ -135,9 +137,9 @@
   box-shadow: 0 2px 8px rgba(0,0,0,.2);
 }
 .store-cart-btn:hover {
-  filter: brightness(0.9);
+  filter: brightness(1.12) saturate(1.1) !important;
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(0,0,0,.25) !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,.3) !important;
 }
 .store-cart-btn:active { transform: translateY(0); }
 .cart-count {
@@ -304,9 +306,9 @@
   margin-top: 12px !important;
 }
 .add-btn:hover {
-  background: var(--sp-btn-cta, var(--sp-accent)) !important;
-  color: var(--sp-texto-btn, var(--sp-primary)) !important;
-  transform: translateY(-1px);
+  filter: brightness(1.15) saturate(1.1) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,.2) !important;
 }
 .add-btn:active { transform: translateY(0) !important; }
 
@@ -555,3 +557,54 @@
 .co-order-details { background: #f8f9fa; border-radius: 10px; padding: 12px 14px; text-align: left; margin-bottom: 20px; display: flex; flex-direction: column; gap: 6px; }
 .co-detail-row { display: flex; justify-content: space-between; font-size: .8rem; color: #555; }
 .co-detail-total { font-weight: 700; color: #1F3B4D; font-size: .88rem; padding-top: 6px; border-top: 1px solid #e0e0e0; }
+
+/* ═══════════════════════════════════════════
+   LAYOUT VARIANTS
+═══════════════════════════════════════════ */
+
+/* ── MODERNO: 3-col large cards, left-aligned hero ── */
+.layout-moderno .hero { text-align: left; padding: 50px 60px; }
+.layout-moderno .hero h2 { font-size: 2.6rem; max-width: 560px; }
+.layout-moderno .hero p  { max-width: 480px; }
+.layout-moderno .products-grid { grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.layout-moderno .product-img  { height: 220px; }
+.layout-moderno .product-info { padding: 18px 20px; }
+.layout-moderno .product-name { font-size: 1rem; }
+.layout-moderno .cur-price    { font-size: 1.2rem; }
+
+/* ── COMPACTO: no hero, 5-col mini cards ── */
+.layout-compacto .hero { display: none; }
+.layout-compacto .store-nav { border-bottom: 3px solid var(--sp-accent); }
+.layout-compacto .products-section { padding: 28px 40px; }
+.layout-compacto .products-grid {
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+.layout-compacto .product-img  { height: 120px; font-size: 2.5rem; }
+.layout-compacto .product-info { padding: 10px 12px; }
+.layout-compacto .product-name { font-size: .82rem; }
+.layout-compacto .product-brand{ display: none; }
+.layout-compacto .stars        { display: none; }
+.layout-compacto .cur-price    { font-size: .95rem; }
+.layout-compacto .add-btn      { padding: 7px 10px !important; font-size: .78rem !important; }
+
+/* ── REVISTA: featured first card large, rest 3-col ── */
+.layout-revista .products-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.layout-revista .product-card:first-child {
+  grid-column: span 2;
+  flex-direction: row;
+}
+.layout-revista .product-card:first-child .product-img {
+  width: 260px;
+  min-width: 260px;
+  height: auto;
+  min-height: 200px;
+  flex-shrink: 0;
+}
+.layout-revista .product-card:first-child .product-info {
+  padding: 24px;
+  justify-content: center;
+}
+.layout-revista .product-card:first-child .product-name { font-size: 1.2rem; }
+.layout-revista .product-card:first-child .cur-price    { font-size: 1.35rem; }
+.layout-revista .product-card:first-child .add-btn      { padding: 12px 20px !important; font-size: .9rem !important; }

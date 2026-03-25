@@ -502,8 +502,8 @@
   background: var(--sp-primary, #1F3B4D);
   color: white;
 }
-.sp-logo { font-size: 1.1rem; font-weight: 800; font-family: inherit; }
-.sp-logo sub { font-size: .65rem; display: block; opacity: .55; margin-top: -3px; }
+.sp-logo { font-size: 1.1rem; font-weight: 800; font-family: inherit; color: var(--sp-nombre, white); }
+.sp-logo sub { font-size: .65rem; display: block; color: var(--sp-tagline, rgba(255,255,255,.55)); margin-top: -3px; }
 .sp-logo img { max-height: 36px; object-fit: contain; }
 .sp-search {
   flex: 1;
@@ -582,6 +582,8 @@
 .sp-products h3 { font-size: .95rem; font-weight: 700; color: var(--sp-texto, var(--sp-primary, #1F3B4D)); margin-bottom: 10px; font-family: inherit; }
 .sp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .sp-card {
+  display: flex;
+  flex-direction: column;
   border-radius: var(--sp-radius-card, 12px);
   overflow: hidden;
   border: 1px solid #eee;
@@ -647,6 +649,30 @@
 }
 .sp-social-btn:hover { background: rgba(255,255,255,.25); text-decoration: none;
 }
+
+/* ── LAYOUT VARIANTS (preview) ── */
+
+/* Moderno */
+.layout-moderno .sp-hero { text-align: left; padding: 20px 24px; }
+.layout-moderno .sp-hero h2 { font-size: 1.2rem; }
+.layout-moderno .sp-grid { grid-template-columns: repeat(3, 1fr); }
+.layout-moderno .sp-card-img { height: 95px; }
+
+/* Compacto */
+.layout-compacto .sp-hero { display: none; }
+.layout-compacto .sp-grid { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.layout-compacto .sp-card-img { height: 55px; }
+.layout-compacto .sp-card-body { padding: 6px; }
+.layout-compacto .sp-card-name { font-size: .65rem; }
+.layout-compacto .sp-card-cat  { display: none; }
+.layout-compacto .sp-card-btn  { padding: 4px; font-size: .65rem; }
+
+/* Revista */
+.layout-revista .sp-grid { grid-template-columns: repeat(3, 1fr); }
+.layout-revista .sp-card:first-child { grid-column: span 2; flex-direction: row; }
+.layout-revista .sp-card:first-child .sp-card-img { width: 110px; min-width: 110px; height: auto; min-height: 80px; flex-shrink: 0; }
+.layout-revista .sp-card:first-child .sp-card-name { font-size: .9rem; }
+.layout-revista .sp-card:first-child .sp-card-price { font-size: 1rem; }
 
 /* URL box */
 .cust-url-box {

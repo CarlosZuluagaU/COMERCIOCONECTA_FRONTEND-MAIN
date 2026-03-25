@@ -98,6 +98,8 @@ export default function TiendaPage() {
       if (cfg.colorBannerSecundario)    root.style.setProperty("--sp-banner-sec",        cfg.colorBannerSecundario);
       if (cfg.colorFooterTexto)         root.style.setProperty("--sp-footer-texto",      cfg.colorFooterTexto);
       if (cfg.colorIconosSociales)      root.style.setProperty("--sp-iconos-sociales",   cfg.colorIconosSociales);
+      if (cfg.colorNombre)              root.style.setProperty("--sp-nombre",            cfg.colorNombre);
+      if (cfg.colorTagline)             root.style.setProperty("--sp-tagline",           cfg.colorTagline);
       setStoreCfg({
         nombre:         cfg.nombre         || "ComerciosConecta",
         tagline:        cfg.tagline        || "Tu tienda de confianza",
@@ -111,6 +113,7 @@ export default function TiendaPage() {
         twitter:        cfg.twitter        || "",
         tiktok:         cfg.tiktok         || "",
         whatsapp:       cfg.whatsapp       || "",
+        layout:         cfg.layout         || "clasico",
       });
     };
 
@@ -142,6 +145,7 @@ export default function TiendaPage() {
     heroTitle: "", heroSubtitle: "", heroCta: "",
     footerTexto: "", footerTelefono: "",
     facebook: "", instagram: "", twitter: "", tiktok: "", whatsapp: "",
+    layout: "clasico",
   });
 
   const [cliente, setCliente] = useState({
@@ -253,7 +257,7 @@ export default function TiendaPage() {
   };
 
   return (
-    <div className="store-page">
+    <div className={`store-page layout-${storeCfg.layout}`}>
       {/* HEADER */}
       <header className="store-header">
         <div className="header-inner">
