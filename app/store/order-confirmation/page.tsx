@@ -29,7 +29,7 @@ function OrderConfirmationContent() {
 
   const wompiStatus   = (searchParams.get("status") || "").toUpperCase();
   const wompiId       = searchParams.get("id") || "";
-  const isPaid   = wompiStatus === "APPROVED" || wompiStatus === "PAID";
+  const isPaid   = wompiStatus === "APPROVED" || wompiStatus === "PAID" || wompiStatus === "PENDING";
   const isFailed = wompiStatus === "DECLINED" || wompiStatus === "ERROR" || wompiStatus === "VOIDED";
 
   const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
@@ -187,10 +187,14 @@ function OrderConfirmationContent() {
     <div className="store-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "#f4f6f8" }}>
       <div className="co-panel" style={{ maxWidth: 440 }}>
         <div className="co-body co-confirmation">
-          <div className="co-confirm-icon">🎉</div>
-          <h2 className="co-confirm-title">¡Pedido confirmado!</h2>
+          <div className="co-confirm-icon">{wompiStatus === "PENDING" ? "⏳" : "🎉"}</div>
+          <h2 className="co-confirm-title">
+            {wompiStatus === "PENDING" ? "Pedido registrado" : "¡Pedido confirmado!"}
+          </h2>
           <p className="co-confirm-sub">
-            Tu pago fue aprobado. Te contactaremos pronto para coordinar la entrega.
+            {wompiStatus === "PENDING"
+              ? "Tu pago está en proceso de verificación. Te notificaremos cuando sea confirmado."
+              : "Tu pago fue aprobado. Te contactaremos pronto para coordinar la entrega."}
           </p>
 
           {order && (
