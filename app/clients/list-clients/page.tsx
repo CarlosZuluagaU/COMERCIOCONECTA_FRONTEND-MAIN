@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 import { FiUsers } from "react-icons/fi";
 import Sidebar from "../../dashboard/Sidebar";
@@ -25,6 +26,7 @@ interface Cliente {
 const PAGE_SIZE = 10;
 
 export default function ListadoClientesPage() {
+  const { comercioId } = useAuth();
   const [clientes, setClientes]     = useState<Cliente[]>([]);
   const [loading, setLoading]       = useState(true);
   const [activeMenu, setActiveMenu] = useState<string | null>("Clientes");
@@ -37,7 +39,10 @@ export default function ListadoClientesPage() {
   const fetchClientes = async () => {
     if (!API_BASE_URL) return;
     try {
-      const res = await axios.get(`${API_BASE_URL}/clientes`);
+      const clientesUrl = comercioId
+        ? `${API_BASE_URL}/clientes?comercioId=${comercioId}`
+        : `${API_BASE_URL}/clientes`;
+      const res = await axios.get(clientesUrl);
       setClientes(res.data);
     } catch {}
     finally { setLoading(false); }

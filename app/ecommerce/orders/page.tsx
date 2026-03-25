@@ -72,7 +72,7 @@ function formatPesos(n: number) {
 }
 
 export default function OrdenesEcommercePage() {
-  const { user } = useAuth();
+  const { user, comercioId } = useAuth();
   const [activeMenu, setActiveMenu] = useState<string | null>("E-commerce");
   const [busqueda, setBusqueda]     = useState("");
   const [filtroEstado, setFiltroEstado] = useState("");
@@ -94,7 +94,10 @@ export default function OrdenesEcommercePage() {
     try {
       setRefreshing(true);
       setError(null);
-      const res = await fetch(`${API_BASE_URL}/checkout/all-orders`);
+      const url = comercioId
+        ? `${API_BASE_URL}/checkout/all-orders?comercioId=${comercioId}`
+        : `${API_BASE_URL}/checkout/all-orders`;
+      const res = await fetch(url);
       if (!res.ok) throw new Error(`Error ${res.status}`);
       const data: OrdenAPI[] = await res.json();
       setOrdenes(

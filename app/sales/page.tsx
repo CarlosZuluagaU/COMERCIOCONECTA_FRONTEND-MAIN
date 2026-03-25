@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import Sidebar from "../dashboard/Sidebar";
 import "../dashboard/dashboard.css";
 import "../dashboard/admin.css";
@@ -44,6 +45,7 @@ function estadoLabel(estado: string) {
 
 export default function VentasPage() {
   const router = useRouter();
+  const { comercioId } = useAuth();
   const [ventas, setVentas]         = useState<any[]>([]);
   const [loading, setLoading]       = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -56,7 +58,10 @@ export default function VentasPage() {
   const fetchVentas = async () => {
     try {
       setRefreshing(true);
-      const res = await fetch(`${API_BASE_URL}/ventas`);
+      const ventasUrl = comercioId
+        ? `${API_BASE_URL}/ventas?comercioId=${comercioId}`
+        : `${API_BASE_URL}/ventas`;
+      const res = await fetch(ventasUrl);
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
       setVentas(await res.json());
       setError(null);
