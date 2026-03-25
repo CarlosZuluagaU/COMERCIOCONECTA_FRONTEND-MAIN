@@ -9,7 +9,7 @@ import "./db-stats.css";
 const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth();
+  const { user, logout, comercioId, authLoaded } = useAuth();
   const router = useRouter();
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -39,10 +39,11 @@ export default function DashboardPage() {
     try {
       const headers: any = token ? { Authorization: `Bearer ${token}` } : {};
 
+      const cid = comercioId;
       const [ordenesRes, productosRes, ventasRes] = await Promise.allSettled([
-        fetch(`${API}/checkout/all-orders`).then(r => r.ok ? r.json() : []),
-        fetch(`${API}/productos`, { headers }).then(r => r.ok ? r.json() : []),
-        fetch(`${API}/ventas`, { headers }).then(r => r.ok ? r.json() : []),
+        fetch(`${API}/checkout/all-orders${cid ? `?comercioId=${cid}` : ""}`).then(r => r.ok ? r.json() : []),
+        fetch(`${API}/productos${cid ? `?comercioId=${cid}` : ""}`, { headers }).then(r => r.ok ? r.json() : []),
+        fetch(`${API}/ventas${cid ? `?comercioId=${cid}` : ""}`, { headers }).then(r => r.ok ? r.json() : []),
       ]);
 
       const ordenes = ordenesRes.status === "fulfilled" ? ordenesRes.value : [];
@@ -73,7 +74,11 @@ export default function DashboardPage() {
     }
   };
 
-  useEffect(() => { fetchStats(); }, []);
+  useEffect(() => {
+    if (!authLoaded) return;
+    fetchStats();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoaded, comercioId]);
 
   const today = new Date().toLocaleDateString("es-ES", {
     weekday: "long", year: "numeric", month: "long", day: "numeric",

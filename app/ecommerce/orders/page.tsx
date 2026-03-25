@@ -102,7 +102,7 @@ export default function OrdenesEcommercePage() {
       const data: OrdenAPI[] = await res.json();
       setOrdenes(
         data.map((o) => ({
-          id: `ORD-${String(o.id).padStart(5, "0")}`,
+          id: `ORD-${String(o.comercioOrderNumber ?? o.id).padStart(5, "0")}`,
           orderId: o.id,
           uuid: o.uuid,
           cliente: o.customerName,
