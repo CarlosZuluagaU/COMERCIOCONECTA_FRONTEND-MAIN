@@ -75,6 +75,10 @@ interface Config {
   colorBoton: string;
   colorBotonCta: string;
   colorBanner: string;
+  colorCarritoBoton: string;
+  colorBannerSecundario: string;
+  colorFooterTexto: string;
+  colorIconosSociales: string;
   fontFamily: string;
   buttonRadius: string;
   cardRadius: string;
@@ -103,7 +107,11 @@ const DEFAULT_CFG: Config = {
   colorTextoBoton:      "#ffffff",
   colorBoton:           "#1F3B4D",
   colorBotonCta:        "#00d4aa",
-  colorBanner:          "#1F3B4D",
+  colorBanner:           "#1F3B4D",
+  colorCarritoBoton:     "#00d4aa",
+  colorBannerSecundario: "#00d4aa",
+  colorFooterTexto:      "#ffffff",
+  colorIconosSociales:   "#ffffff",
   fontFamily:           "'Segoe UI', system-ui, sans-serif",
   buttonRadius:         "50px",
   cardRadius:           "12px",
@@ -191,7 +199,11 @@ export default function StoreCustomizerPage() {
           colorTextoBoton:      data.colorTextoBoton      || DEFAULT_CFG.colorTextoBoton,
           colorBoton:           data.colorBoton           || DEFAULT_CFG.colorBoton,
           colorBotonCta:        data.colorBotonCta        || DEFAULT_CFG.colorBotonCta,
-          colorBanner:          data.colorBanner          || DEFAULT_CFG.colorBanner,
+          colorBanner:           data.colorBanner           || DEFAULT_CFG.colorBanner,
+          colorCarritoBoton:     data.colorCarritoBoton     || DEFAULT_CFG.colorCarritoBoton,
+          colorBannerSecundario: data.colorBannerSecundario || DEFAULT_CFG.colorBannerSecundario,
+          colorFooterTexto:      data.colorFooterTexto      || DEFAULT_CFG.colorFooterTexto,
+          colorIconosSociales:   data.colorIconosSociales   || DEFAULT_CFG.colorIconosSociales,
           fontFamily:           data.fontFamily           || DEFAULT_CFG.fontFamily,
           buttonRadius:         data.buttonRadius         || DEFAULT_CFG.buttonRadius,
           cardRadius:           data.cardRadius           || DEFAULT_CFG.cardRadius,
@@ -263,7 +275,11 @@ export default function StoreCustomizerPage() {
     "--sp-texto-btn":    cfg.colorTextoBoton,
     "--sp-btn":          cfg.colorBoton,
     "--sp-btn-cta":      cfg.colorBotonCta,
-    "--sp-banner":       cfg.colorBanner,
+    "--sp-banner":            cfg.colorBanner,
+    "--sp-carrito-btn":       cfg.colorCarritoBoton,
+    "--sp-banner-sec":        cfg.colorBannerSecundario,
+    "--sp-footer-texto":      cfg.colorFooterTexto,
+    "--sp-iconos-sociales":   cfg.colorIconosSociales,
     fontFamily:          cfg.fontFamily,
   } as React.CSSProperties;
 
@@ -421,6 +437,24 @@ export default function StoreCustomizerPage() {
                   </div>
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">
+                      Botón carrito <span className="cust-ctrl-hint">(header, contador del carrito)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorCarritoBoton}
+                        onChange={e => update({ colorCarritoBoton: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorCarritoBoton}</div>
+                    </div>
+                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {([[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#10b981","Verde"],["#7c3aed","Morado"],["#dc2626","Rojo"],["#000000","Negro"]] as [string,string][]).map(([c,l]) => (
+                        <div key={l} onClick={() => update({ colorCarritoBoton: c })}
+                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                            background:c, color: c==="#ffffff"?"#333":"#fff",
+                            border: cfg.colorCarritoBoton===c?"2px solid #333":"2px solid transparent" }}>{l}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
                       Botón CTA <span className="cust-ctrl-hint">(Explorar, Pagar, Confirmar)</span>
                     </label>
                     <div className="cust-color-row">
@@ -457,9 +491,27 @@ export default function StoreCustomizerPage() {
                             border: cfg.colorBanner===c?"2px solid #333":"2px solid transparent" }}>{l}</div>
                       ))}
                     </div>
+                  </div>
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Color secundario del banner <span className="cust-ctrl-hint">(degradado final del hero)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorBannerSecundario}
+                        onChange={e => update({ colorBannerSecundario: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorBannerSecundario}</div>
+                    </div>
+                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {([[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#7c3aed","Morado"],["#f59e0b","Amarillo"],["#10b981","Verde"],["#ffffff","Blanco"]] as [string,string][]).map(([c,l]) => (
+                        <div key={l} onClick={() => update({ colorBannerSecundario: c })}
+                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                            background:c, color: c==="#ffffff"?"#333":"#fff",
+                            border: cfg.colorBannerSecundario===c?"2px solid #333":"2px solid transparent" }}>{l}</div>
+                      ))}
+                    </div>
                     <div style={{
                       marginTop: 10, borderRadius: 8, height: 40,
-                      background: `linear-gradient(135deg, ${cfg.colorBanner} 0%, ${cfg.colorBanner} 60%, ${cfg.colorBotonCta} 100%)`,
+                      background: `linear-gradient(135deg, ${cfg.colorBanner} 0%, ${cfg.colorBannerSecundario} 100%)`,
                       display: "flex", alignItems: "center", justifyContent: "center",
                       fontSize: ".75rem", fontWeight: 700, color: "white",
                     }}>
@@ -533,6 +585,45 @@ export default function StoreCustomizerPage() {
                             border: cfg.colorTextoBoton === color ? "2px solid #333" : "2px solid transparent" }}>
                           {label}
                         </div>
+                      ))}
+                    </div>
+                  </div>
+                </Section>
+
+                <Section icon="🔡" bg="#fef3c7" title="Colores del Footer" subtitle="Texto del pie de página e iconos de redes">
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Texto del footer <span className="cust-ctrl-hint">(nombre, copyright, teléfono)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorFooterTexto}
+                        onChange={e => update({ colorFooterTexto: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorFooterTexto}</div>
+                    </div>
+                    <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
+                      {([["#ffffff","Blanco"],["#000000","Negro"],[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"]] as [string,string][]).map(([color,label]) => (
+                        <div key={label} onClick={() => update({ colorFooterTexto: color })}
+                          style={{ cursor:"pointer", padding:"5px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                            background:color, color:color==="#ffffff"?"#333":"#fff",
+                            border:cfg.colorFooterTexto===color?"2px solid #333":"2px solid transparent" }}>{label}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Color iconos de redes sociales <span className="cust-ctrl-hint">(Facebook, Instagram, etc.)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorIconosSociales}
+                        onChange={e => update({ colorIconosSociales: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorIconosSociales}</div>
+                    </div>
+                    <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
+                      {([["#ffffff","Blanco"],["#000000","Negro"],[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"]] as [string,string][]).map(([color,label]) => (
+                        <div key={label} onClick={() => update({ colorIconosSociales: color })}
+                          style={{ cursor:"pointer", padding:"5px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                            background:color, color:color==="#ffffff"?"#333":"#fff",
+                            border:cfg.colorIconosSociales===color?"2px solid #333":"2px solid transparent" }}>{label}</div>
                       ))}
                     </div>
                   </div>

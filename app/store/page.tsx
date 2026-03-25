@@ -73,6 +73,10 @@ export default function TiendaPage() {
     root.style.removeProperty("--sp-btn");
     root.style.removeProperty("--sp-btn-cta");
     root.style.removeProperty("--sp-banner");
+    root.style.removeProperty("--sp-carrito-btn");
+    root.style.removeProperty("--sp-banner-sec");
+    root.style.removeProperty("--sp-footer-texto");
+    root.style.removeProperty("--sp-iconos-sociales");
 
     const apply = (cfg: any) => {
       if (!cfg) return;
@@ -89,7 +93,11 @@ export default function TiendaPage() {
       if (cfg.colorTextoBoton)          root.style.setProperty("--sp-texto-btn",    cfg.colorTextoBoton);
       if (cfg.colorBoton)               root.style.setProperty("--sp-btn",          cfg.colorBoton);
       if (cfg.colorBotonCta)            root.style.setProperty("--sp-btn-cta",      cfg.colorBotonCta);
-      if (cfg.colorBanner)              root.style.setProperty("--sp-banner",        cfg.colorBanner);
+      if (cfg.colorBanner)              root.style.setProperty("--sp-banner",            cfg.colorBanner);
+      if (cfg.colorCarritoBoton)        root.style.setProperty("--sp-carrito-btn",       cfg.colorCarritoBoton);
+      if (cfg.colorBannerSecundario)    root.style.setProperty("--sp-banner-sec",        cfg.colorBannerSecundario);
+      if (cfg.colorFooterTexto)         root.style.setProperty("--sp-footer-texto",      cfg.colorFooterTexto);
+      if (cfg.colorIconosSociales)      root.style.setProperty("--sp-iconos-sociales",   cfg.colorIconosSociales);
       setStoreCfg({
         nombre:         cfg.nombre         || "ComerciosConecta",
         tagline:        cfg.tagline        || "Tu tienda de confianza",

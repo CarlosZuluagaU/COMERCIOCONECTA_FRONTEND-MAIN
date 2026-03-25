@@ -8,9 +8,13 @@
   --sp-texto:        #1F3B4D;
   --sp-texto-sec:    #666666;
   --sp-texto-btn:    #ffffff;
-  --sp-btn:          #1F3B4D;
-  --sp-btn-cta:      #00d4aa;
-  --sp-banner:       #1F3B4D;
+  --sp-btn:              #1F3B4D;
+  --sp-btn-cta:          #00d4aa;
+  --sp-banner:           #1F3B4D;
+  --sp-carrito-btn:      #00d4aa;
+  --sp-banner-sec:       #00d4aa;
+  --sp-footer-texto:     #ffffff;
+  --sp-iconos-sociales:  #ffffff;
 }
 
 /* ─── STORE PAGE ─────────────────────────────────────── */
@@ -114,7 +118,7 @@
   display: flex !important;
   align-items: center;
   gap: 6px;
-  background: var(--sp-accent) !important;
+  background: var(--sp-carrito-btn, var(--sp-accent)) !important;
   color: var(--sp-primary) !important;
   border: none !important;
   padding: 8px 18px !important;
@@ -173,7 +177,7 @@
 
 /* ─── HERO ─── */
 .hero {
-  background: linear-gradient(135deg, var(--sp-banner, var(--sp-primary)) 0%, var(--sp-banner, var(--sp-primary)) 60%, var(--sp-btn-cta, var(--sp-accent)) 100%);
+  background: linear-gradient(135deg, var(--sp-banner, var(--sp-primary)) 0%, var(--sp-banner, var(--sp-primary)) 60%, var(--sp-banner-sec, var(--sp-btn-cta, var(--sp-accent))) 100%);
   color: white;
   padding: 60px 40px;
   text-align: center;
@@ -320,7 +324,7 @@
   padding-bottom: 14px;
   border-bottom: 1px solid rgba(255,255,255,.1);
 }
-.store-footer-brand span { font-size: 1rem; font-weight: 800; color: white; }
+.store-footer-brand span { font-size: 1rem; font-weight: 800; color: var(--sp-footer-texto, white); }
 .store-footer-brand strong { color: var(--sp-accent); }
 .store-footer-brand small { display: block; font-size: .7rem; color: rgba(255,255,255,.45); margin-top: 2px; }
 .store-footer-social { display: flex; gap: 8px; }
@@ -332,7 +336,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--sp-iconos-sociales, white);
   text-decoration: none;
   font-size: 1rem;
   transition: background .15s;
@@ -344,7 +348,7 @@
   align-items: center;
   padding-top: 10px;
   font-size: .72rem;
-  color: rgba(255,255,255,.4);
+  color: var(--sp-footer-texto, rgba(255,255,255,.7));
 }
 
 /* ─── CART OVERLAY ─── */
