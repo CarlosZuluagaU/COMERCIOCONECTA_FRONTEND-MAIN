@@ -23,6 +23,8 @@ export default function OrderConfirmationPage() {
   const searchParams = useSearchParams();
   const [order, setOrder]         = useState<ConfirmedOrder | null>(null);
   const [loading, setLoading]     = useState(true);
+  const [apiError, setApiError]   = useState<string | null>(null);
+  const [retrying, setRetrying]   = useState(false);
   const [countdown, setCountdown] = useState(5);
 
   const wompiStatus   = (searchParams.get("status") || "").toUpperCase();
@@ -32,6 +34,37 @@ export default function OrderConfirmationPage() {
 
   const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
+  const confirmOrder = async (pending: any) => {
+    setRetrying(true);
+    setApiError(null);
+    try {
+      const res = await fetch(`${API}/checkout/confirm-order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pending),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Error del servidor (HTTP ${res.status})`);
+      }
+      const data = await res.json();
+      // Solo eliminar pendingOrder después de registrar con éxito
+      localStorage.removeItem("pendingOrder");
+      setOrder({
+        orderId:      data.orderId,
+        orderNumber:  data.orderNumber,
+        wompiRef:     wompiId,
+        customerName: pending.customerName,
+        customerCity: pending.customerCity,
+        total:        pending.totalInCents / 100,
+      });
+    } catch (e: any) {
+      setApiError(e.message || "No se pudo registrar el pedido");
+    } finally {
+      setRetrying(false);
+    }
+  };
+
   useEffect(() => {
     const run = async () => {
       try {
@@ -40,33 +73,18 @@ export default function OrderConfirmationPage() {
         const pending = JSON.parse(raw);
 
         if (isPaid) {
-          // Pago aprobado → crear el pedido ahora
-          localStorage.removeItem("pendingOrder");
-          const res = await fetch(`${API}/checkout/confirm-order`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(pending),
-          });
-          if (res.ok) {
-            const data = await res.json();
-            setOrder({
-              orderId:      data.orderId,
-              orderNumber:  data.orderNumber,
-              wompiRef:     wompiId,
-              customerName: pending.customerName,
-              customerCity: pending.customerCity,
-              total:        pending.totalInCents / 100,
-            });
-          }
+          await confirmOrder(pending);
         } else if (isFailed) {
-          // Pago rechazado → NO crear pedido, solo limpiar
           localStorage.removeItem("pendingOrder");
         }
-        // Si wompiStatus está vacío (llegó sin parámetros), no hacer nada
-      } catch {}
-      finally { setLoading(false); }
+      } catch (e: any) {
+        setApiError(e.message || "Error inesperado");
+      } finally {
+        setLoading(false);
+      }
     };
     run();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Cuenta regresiva y redirección automática si pago falló
@@ -83,6 +101,44 @@ export default function OrderConfirmationPage() {
         <div style={{ textAlign: "center", color: "#888" }}>
           <div style={{ fontSize: "2rem", marginBottom: 12 }}>⏳</div>
           <p>Procesando tu pedido…</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error al registrar el pedido (pago aprobado pero API falló)
+  if (apiError && !order) {
+    const raw = typeof window !== "undefined" ? localStorage.getItem("pendingOrder") : null;
+    const pending = raw ? JSON.parse(raw) : null;
+    return (
+      <div className="store-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "#f4f6f8" }}>
+        <div className="co-panel" style={{ maxWidth: 430 }}>
+          <div className="co-body co-confirmation" style={{ textAlign: "center" }}>
+            <div style={{ fontSize: "3rem", marginBottom: 12 }}>⚠️</div>
+            <h2 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#1F3B4D", marginBottom: 8 }}>
+              Tu pago fue aprobado
+            </h2>
+            <p style={{ color: "#555", fontSize: ".88rem", marginBottom: 16 }}>
+              Wompi procesó el pago exitosamente, pero hubo un error al registrar tu pedido.<br />
+              <strong>No se realizó ningún cobro adicional.</strong>
+            </p>
+            <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 10, padding: "12px 16px", marginBottom: 20, fontSize: ".82rem", color: "#b91c1c", textAlign: "left" }}>
+              {apiError}
+            </div>
+            {pending && (
+              <button
+                className="co-btn-primary"
+                disabled={retrying}
+                onClick={() => confirmOrder(pending)}
+                style={{ marginBottom: 10 }}
+              >
+                {retrying ? "Reintentando…" : "🔄 Reintentar registro de pedido"}
+              </button>
+            )}
+            <p style={{ fontSize: ".75rem", color: "#aaa" }}>
+              Referencia Wompi: <strong>{wompiId}</strong> — guarda esta referencia para soporte.
+            </p>
+          </div>
         </div>
       </div>
     );

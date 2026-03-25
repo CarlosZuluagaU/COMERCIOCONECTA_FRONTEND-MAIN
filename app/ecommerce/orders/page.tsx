@@ -80,7 +80,8 @@ export default function OrdenesEcommercePage() {
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [enviando, setEnviando]     = useState<number | null>(null);
+  const [enviando, setEnviando]       = useState<number | null>(null);
+  const [facturando, setFacturando]   = useState<number | null>(null);
   const [pagina, setPagina]         = useState(1);
   const [detalle, setDetalle]       = useState<OrdenDisplay | null>(null);
   const [cambiandoEstado, setCambiandoEstado] = useState(false);
@@ -183,6 +184,23 @@ export default function OrdenesEcommercePage() {
       alert("Error al enviar: " + (e.message || "intenta de nuevo"));
     } finally {
       setEnviando(null);
+    }
+  };
+
+  const facturarPedido = async (o: OrdenDisplay) => {
+    if (!confirm(`¿Facturar electrónicamente el pedido ${o.id}?\nSi no ha sido enviado, se marcará como enviado primero.`)) return;
+    setFacturando(o.orderId);
+    try {
+      const res = await fetch(`${API_BASE_URL}/checkout/orders/${o.orderId}/facturar`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
+      setDetalle(null);
+      await fetchOrdenes();
+      alert(`✅ Factura electrónica generada\nNúmero Factus: ${data.factusNumber || "—"}\nEstado: ${data.status || "OK"}`);
+    } catch (e: any) {
+      alert("Error al facturar: " + (e.message || "intenta de nuevo"));
+    } finally {
+      setFacturando(null);
     }
   };
 
@@ -386,20 +404,36 @@ export default function OrdenesEcommercePage() {
                 </div>
 
                 {/* Actions */}
-                {detalle.estado === "Pagada" ? (
-                  <button
-                    onClick={() => enviarPedido(detalle)}
-                    disabled={enviando === detalle.orderId}
-                    style={{
-                      display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                      width: "100%", padding: "13px", background: "linear-gradient(135deg,#00d4aa,#00a88f)",
-                      color: "white", border: "none", borderRadius: 10,
-                      fontSize: "1rem", fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
-                    }}
-                  >
-                    <FiTruck />
-                    {enviando === detalle.orderId ? "Enviando…" : "Enviar Pedido"}
-                  </button>
+                {(detalle.estado === "Pagada" || detalle.estado === "Enviada") ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {detalle.estado === "Pagada" && (
+                      <button
+                        onClick={() => enviarPedido(detalle)}
+                        disabled={enviando === detalle.orderId}
+                        style={{
+                          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                          width: "100%", padding: "12px", background: "linear-gradient(135deg,#00d4aa,#00a88f)",
+                          color: "white", border: "none", borderRadius: 10,
+                          fontSize: ".95rem", fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+                        }}
+                      >
+                        <FiTruck />
+                        {enviando === detalle.orderId ? "Enviando…" : "Marcar como Enviado"}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => facturarPedido(detalle)}
+                      disabled={facturando === detalle.orderId}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                        width: "100%", padding: "12px", background: "linear-gradient(135deg,#1F3B4D,#2d5470)",
+                        color: "white", border: "none", borderRadius: 10,
+                        fontSize: ".95rem", fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+                      }}
+                    >
+                      🧾 {facturando === detalle.orderId ? "Facturando…" : "Generar Factura Electrónica"}
+                    </button>
+                  </div>
                 ) : (
                   <button
                     onClick={() => setDetalle(null)}
@@ -518,7 +552,7 @@ export default function OrdenesEcommercePage() {
                             >
                               <FiEye size={13} /> Ver
                             </button>
-                            {(o.estado === "Pagada" || o.estado === "Pendiente") && (
+                            {o.estado === "Pagada" && (
                               <button
                                 className="pl-act-btn"
                                 style={{ background: "#d1fae5", color: "#065f46", display: "inline-flex", alignItems: "center", gap: 4 }}
@@ -526,7 +560,17 @@ export default function OrdenesEcommercePage() {
                                 disabled={enviando === o.orderId}
                               >
                                 <FiTruck size={13} />
-                                {enviando === o.orderId ? "Enviando…" : "Enviar"}
+                                {enviando === o.orderId ? "…" : "Enviar"}
+                              </button>
+                            )}
+                            {(o.estado === "Pagada" || o.estado === "Enviada") && (
+                              <button
+                                className="pl-act-btn"
+                                style={{ background: "#ede9fe", color: "#5b21b6", display: "inline-flex", alignItems: "center", gap: 4 }}
+                                onClick={() => facturarPedido(o)}
+                                disabled={facturando === o.orderId}
+                              >
+                                🧾 {facturando === o.orderId ? "…" : "Facturar"}
                               </button>
                             )}
                           </div>
