@@ -26,7 +26,7 @@ interface Cliente {
 const PAGE_SIZE = 10;
 
 export default function ListadoClientesPage() {
-  const { comercioId } = useAuth();
+  const { comercioId, authLoaded } = useAuth();
   const [clientes, setClientes]     = useState<Cliente[]>([]);
   const [loading, setLoading]       = useState(true);
   const [activeMenu, setActiveMenu] = useState<string | null>("Clientes");
@@ -48,7 +48,11 @@ export default function ListadoClientesPage() {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchClientes(); }, [API_BASE_URL]);
+  useEffect(() => {
+    if (!authLoaded) return;
+    fetchClientes();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoaded, comercioId]);
 
   const eliminarCliente = (id: number) => {
     if (!confirm("¿Está seguro de eliminar este cliente?")) return;

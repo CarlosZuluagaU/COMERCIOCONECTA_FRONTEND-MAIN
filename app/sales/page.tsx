@@ -45,7 +45,7 @@ function estadoLabel(estado: string) {
 
 export default function VentasPage() {
   const router = useRouter();
-  const { comercioId } = useAuth();
+  const { comercioId, authLoaded } = useAuth();
   const [ventas, setVentas]         = useState<any[]>([]);
   const [loading, setLoading]       = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -73,7 +73,11 @@ export default function VentasPage() {
     }
   };
 
-  useEffect(() => { fetchVentas(); }, [API_BASE_URL]);
+  useEffect(() => {
+    if (!authLoaded) return;
+    fetchVentas();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoaded, comercioId]);
 
   const filtradas = ventas.filter(v => {
     const q = busqueda.toLowerCase();

@@ -72,7 +72,7 @@ function formatPesos(n: number) {
 }
 
 export default function OrdenesEcommercePage() {
-  const { user, comercioId } = useAuth();
+  const { user, comercioId, authLoaded } = useAuth();
   const [activeMenu, setActiveMenu] = useState<string | null>("E-commerce");
   const [busqueda, setBusqueda]     = useState("");
   const [filtroEstado, setFiltroEstado] = useState("");
@@ -141,7 +141,12 @@ export default function OrdenesEcommercePage() {
     } catch {}
   };
 
-  useEffect(() => { fetchOrdenes(); fetchLowStock(); }, []);
+  useEffect(() => {
+    if (!authLoaded) return;
+    fetchOrdenes();
+    fetchLowStock();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoaded, comercioId]);
 
   const ordenesFiltradas = ordenes.filter((o) => {
     const q = busqueda.toLowerCase();
