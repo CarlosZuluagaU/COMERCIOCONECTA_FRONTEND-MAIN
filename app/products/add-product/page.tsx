@@ -11,7 +11,6 @@ interface Proveedor { id: string; nombre: string; tipo: string; estado: "Activo"
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
-const MARCAS = ["Nivea","L'Oréal","Dove","Head & Shoulders","MAC","Maybelline","Bayer","Pfizer","Genérico"];
 
 const INITIAL = {
   nombre: "", referencia: "", precioCompra: 0, precioVenta: 0,
@@ -34,6 +33,10 @@ export default function AgregarProductoPage() {
   const [catInput, setCatInput] = useState("");
   const [catOpen, setCatOpen] = useState(false);
   const catRef = useRef<HTMLDivElement>(null);
+  const [marcas, setMarcas] = useState<string[]>([]);
+  const [marcaInput, setMarcaInput] = useState("");
+  const [marcaOpen, setMarcaOpen] = useState(false);
+  const marcaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -44,16 +47,17 @@ export default function AgregarProductoPage() {
     const cid = comercioId;
     if (cid) {
       fetch(`${API}/productos/categorias?comercioId=${cid}`, { headers: { Authorization: `Bearer ${token}` } })
-        .then(r => r.ok ? r.json() : [])
-        .then(setCategorias)
-        .catch(() => setCategorias([]));
+        .then(r => r.ok ? r.json() : []).then(setCategorias).catch(() => setCategorias([]));
+      fetch(`${API}/productos/marcas?comercioId=${cid}`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.ok ? r.json() : []).then(setMarcas).catch(() => setMarcas([]));
     }
   }, [token, comercioId]);
 
-  // Cerrar dropdown al hacer clic fuera
+  // Cerrar dropdowns al hacer clic fuera
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (catRef.current && !catRef.current.contains(e.target as Node)) setCatOpen(false);
+      if (marcaRef.current && !marcaRef.current.contains(e.target as Node)) setMarcaOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -157,10 +161,36 @@ export default function AgregarProductoPage() {
                 <div className="adm-row">
                   <div className="adm-field">
                     <label>Marca</label>
-                    <select value={form.marca} onChange={handleChange("marca")}>
-                      <option value="">Seleccionar marca</option>
-                      {MARCAS.map(m => <option key={m}>{m}</option>)}
-                    </select>
+                    <div ref={marcaRef} style={{ position: "relative" }}>
+                      <input
+                        value={marcaInput}
+                        onChange={e => { setMarcaInput(e.target.value); setForm(prev => ({ ...prev, marca: e.target.value })); setMarcaOpen(true); }}
+                        onFocus={() => setMarcaOpen(true)}
+                        placeholder="Escribe o selecciona una marca"
+                        autoComplete="off"
+                      />
+                      {marcaOpen && (
+                        <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 100, background: "white", border: "1px solid #d1d5db", borderRadius: 8, boxShadow: "0 4px 12px rgba(0,0,0,.1)", maxHeight: 200, overflowY: "auto" }}>
+                          {marcas.filter(m => m.toLowerCase().includes(marcaInput.toLowerCase())).map(m => (
+                            <div key={m} onMouseDown={() => { setMarcaInput(m); setForm(prev => ({ ...prev, marca: m })); setMarcaOpen(false); }}
+                              style={{ padding: "8px 12px", cursor: "pointer", fontSize: ".88rem" }}
+                              onMouseEnter={e => (e.currentTarget.style.background = "#f0fdf4")}
+                              onMouseLeave={e => (e.currentTarget.style.background = "white")}
+                            >{m}</div>
+                          ))}
+                          {marcaInput && !marcas.some(m => m.toLowerCase() === marcaInput.toLowerCase()) && (
+                            <div onMouseDown={() => { setMarcas(prev => [...prev, marcaInput]); setForm(prev => ({ ...prev, marca: marcaInput })); setMarcaOpen(false); }}
+                              style={{ padding: "8px 12px", cursor: "pointer", fontSize: ".88rem", color: "#00a88f", fontWeight: 600 }}
+                              onMouseEnter={e => (e.currentTarget.style.background = "#f0fdf4")}
+                              onMouseLeave={e => (e.currentTarget.style.background = "white")}
+                            >+ Crear marca "{marcaInput}"</div>
+                          )}
+                          {marcas.length === 0 && !marcaInput && (
+                            <div style={{ padding: "8px 12px", fontSize: ".82rem", color: "#aaa" }}>Escribe para crear tu primera marca</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="adm-field">
                     <label>Estado</label>
