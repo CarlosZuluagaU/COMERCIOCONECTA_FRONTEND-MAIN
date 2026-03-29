@@ -228,35 +228,7 @@ export default function OrdenesEcommercePage() {
       <Sidebar activeMenu={activeMenu} onMenuToggle={setActiveMenu} />
       <main className="dashboard-main">
 
-        {/* ── ALERTA STOCK BAJO ── */}
-        {lowStock.length > 0 && (
-          <div style={{
-            display: "flex", alignItems: "center", gap: 10,
-            background: "#fffbf5", border: "1px solid #ffe4b8",
-            borderLeft: "3px solid #f59e0b", borderRadius: 8,
-            padding: "8px 14px", marginBottom: 16,
-          }}>
-            <span style={{ fontSize: ".85rem" }}>⚠️</span>
-            <span style={{ fontSize: ".82rem", color: "#92400e", flex: 1 }}>
-              <strong>{lowStock.length}</strong> producto{lowStock.length > 1 ? "s" : ""} con stock bajo
-              {showLowStock && (
-                <span style={{ marginLeft: 12, color: "#78350f" }}>
-                  {lowStock.map((p, i) => (
-                    <span key={i} style={{ marginRight: 12 }}>
-                      {p.nombre} <span style={{ color: "#dc2626", fontWeight: 700 }}>{p.stock}</span>/{p.stockMinimo}
-                    </span>
-                  ))}
-                </span>
-              )}
-            </span>
-            <button
-              onClick={() => setShowLowStock(v => !v)}
-              style={{ background: "none", border: "none", cursor: "pointer", color: "#b45309", fontSize: ".78rem", whiteSpace: "nowrap", padding: 0 }}
-            >
-              {showLowStock ? "Ocultar" : "Ver"}
-            </button>
-          </div>
-        )}
+        {/* ── ALERTA STOCK BAJO (desactivada temporalmente) ── */}
 
         {/* ── FLOATING DETAIL PANEL ── */}
         {detalle && (
