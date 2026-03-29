@@ -240,7 +240,6 @@ export default function AgregarProductoPage() {
                       )}
                     </div>
                   </div>
-                  </div>
                 </div>
                 <div className="adm-row">
                   <div className="adm-field adm-field-full">
