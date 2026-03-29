@@ -12,9 +12,6 @@ interface Proveedor { id: string; nombre: string; tipo: string; estado: "Activo"
 const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
 const MARCAS = ["Nivea","L'Oréal","Dove","Head & Shoulders","MAC","Maybelline","Bayer","Pfizer","Genérico"];
-const ALMACENAMIENTOS = [
-  "Temperatura ambiente","Refrigerado (2-8°C)","Protegido de la luz","Ambiente seco","Congelado",
-];
 
 export default function EditarProductoPage() {
   const { token, comercioId } = useAuth();
@@ -32,7 +29,7 @@ export default function EditarProductoPage() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     nombre: "", referencia: "", precioCompra: 0, precioVenta: 0,
-    iva: 19, categoria: "", marca: "", almacenamiento: "",
+    iva: 19, categoria: "", marca: "",
     estado: "Activo", stock: 0, stockMinimo: 5, proveedor: "", descripcion: "",
   });
   const [imagenUrl, setImagenUrl] = useState<string>("");
@@ -71,7 +68,6 @@ export default function EditarProductoPage() {
           iva:           prod.iva           ?? 19,
           categoria:     prod.categoria     || "",
           marca:         prod.marca         || "",
-          almacenamiento:prod.almacenamiento|| "",
           estado:        prod.estado        || "Activo",
           stock:         prod.stock         ?? 0,
           stockMinimo:   prod.stockMinimo   ?? 5,
@@ -201,6 +197,15 @@ export default function EditarProductoPage() {
                     </select>
                   </div>
                   <div className="adm-field">
+                    <label>Estado</label>
+                    <select value={form.estado} onChange={handleChange("estado")}>
+                      <option value="Activo">Activo</option>
+                      <option value="Inactivo">Inactivo</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="adm-row">
+                  <div className="adm-field adm-field-full">
                     <label>Categoría *</label>
                     <div ref={catRef} style={{ position: "relative" }}>
                       <input
@@ -232,22 +237,6 @@ export default function EditarProductoPage() {
                         </div>
                       )}
                     </div>
-                  </div>
-                </div>
-                <div className="adm-row">
-                  <div className="adm-field">
-                    <label>Estado</label>
-                    <select value={form.estado} onChange={handleChange("estado")}>
-                      <option value="Activo">Activo</option>
-                      <option value="Inactivo">Inactivo</option>
-                    </select>
-                  </div>
-                  <div className="adm-field">
-                    <label>Almacenamiento</label>
-                    <select value={form.almacenamiento} onChange={handleChange("almacenamiento")}>
-                      <option value="">Seleccionar condición</option>
-                      {ALMACENAMIENTOS.map(a => <option key={a}>{a}</option>)}
-                    </select>
                   </div>
                 </div>
                 <div className="adm-row">
