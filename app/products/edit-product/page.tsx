@@ -11,23 +11,23 @@ interface Proveedor { id: string; nombre: string; tipo: string; estado: "Activo"
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
-const CATEGORIAS = [
-  "Medicamentos","Cuidado Personal","Cosméticos","Maquillaje",
-  "Suplementos","Cuidado Capilar","Higiene","Accesorios",
-];
 const MARCAS = ["Nivea","L'Oréal","Dove","Head & Shoulders","MAC","Maybelline","Bayer","Pfizer","Genérico"];
 const ALMACENAMIENTOS = [
   "Temperatura ambiente","Refrigerado (2-8°C)","Protegido de la luz","Ambiente seco","Congelado",
 ];
 
 export default function EditarProductoPage() {
-  const { token } = useAuth();
+  const { token, comercioId } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const productoId = searchParams.get("id");
 
   const [activeMenu, setActiveMenu] = useState<string | null>("Productos");
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
+  const [categorias, setCategorias] = useState<string[]>([]);
+  const [catInput, setCatInput] = useState("");
+  const [catOpen, setCatOpen] = useState(false);
+  const catRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
@@ -40,7 +40,19 @@ export default function EditarProductoPage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (catRef.current && !catRef.current.contains(e.target as Node)) setCatOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  useEffect(() => {
     if (!token || !productoId) return;
+    if (comercioId) {
+      fetch(`${API}/productos/categorias?comercioId=${comercioId}`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.ok ? r.json() : []).then(setCategorias).catch(() => setCategorias([]));
+    }
 
     Promise.all([
       fetch(`${API}/productos/${productoId}`, { headers: { Authorization: `Bearer ${token}` } })
@@ -50,6 +62,7 @@ export default function EditarProductoPage() {
     ]).then(([prod, provs]) => {
       setProveedores(provs);
       if (prod) {
+        setCatInput(prod.categoria || "");
         setForm({
           nombre:        prod.nombre        || "",
           referencia:    prod.referencia    || "",
@@ -189,10 +202,36 @@ export default function EditarProductoPage() {
                   </div>
                   <div className="adm-field">
                     <label>Categoría *</label>
-                    <select value={form.categoria} onChange={handleChange("categoria")}>
-                      <option value="">Seleccionar categoría</option>
-                      {CATEGORIAS.map(c => <option key={c}>{c}</option>)}
-                    </select>
+                    <div ref={catRef} style={{ position: "relative" }}>
+                      <input
+                        value={catInput}
+                        onChange={e => { setCatInput(e.target.value); setForm(prev => ({ ...prev, categoria: e.target.value })); setCatOpen(true); }}
+                        onFocus={() => setCatOpen(true)}
+                        placeholder="Escribe o selecciona una categoría"
+                        autoComplete="off"
+                      />
+                      {catOpen && (
+                        <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 100, background: "white", border: "1px solid #d1d5db", borderRadius: 8, boxShadow: "0 4px 12px rgba(0,0,0,.1)", maxHeight: 200, overflowY: "auto" }}>
+                          {categorias.filter(c => c.toLowerCase().includes(catInput.toLowerCase())).map(c => (
+                            <div key={c} onMouseDown={() => { setCatInput(c); setForm(prev => ({ ...prev, categoria: c })); setCatOpen(false); }}
+                              style={{ padding: "8px 12px", cursor: "pointer", fontSize: ".88rem" }}
+                              onMouseEnter={e => (e.currentTarget.style.background = "#f0fdf4")}
+                              onMouseLeave={e => (e.currentTarget.style.background = "white")}
+                            >{c}</div>
+                          ))}
+                          {catInput && !categorias.some(c => c.toLowerCase() === catInput.toLowerCase()) && (
+                            <div onMouseDown={() => { setCategorias(prev => [...prev, catInput]); setForm(prev => ({ ...prev, categoria: catInput })); setCatOpen(false); }}
+                              style={{ padding: "8px 12px", cursor: "pointer", fontSize: ".88rem", color: "#00a88f", fontWeight: 600 }}
+                              onMouseEnter={e => (e.currentTarget.style.background = "#f0fdf4")}
+                              onMouseLeave={e => (e.currentTarget.style.background = "white")}
+                            >+ Crear categoría "{catInput}"</div>
+                          )}
+                          {categorias.length === 0 && !catInput && (
+                            <div style={{ padding: "8px 12px", fontSize: ".82rem", color: "#aaa" }}>Escribe para crear tu primera categoría</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="adm-row">
