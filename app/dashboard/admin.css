@@ -288,13 +288,16 @@
 .adm-field select,
 .adm-field textarea {
   padding: 10px 13px;
+  height: 42px;
   border: 1.5px solid #e0e0e0;
   border-radius: 8px;
   font-size: .88rem;
   outline: none;
   font-family: inherit;
   background: white;
+  box-sizing: border-box;
 }
+.adm-field textarea { height: auto; min-height: 80px; }
 .adm-field input:focus,
 .adm-field select:focus,
 .adm-field textarea:focus { border-color: #00d4aa; }
