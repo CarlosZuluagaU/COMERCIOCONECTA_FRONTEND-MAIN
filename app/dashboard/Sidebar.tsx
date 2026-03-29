@@ -43,7 +43,6 @@ const menu = [
     icon: "🧾",
     sub: [
       { label: "Ver ventas",  path: "/sales" },
-      { label: "Crear venta", path: "/sales/create" },
     ],
   },
   {
