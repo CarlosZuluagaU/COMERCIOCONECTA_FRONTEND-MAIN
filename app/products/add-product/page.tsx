@@ -148,17 +148,65 @@ export default function AgregarProductoPage() {
               {/* Información General */}
               <div className="adm-fcard">
                 <h3>Información General</h3>
+
+                {/* Nombre — ancho completo */}
                 <div className="adm-row">
-                  <div className="adm-field">
+                  <div className="adm-field adm-field-full">
                     <label>Nombre *</label>
                     <input value={form.nombre} onChange={handleChange("nombre")} placeholder="Ej: Crema Hidratante" />
                   </div>
+                </div>
+
+                {/* Referencia + Estado */}
+                <div className="adm-row">
                   <div className="adm-field">
                     <label>Referencia *</label>
                     <input value={form.referencia} onChange={handleChange("referencia")} placeholder="Ej: NIV-001" />
                   </div>
+                  <div className="adm-field">
+                    <label>Estado</label>
+                    <select value={form.estado} onChange={handleChange("estado")}>
+                      <option value="Activo">Activo</option>
+                      <option value="Inactivo">Inactivo</option>
+                    </select>
+                  </div>
                 </div>
+
+                {/* Categoría + Marca */}
                 <div className="adm-row">
+                  <div className="adm-field">
+                    <label>Categoría *</label>
+                    <div ref={catRef} style={{ position: "relative" }}>
+                      <input
+                        value={catInput}
+                        onChange={e => { setCatInput(e.target.value); setForm(prev => ({ ...prev, categoria: e.target.value })); setCatOpen(true); }}
+                        onFocus={() => setCatOpen(true)}
+                        placeholder="Escribe o selecciona una categoría"
+                        autoComplete="off"
+                      />
+                      {catOpen && (
+                        <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 100, background: "white", border: "1px solid #d1d5db", borderRadius: 8, boxShadow: "0 4px 12px rgba(0,0,0,.1)", maxHeight: 200, overflowY: "auto" }}>
+                          {categorias.filter(c => c.toLowerCase().includes(catInput.toLowerCase())).map(c => (
+                            <div key={c} onMouseDown={() => { setCatInput(c); setForm(prev => ({ ...prev, categoria: c })); setCatOpen(false); }}
+                              style={{ padding: "8px 12px", cursor: "pointer", fontSize: ".88rem" }}
+                              onMouseEnter={e => (e.currentTarget.style.background = "#f0fdf4")}
+                              onMouseLeave={e => (e.currentTarget.style.background = "white")}
+                            >{c}</div>
+                          ))}
+                          {catInput && !categorias.some(c => c.toLowerCase() === catInput.toLowerCase()) && (
+                            <div onMouseDown={() => { setCategorias(prev => [...prev, catInput]); setForm(prev => ({ ...prev, categoria: catInput })); setCatOpen(false); }}
+                              style={{ padding: "8px 12px", cursor: "pointer", fontSize: ".88rem", color: "#00a88f", fontWeight: 600 }}
+                              onMouseEnter={e => (e.currentTarget.style.background = "#f0fdf4")}
+                              onMouseLeave={e => (e.currentTarget.style.background = "white")}
+                            >+ Crear categoría "{catInput}"</div>
+                          )}
+                          {categorias.length === 0 && !catInput && (
+                            <div style={{ padding: "8px 12px", fontSize: ".82rem", color: "#aaa" }}>Escribe para crear tu primera categoría</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                   <div className="adm-field">
                     <label>Marca</label>
                     <div ref={marcaRef} style={{ position: "relative" }}>
@@ -192,47 +240,6 @@ export default function AgregarProductoPage() {
                       )}
                     </div>
                   </div>
-                  <div className="adm-field">
-                    <label>Estado</label>
-                    <select value={form.estado} onChange={handleChange("estado")}>
-                      <option value="Activo">Activo</option>
-                      <option value="Inactivo">Inactivo</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="adm-row">
-                  <div className="adm-field adm-field-full">
-                    <label>Categoría *</label>
-                    <div ref={catRef} style={{ position: "relative" }}>
-                      <input
-                        value={catInput}
-                        onChange={e => { setCatInput(e.target.value); setForm(prev => ({ ...prev, categoria: e.target.value })); setCatOpen(true); }}
-                        onFocus={() => setCatOpen(true)}
-                        placeholder="Escribe o selecciona una categoría"
-                        autoComplete="off"
-                      />
-                      {catOpen && (
-                        <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 100, background: "white", border: "1px solid #d1d5db", borderRadius: 8, boxShadow: "0 4px 12px rgba(0,0,0,.1)", maxHeight: 200, overflowY: "auto" }}>
-                          {categorias.filter(c => c.toLowerCase().includes(catInput.toLowerCase())).map(c => (
-                            <div key={c} onMouseDown={() => { setCatInput(c); setForm(prev => ({ ...prev, categoria: c })); setCatOpen(false); }}
-                              style={{ padding: "8px 12px", cursor: "pointer", fontSize: ".88rem" }}
-                              onMouseEnter={e => (e.currentTarget.style.background = "#f0fdf4")}
-                              onMouseLeave={e => (e.currentTarget.style.background = "white")}
-                            >{c}</div>
-                          ))}
-                          {catInput && !categorias.some(c => c.toLowerCase() === catInput.toLowerCase()) && (
-                            <div onMouseDown={() => { setCategorias(prev => [...prev, catInput]); setForm(prev => ({ ...prev, categoria: catInput })); setCatOpen(false); }}
-                              style={{ padding: "8px 12px", cursor: "pointer", fontSize: ".88rem", color: "#00a88f", fontWeight: 600 }}
-                              onMouseEnter={e => (e.currentTarget.style.background = "#f0fdf4")}
-                              onMouseLeave={e => (e.currentTarget.style.background = "white")}
-                            >+ Crear categoría "{catInput}"</div>
-                          )}
-                          {categorias.length === 0 && !catInput && (
-                            <div style={{ padding: "8px 12px", fontSize: ".82rem", color: "#aaa" }}>Escribe para crear tu primera categoría</div>
-                          )}
-                        </div>
-                      )}
-                    </div>
                   </div>
                 </div>
                 <div className="adm-row">
