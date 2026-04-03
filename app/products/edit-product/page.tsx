@@ -35,6 +35,8 @@ export default function EditarProductoPage() {
     iva: 19, categoria: "", marca: "",
     estado: "Activo", stock: 0, stockMinimo: 5, proveedor: "", descripcion: "",
   });
+  const [precioCompraDisplay, setPrecioCompraDisplay] = useState("");
+  const [precioVentaDisplay, setPrecioVentaDisplay]   = useState("");
   const [imagenUrl, setImagenUrl] = useState<string>("");
   const [imagenNombre, setImagenNombre] = useState<string>("");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -67,6 +69,11 @@ export default function EditarProductoPage() {
       if (prod) {
         setCatInput(prod.categoria || "");
         setMarcaInput(prod.marca || "");
+        const pc = prod.precioCompra || 0;
+        const pv = prod.precioVenta  || 0;
+        const fmt = (n: number) => n ? n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "";
+        setPrecioCompraDisplay(fmt(pc));
+        setPrecioVentaDisplay(fmt(pv));
         setForm({
           nombre:        prod.nombre        || "",
           referencia:    prod.referencia    || "",
@@ -92,11 +99,7 @@ export default function EditarProductoPage() {
     }).finally(() => setLoading(false));
   }, [token, productoId]);
 
-  // Parse Colombian number format: "824.950" → 824950
-  const parseNum = (v: string) => {
-    const clean = v.replace(/\./g, "").replace(",", ".");
-    return Number(clean);
-  };
+  const fmt = (n: number) => n ? n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "";
 
   const handleChange =
     (field: string) =>
@@ -104,15 +107,25 @@ export default function EditarProductoPage() {
       const v = e.target.value;
       setForm(prev => ({
         ...prev,
-        [field]: ["precioCompra","precioVenta","iva","stock","stockMinimo"].includes(field)
-          ? parseNum(v) : v,
+        [field]: ["iva","stock","stockMinimo"].includes(field)
+          ? (Number(v.replace(/\D/g, "")) || 0) : v,
       }));
     };
 
   const handlePrecioCompra = (e: ChangeEvent<HTMLInputElement>) => {
-    const pc = parseNum(e.target.value);
+    const raw = e.target.value.replace(/\./g, "").replace(/\D/g, "");
+    const pc = Number(raw) || 0;
     const pv = Math.round(pc * (1 + form.iva / 100) * 1.4);
+    setPrecioCompraDisplay(fmt(pc));
+    setPrecioVentaDisplay(fmt(pv));
     setForm(prev => ({ ...prev, precioCompra: pc, precioVenta: pv }));
+  };
+
+  const handlePrecioVenta = (e: ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\./g, "").replace(/\D/g, "");
+    const pv = Number(raw) || 0;
+    setPrecioVentaDisplay(fmt(pv));
+    setForm(prev => ({ ...prev, precioVenta: pv }));
   };
 
   const handleImageFile = (e: ChangeEvent<HTMLInputElement>) => {
@@ -286,17 +299,17 @@ export default function EditarProductoPage() {
                 <div className="adm-row">
                   <div className="adm-field">
                     <label>Precio de Compra *</label>
-                    <input type="number" value={form.precioCompra} onChange={handlePrecioCompra} min="0" step="1" />
+                    <input type="text" inputMode="numeric" value={precioCompraDisplay} onChange={handlePrecioCompra} placeholder="0" />
                   </div>
                   <div className="adm-field">
                     <label>Precio de Venta *</label>
-                    <input type="number" value={form.precioVenta} onChange={handleChange("precioVenta")} min="0" step="1" />
+                    <input type="text" inputMode="numeric" value={precioVentaDisplay} onChange={handlePrecioVenta} placeholder="0" />
                   </div>
                 </div>
                 <div className="adm-row">
                   <div className="adm-field">
                     <label>IVA (%)</label>
-                    <input type="number" value={form.iva} onChange={handleChange("iva")} min="0" max="100" />
+                    <input type="text" inputMode="numeric" value={form.iva || ""} onChange={handleChange("iva")} placeholder="19" />
                   </div>
                   <div className="adm-field">
                     <label>Proveedor</label>
@@ -311,11 +324,11 @@ export default function EditarProductoPage() {
                 <div className="adm-row">
                   <div className="adm-field">
                     <label>Stock Actual</label>
-                    <input type="number" value={form.stock} onChange={handleChange("stock")} min="0" />
+                    <input type="text" inputMode="numeric" value={form.stock || ""} onChange={handleChange("stock")} placeholder="0" />
                   </div>
                   <div className="adm-field">
                     <label>Stock Mínimo</label>
-                    <input type="number" value={form.stockMinimo} onChange={handleChange("stockMinimo")} min="0" />
+                    <input type="text" inputMode="numeric" value={form.stockMinimo || ""} onChange={handleChange("stockMinimo")} placeholder="5" />
                   </div>
                 </div>
               </div>
