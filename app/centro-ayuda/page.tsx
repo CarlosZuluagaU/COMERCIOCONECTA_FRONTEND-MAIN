@@ -8,8 +8,8 @@ const FAQS = [
     cat: "Cuenta y registro",
     items: [
       { q: "¿Cómo creo mi cuenta en ComerciosConecta?", a: "Ve a la página de registro, ingresa tus datos personales y los de tu comercio. En menos de 2 minutos tendrás acceso a tu panel. No necesitas tarjeta de crédito para la prueba de 14 días." },
-      { q: "¿Puedo registrarme con mi cuenta de Google?", a: "Sí. En la pantalla de registro verás el botón "Registrarse con Google". Conecta tu cuenta y completa los datos de tu comercio para finalizar." },
-      { q: "¿Cómo cambio mi contraseña?", a: "Inicia sesión, ve a Mi Perfil (ícono superior derecho) y en la sección "Cambiar Contraseña" ingresa tu nueva clave. Los cambios se aplican de inmediato." },
+      { q: "¿Puedo registrarme con mi cuenta de Google?", a: "Sí. En la pantalla de registro verás el botón 'Registrarse con Google'. Conecta tu cuenta y completa los datos de tu comercio para finalizar." },
+      { q: "¿Cómo cambio mi contraseña?", a: "Inicia sesión, ve a Mi Perfil (ícono superior derecho) y en la sección 'Cambiar Contraseña' ingresa tu nueva clave. Los cambios se aplican de inmediato." },
       { q: "¿Puedo tener varios usuarios con el mismo comercio?", a: "Actualmente cada comercio tiene un usuario administrador. El soporte multi-usuario está en nuestro roadmap para el segundo semestre de 2026." },
     ],
   },
