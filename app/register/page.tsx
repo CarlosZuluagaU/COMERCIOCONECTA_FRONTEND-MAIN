@@ -14,6 +14,17 @@ const CATEGORIAS = [
   "Tecnología",
   "Ferretería",
   "Papelería",
+  "Hogar y Decoración",
+  "Deportes y Aire Libre",
+  "Juguetes y Entretenimiento",
+  "Mascotas",
+  "Arte y Cultura",
+  "Servicios Profesionales",
+  "Educación y Formación",
+  "Automotriz",
+  "Turismo y Experiencias",
+  "Electrodomésticos y Electrónica",
+  "Joyería y Accesorios",
   "Otro",
 ];
 
