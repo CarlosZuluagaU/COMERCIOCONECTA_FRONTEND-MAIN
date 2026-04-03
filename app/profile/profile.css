@@ -94,6 +94,47 @@
 }
 .prf-btn-dark:disabled { opacity: .55; cursor: not-allowed; }
 
+/* GOOGLE BADGE */
+.prf-badge-google { background: rgba(66,133,244,.15); color: #4285F4; border: 1px solid rgba(66,133,244,.3); }
+
+/* AVATAR IMG (Google photo) */
+.prf-hero-avatar-img {
+  width: 72px; height: 72px; border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255,255,255,.3);
+  flex-shrink: 0;
+}
+
+/* GOOGLE CARD */
+.prf-google-card {
+  background: #f8faff;
+  border: 1.5px solid #dbeafe;
+  border-radius: 12px;
+  padding: 18px;
+}
+.prf-google-header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+}
+.prf-google-title { font-size: .86rem; font-weight: 700; color: #1F3B4D; }
+.prf-google-email { font-size: .76rem; color: #6b7280; margin-top: 1px; }
+.prf-google-connected {
+  margin-left: auto; font-size: .7rem; font-weight: 700;
+  background: #dcfce7; color: #15803d; padding: 3px 10px; border-radius: 20px;
+  border: 1px solid #bbf7d0; white-space: nowrap;
+}
+.prf-google-desc {
+  font-size: .82rem; color: #64748b; line-height: 1.6; margin-bottom: 16px;
+}
+.prf-google-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.prf-google-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: .78rem; font-weight: 600; color: #4285F4;
+  background: white; border: 1.5px solid #dbeafe;
+  padding: 7px 14px; border-radius: 8px; text-decoration: none;
+  transition: background .15s;
+}
+.prf-google-link:hover { background: #eff6ff; }
+
 /* DANGER */
 .prf-danger-card { border: 1.5px solid #fee2e2 !important; }
 .prf-danger-item {
