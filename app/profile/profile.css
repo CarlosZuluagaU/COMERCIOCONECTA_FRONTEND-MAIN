@@ -1,0 +1,117 @@
+/* LAYOUT */
+.prf-content { max-width: 1060px !important; }
+
+.prf-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 20px;
+  align-items: start;
+}
+.prf-left  { display: flex; flex-direction: column; gap: 20px; }
+.prf-right { display: flex; flex-direction: column; gap: 20px; }
+
+/* HERO */
+.prf-hero {
+  background: linear-gradient(135deg, #1F3B4D 0%, #2d5066 100%);
+  border-radius: 16px;
+  padding: 28px 32px;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin-bottom: 4px;
+}
+.prf-hero-avatar {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, #00d4aa, #00a88f);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 800; font-size: 1.8rem;
+  border: 3px solid rgba(255,255,255,.25);
+  flex-shrink: 0;
+}
+.prf-hero-info h2 { font-size: 1.15rem; font-weight: 800; color: white; margin-bottom: 4px; }
+.prf-hero-info p  { font-size: .8rem; color: rgba(255,255,255,.6); margin-bottom: 10px; }
+.prf-hero-badges  { display: flex; gap: 8px; }
+.prf-badge {
+  font-size: .7rem; padding: 3px 12px; border-radius: 20px; font-weight: 600;
+}
+.prf-badge-green { background: rgba(0,212,170,.2); color: #00d4aa; border: 1px solid rgba(0,212,170,.3); }
+.prf-badge-dim   { background: rgba(255,255,255,.1); color: rgba(255,255,255,.75); border: 1px solid rgba(255,255,255,.2); }
+
+/* CARD TITLE */
+.prf-card-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: .88rem; font-weight: 700; color: #1F3B4D;
+  padding-bottom: 12px; margin-bottom: 18px;
+  border-bottom: 2px solid #00d4aa;
+}
+.prf-card-title-danger { color: #dc2626; border-bottom-color: #fca5a5; }
+.prf-card-title-danger svg { color: #dc2626; }
+
+/* HINT */
+.prf-hint { font-size: .7rem; color: #9ca3af; margin-top: 3px; display: block; }
+
+/* PASSWORD */
+.prf-pwd-wrap { position: relative; }
+.prf-pwd-wrap input { width: 100%; padding-right: 40px !important; }
+.prf-eye {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  background: none !important; border: none !important; cursor: pointer;
+  padding: 0 !important; font-size: .9rem; line-height: 1;
+  width: auto !important; height: auto !important; color: #6b7280 !important;
+  box-shadow: none !important;
+}
+.prf-strength { margin-top: 6px; display: flex; align-items: center; gap: 8px; }
+.prf-strength-bar {
+  flex: 1; height: 4px; background: #e5e7eb; border-radius: 2px; overflow: hidden;
+}
+
+/* MESSAGES */
+.prf-msg {
+  margin-top: 12px; padding: 10px 14px; border-radius: 8px;
+  font-size: .83rem; font-weight: 600;
+}
+.prf-msg-ok  { background: #d1fae5; color: #065f46; }
+.prf-msg-err { background: #fee2e2; color: #991b1b; }
+
+/* BUTTONS */
+.prf-btn-save {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #00d4aa, #00a88f);
+  color: #1F3B4D; border: none; padding: 11px 22px; border-radius: 10px;
+  font-size: .875rem; font-weight: 700; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,168,143,.3);
+  margin-top: 18px; transition: opacity .15s;
+}
+.prf-btn-save:disabled { opacity: .55; cursor: not-allowed; }
+
+.prf-btn-dark {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #1F3B4D, #2d5066);
+  color: white; border: none; padding: 11px 22px; border-radius: 10px;
+  font-size: .875rem; font-weight: 700; cursor: pointer;
+  margin-top: 6px; width: 100%; justify-content: center;
+  transition: opacity .15s;
+}
+.prf-btn-dark:disabled { opacity: .55; cursor: not-allowed; }
+
+/* DANGER */
+.prf-danger-card { border: 1.5px solid #fee2e2 !important; }
+.prf-danger-item {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+}
+.prf-danger-item p    { font-size: .84rem; color: #374151; font-weight: 600; margin-bottom: 2px; }
+.prf-danger-item span { font-size: .72rem; color: #9ca3af; }
+.prf-btn-outline-danger {
+  background: none !important; border: 1.5px solid #ef4444 !important;
+  color: #ef4444 !important; padding: 7px 16px; border-radius: 8px;
+  font-size: .78rem; font-weight: 700; cursor: pointer; white-space: nowrap;
+  flex-shrink: 0;
+}
+.prf-btn-outline-danger:hover { background: #fef2f2 !important; }
+
+/* 3-col row in form */
+.adm-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+@media (max-width: 900px) {
+  .prf-grid { grid-template-columns: 1fr; }
+}

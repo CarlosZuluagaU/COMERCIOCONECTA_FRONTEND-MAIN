@@ -281,6 +281,7 @@
   border-bottom: 2px solid #00d4aa;
 }
 .adm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.adm-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
 .adm-row + .adm-row { margin-top: 12px; }
 .adm-field { display: flex; flex-direction: column; gap: 5px; }
 .adm-field label { font-size: .78rem; font-weight: 600; color: #555; }
