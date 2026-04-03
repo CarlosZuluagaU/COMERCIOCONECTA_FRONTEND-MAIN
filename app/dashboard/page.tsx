@@ -108,23 +108,21 @@ export default function DashboardPage() {
               </div>
               {menuOpen && (
                 <div className="db-avatar-menu">
-                  <div className="db-avatar-menu-header">
-                    <div className="db-avatar-menu-mini">
+                  <div className="db-avatar-menu-top">
+                    <div className="db-avatar-menu-big">
                       {(user || "U").charAt(0).toUpperCase()}
                     </div>
-                    <div className="db-avatar-menu-info">
-                      <div className="db-avatar-menu-name">{user || "Usuario"}</div>
-                      <div className="db-avatar-menu-role">Administrador</div>
-                    </div>
+                    <div className="db-avatar-menu-name">{user || "Usuario"}</div>
+                    <div className="db-avatar-menu-role">Administrador</div>
                   </div>
+                  <div className="db-avatar-menu-divider" />
                   <div className="db-avatar-menu-body">
                     <button className="db-avatar-menu-item" onClick={() => { setMenuOpen(false); router.push("/profile"); }}>
-                      <span className="db-avatar-menu-item-icon">👤</span>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
                       Editar perfil
                     </button>
-                    <div className="db-avatar-menu-divider" />
                     <button className="db-avatar-menu-item db-avatar-menu-logout" onClick={() => { setMenuOpen(false); logout(); router.push("/login"); }}>
-                      <span className="db-avatar-menu-item-icon">🚪</span>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                       Cerrar sesión
                     </button>
                   </div>
