@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Editar Perfil – ComerciosConecta</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  aside { width: 220px; background: linear-gradient(180deg,#1F3B4D,#16303f); color: white; display: flex; flex-direction: column; min-height: 100vh; flex-shrink: 0; }
+  .sb-brand { padding: 28px 20px 20px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .sb-brand h1 { font-size: 1.2rem; font-weight: 800; }
+  .sb-brand h1 span { color: #00d4aa; }
+  .sb-brand p { font-size: .7rem; color: rgba(255,255,255,.45); margin-top: 2px; }
+  nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: .85rem; color: rgba(255,255,255,.7); cursor: pointer; text-decoration: none; }
+  .nav-item:hover, .nav-item.active { background: rgba(0,212,170,.15); color: #00d4aa; }
+  .nav-item .icon { width: 18px; text-align: center; font-size: .95rem; }
+  .sb-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,.08); }
+  .sb-store-btn { display:flex; align-items:center; gap:8px; background:rgba(0,212,170,.15); border:1px solid rgba(0,212,170,.3); color:#00d4aa; padding:9px 14px; border-radius:8px; font-size:.8rem; font-weight:600; margin-bottom:10px; cursor:pointer; }
+  .logout { display: flex; align-items: center; gap: 10px; background: #f56565; color: white; border: none; width: 100%; padding: 10px 14px; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; }
+  .sb-version { font-size:.65rem; color:rgba(255,255,255,.25); text-align:center; margin-top:10px; }
+
+  /* MAIN */
+  main { flex: 1; display: flex; flex-direction: column; overflow: auto; }
+
+  /* HEADER */
+  header { background: white; padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .header-title { display:flex; align-items:center; gap:10px; }
+  .header-title svg { color:#00a88f; }
+  .header-title h1 { font-size: 1.05rem; color: #1F3B4D; font-weight: 700; }
+  .btn-back { background:#f0f4f8; border:none; padding:8px 16px; border-radius:8px; font-size:.82rem; font-weight:600; color:#1F3B4D; cursor:pointer; }
+
+  /* CONTENT */
+  .content { padding: 28px; display: flex; flex-direction: column; gap: 20px; }
+
+  /* PROFILE HERO */
+  .profile-hero {
+    background: linear-gradient(135deg, #1F3B4D 0%, #2d5066 100%);
+    border-radius: 16px;
+    padding: 28px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .profile-hero::before {
+    content: "";
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(0,212,170,.08);
+  }
+  .avatar-upload {
+    position: relative;
+    flex-shrink: 0;
+  }
+  .avatar-circle {
+    width: 88px; height: 88px; border-radius: 50%;
+    background: linear-gradient(135deg, #00d4aa, #00a88f);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2rem; font-weight: 800; color: white;
+    border: 3px solid rgba(255,255,255,.3);
+    position: relative;
+  }
+  .avatar-edit-btn {
+    position: absolute; bottom: 0; right: 0;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: white; border: 2px solid #00a88f;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: .75rem;
+  }
+  .hero-info { flex: 1; }
+  .hero-info h2 { font-size: 1.3rem; font-weight: 800; color: white; margin-bottom: 4px; }
+  .hero-info p { font-size: .82rem; color: rgba(255,255,255,.6); margin-bottom: 12px; }
+  .hero-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge { font-size: .7rem; padding: 3px 12px; border-radius: 20px; font-weight: 600; }
+  .badge-green { background: rgba(0,212,170,.2); color: #00d4aa; border: 1px solid rgba(0,212,170,.3); }
+  .badge-blue  { background: rgba(255,255,255,.1); color: rgba(255,255,255,.8); border: 1px solid rgba(255,255,255,.2); }
+  .hero-stats { display: flex; flex-direction: column; gap: 8px; text-align: right; }
+  .hero-stat-val { font-size: 1.4rem; font-weight: 800; color: #00d4aa; }
+  .hero-stat-lbl { font-size: .7rem; color: rgba(255,255,255,.5); }
+
+  /* GRID */
+  .grid-2col { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start; }
+
+  /* CARDS */
+  .card { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+  .card-title {
+    font-size: .88rem; font-weight: 700; color: #1F3B4D;
+    margin-bottom: 20px; padding-bottom: 12px;
+    border-bottom: 2px solid #00d4aa;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title svg { color: #00a88f; }
+
+  /* FORM */
+  .form-row { display: grid; gap: 14px; }
+  .form-row.cols-2 { grid-template-columns: 1fr 1fr; }
+  .form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: .75rem; font-weight: 600; color: #374151; }
+  .field label span { color: #ef4444; margin-left: 2px; }
+  .field input, .field select, .field textarea {
+    padding: 9px 13px; border: 1.5px solid #e0e0e0; border-radius: 8px;
+    font-size: .86rem; color: #1F3B4D; font-family: inherit;
+    outline: none; transition: border .15s;
+    background: white;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: #00a88f; }
+  .field textarea { resize: vertical; min-height: 76px; }
+  .field .hint { font-size: .7rem; color: #9ca3af; margin-top: 2px; }
+  .field .hint.info { color: #6b7280; }
+
+  /* SECTION DIVIDER */
+  .section-sep { grid-column: 1 / -1; height: 1px; background: #f0f2f5; margin: 6px 0; }
+
+  /* SAVE BTN */
+  .btn-save {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, #00d4aa, #00a88f);
+    color: white; border: none; padding: 11px 22px; border-radius: 10px;
+    font-size: .875rem; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,168,143,.3);
+    margin-top: 18px;
+  }
+  .btn-danger {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, #1F3B4D, #2d5066);
+    color: white; border: none; padding: 11px 22px; border-radius: 10px;
+    font-size: .875rem; font-weight: 700; cursor: pointer;
+    margin-top: 18px;
+  }
+
+  /* RIGHT SIDEBAR CARDS */
+  .right-col { display: flex; flex-direction: column; gap: 20px; }
+
+  /* PASSWORD STRENGTH */
+  .pwd-strength { margin-top: 6px; }
+  .pwd-bar { height: 4px; border-radius: 2px; background: #e5e7eb; overflow: hidden; }
+  .pwd-fill { height: 100%; border-radius: 2px; width: 35%; background: #f59e0b; }
+  .pwd-label { font-size: .68rem; color: #f59e0b; margin-top: 3px; font-weight: 600; }
+
+  /* ACTIVITY LOG */
+  .activity-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+  .activity-item:last-child { border-bottom: none; }
+  .act-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+  .act-text { font-size: .8rem; color: #374151; font-weight: 500; }
+  .act-time { font-size: .7rem; color: #9ca3af; margin-top: 1px; }
+
+  /* DANGER ZONE */
+  .danger-card { border: 1.5px solid #fee2e2; }
+  .danger-card .card-title { color: #dc2626; border-bottom-color: #fca5a5; }
+  .danger-card .card-title svg { color: #dc2626; }
+  .danger-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #fef2f2; }
+  .danger-item:last-child { border-bottom: none; }
+  .danger-item p { font-size: .84rem; color: #374151; font-weight: 600; }
+  .danger-item span { font-size: .73rem; color: #9ca3af; }
+  .btn-danger-outline { background: none; border: 1.5px solid #ef4444; color: #ef4444; padding: 6px 14px; border-radius: 8px; font-size: .78rem; font-weight: 600; cursor: pointer; }
+
+  /* SUCCESS TOAST (decorativo) */
+  .toast { display:flex; align-items:center; gap:10px; background:#d1fae5; border:1px solid #a7f3d0; border-radius:10px; padding:12px 16px; font-size:.83rem; color:#065f46; font-weight:600; margin-bottom:4px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside>
+  <div class="sb-brand">
+    <h1>Comercios<span>Conecta</span></h1>
+    <p>Suite empresarial</p>
+  </div>
+  <nav>
+    <a class="nav-item" href="#"><span class="icon">📊</span> Estadísticas</a>
+    <a class="nav-item" href="#"><span class="icon">📦</span> Productos</a>
+    <a class="nav-item" href="#"><span class="icon">🛒</span> Pedidos</a>
+    <a class="nav-item" href="#"><span class="icon">👥</span> Clientes</a>
+    <a class="nav-item" href="#"><span class="icon">🧾</span> Facturación</a>
+    <a class="nav-item" href="#"><span class="icon">📥</span> Compras</a>
+    <a class="nav-item active" href="#"><span class="icon">👤</span> Mi Perfil</a>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-store-btn">🛍️ Ver mi Tienda</div>
+    <button class="logout">🚪 Cerrar sesión</button>
+    <div class="sb-version">Sistema v1.0.0</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main>
+  <!-- HEADER -->
+  <header>
+    <div class="header-title">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      <h1>Editar Perfil</h1>
+    </div>
+    <button class="btn-back">← Volver</button>
+  </header>
+
+  <div class="content">
+
+    <!-- TOAST (éxito guardado) -->
+    <!-- <div class="toast">✅ Perfil actualizado correctamente</div> -->
+
+    <!-- HERO -->
+    <div class="profile-hero">
+      <div class="avatar-upload">
+        <div class="avatar-circle">
+          J
+          <div class="avatar-edit-btn" title="Cambiar foto">✏️</div>
+        </div>
+      </div>
+      <div class="hero-info">
+        <h2>Joseph Roldan</h2>
+        <p>joseph@gmail.com · Miembro desde marzo 2025</p>
+        <div class="hero-badges">
+          <span class="badge badge-green">● Activo</span>
+          <span class="badge badge-blue">🏪 Comodisimo</span>
+          <span class="badge badge-blue">Administrador</span>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-val">47</div>
+          <div class="hero-stat-lbl">Pedidos gestionados</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRID PRINCIPAL -->
+    <div class="grid-2col">
+
+      <!-- COLUMNA IZQUIERDA -->
+      <div style="display:flex;flex-direction:column;gap:20px;">
+
+        <!-- INFORMACIÓN PERSONAL -->
+        <div class="card">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            Información Personal
+          </div>
+
+          <div class="form-row cols-2">
+            <div class="field">
+              <label>Nombre <span>*</span></label>
+              <input type="text" value="Joseph" placeholder="Tu nombre" />
+            </div>
+            <div class="field">
+              <label>Apellido <span>*</span></label>
+              <input type="text" value="Roldan" placeholder="Tu apellido" />
+            </div>
+          </div>
+
+          <div class="form-row cols-2" style="margin-top:14px;">
+            <div class="field">
+              <label>Correo electrónico <span>*</span></label>
+              <input type="email" value="joseph@gmail.com" />
+              <span class="hint info">Si cambias el correo, tu sesión se actualizará</span>
+            </div>
+            <div class="field">
+              <label>Teléfono</label>
+              <input type="tel" value="+57 300 000 0000" placeholder="+57 300 000 0000" />
+            </div>
+          </div>
+
+          <div class="form-row cols-3" style="margin-top:14px;">
+            <div class="field">
+              <label>Tipo de documento</label>
+              <select>
+                <option>Cédula de ciudadanía</option>
+                <option>NIT</option>
+                <option>Cédula de extranjería</option>
+                <option>Pasaporte</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Número de documento</label>
+              <input type="text" value="1234567890" placeholder="Número" />
+            </div>
+            <div class="field">
+              <label>Fecha de nacimiento</label>
+              <input type="date" value="1998-06-15" />
+            </div>
+          </div>
+
+          <div class="form-row cols-2" style="margin-top:14px;">
+            <div class="field">
+              <label>País</label>
+              <select>
+                <option selected>Colombia</option>
+                <option>Venezuela</option>
+                <option>Ecuador</option>
+                <option>Perú</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Ciudad</label>
+              <input type="text" value="Medellín" placeholder="Tu ciudad" />
+            </div>
+          </div>
+
+          <div class="form-row" style="margin-top:14px;">
+            <div class="field">
+              <label>Dirección</label>
+              <input type="text" value="Cra 45 #78-12, El Poblado" placeholder="Dirección de residencia" />
+            </div>
+          </div>
+
+          <div class="form-row" style="margin-top:14px;">
+            <div class="field">
+              <label>Biografía / Descripción</label>
+              <textarea placeholder="Cuéntanos un poco sobre ti o tu rol en el negocio…">Administrador principal del comercio Comodísimo. Encargado de ventas y facturación.</textarea>
+              <span class="hint">Visible en el perfil interno del equipo</span>
+            </div>
+          </div>
+
+          <button class="btn-save">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Guardar cambios
+          </button>
+        </div>
+
+        <!-- PREFERENCIAS -->
+        <div class="card">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2"/></svg>
+            Preferencias del Sistema
+          </div>
+          <div class="form-row cols-2">
+            <div class="field">
+              <label>Moneda</label>
+              <select>
+                <option selected>COP – Peso colombiano</option>
+                <option>USD – Dólar</option>
+                <option>EUR – Euro</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Zona horaria</label>
+              <select>
+                <option selected>America/Bogota (UTC-5)</option>
+                <option>America/New_York (UTC-5)</option>
+                <option>America/Lima (UTC-5)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row cols-2" style="margin-top:14px;">
+            <div class="field">
+              <label>Idioma de la plataforma</label>
+              <select>
+                <option selected>Español</option>
+                <option>English</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Formato de fecha</label>
+              <select>
+                <option selected>DD/MM/AAAA</option>
+                <option>MM/DD/YYYY</option>
+                <option>AAAA-MM-DD</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-save" style="margin-top:18px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Guardar preferencias
+          </button>
+        </div>
+
+      </div>
+
+      <!-- COLUMNA DERECHA -->
+      <div class="right-col">
+
+        <!-- CAMBIAR CONTRASEÑA -->
+        <div class="card">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Seguridad
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>Contraseña actual <span>*</span></label>
+              <input type="password" placeholder="••••••••" />
+            </div>
+            <div class="field" style="margin-top:10px;">
+              <label>Nueva contraseña <span>*</span></label>
+              <input type="password" placeholder="Mínimo 6 caracteres" />
+              <div class="pwd-strength">
+                <div class="pwd-bar"><div class="pwd-fill"></div></div>
+                <div class="pwd-label">Seguridad: Media</div>
+              </div>
+            </div>
+            <div class="field" style="margin-top:10px;">
+              <label>Confirmar contraseña <span>*</span></label>
+              <input type="password" placeholder="Repite la contraseña" />
+            </div>
+          </div>
+          <button class="btn-danger">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Cambiar contraseña
+          </button>
+        </div>
+
+        <!-- ACTIVIDAD RECIENTE -->
+        <div class="card">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Actividad Reciente
+          </div>
+          <div class="activity-item">
+            <div class="act-dot" style="background:#10b981;"></div>
+            <div>
+              <div class="act-text">Inicio de sesión exitoso</div>
+              <div class="act-time">Hoy, 9:32 a.m. · Chrome / Windows</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="act-dot" style="background:#3b82f6;"></div>
+            <div>
+              <div class="act-text">Perfil actualizado</div>
+              <div class="act-time">Ayer, 4:15 p.m.</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="act-dot" style="background:#f59e0b;"></div>
+            <div>
+              <div class="act-text">Contraseña cambiada</div>
+              <div class="act-time">Hace 3 días</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="act-dot" style="background:#10b981;"></div>
+            <div>
+              <div class="act-text">Inicio de sesión exitoso</div>
+              <div class="act-time">Hace 4 días · Firefox / Android</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ZONA DE PELIGRO -->
+        <div class="card danger-card">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Zona de Peligro
+          </div>
+          <div class="danger-item">
+            <div>
+              <p>Cerrar todas las sesiones</p>
+              <span>Cierra sesión en todos los dispositivos</span>
+            </div>
+            <button class="btn-danger-outline">Cerrar</button>
+          </div>
+          <div class="danger-item">
+            <div>
+              <p>Desactivar cuenta</p>
+              <span>Tu cuenta quedará pausada temporalmente</span>
+            </div>
+            <button class="btn-danger-outline">Desactivar</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+</body>
+</html>
