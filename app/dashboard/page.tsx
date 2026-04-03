@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 import Sidebar from "./Sidebar";
@@ -13,11 +14,15 @@ export default function DashboardPage() {
   const router = useRouter();
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const avatarRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+      if (
+        menuRef.current && !menuRef.current.contains(e.target as Node) &&
+        avatarRef.current && !avatarRef.current.contains(e.target as Node)
+      ) setMenuOpen(false);
     };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
@@ -102,34 +107,45 @@ export default function DashboardPage() {
             <button className="db-notif-btn" onClick={fetchStats} title="Actualizar">
               {loading ? "🔄" : "🔔"}
             </button>
-            <div className="db-avatar-wrap" ref={menuRef}>
-              <div className="db-avatar" onClick={() => setMenuOpen(o => !o)} style={{ cursor: "pointer" }}>
-                {(user || "U").charAt(0).toUpperCase()}
-              </div>
-              {menuOpen && (
-                <div className="db-avatar-menu">
-                  <div className="db-avatar-menu-top">
-                    <div className="db-avatar-menu-big">
-                      {(user || "U").charAt(0).toUpperCase()}
-                    </div>
-                    <div className="db-avatar-menu-name">{user || "Usuario"}</div>
-                    <div className="db-avatar-menu-role">Administrador</div>
-                  </div>
-                  <div className="db-avatar-menu-divider" />
-                  <div className="db-avatar-menu-body">
-                    <button className="db-avatar-menu-item" onClick={() => { setMenuOpen(false); router.push("/profile"); }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-                      Editar perfil
-                    </button>
-                    <button className="db-avatar-menu-item db-avatar-menu-logout" onClick={() => { setMenuOpen(false); logout(); router.push("/login"); }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                      Cerrar sesión
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+            <button
+              ref={avatarRef}
+              className="db-avatar"
+              onClick={() => setMenuOpen(o => !o)}
+            >
+              {(user || "U").charAt(0).toUpperCase()}
+            </button>
           </div>
+
+          {/* Portal: popup flotante estilo Google */}
+          {menuOpen && typeof document !== "undefined" && createPortal(
+            <>
+              <div className="db-profile-backdrop" onClick={() => setMenuOpen(false)} />
+              <div className="db-profile-popup" ref={menuRef}>
+                <button className="db-profile-close" onClick={() => setMenuOpen(false)} aria-label="Cerrar">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+                <div className="db-profile-top">
+                  <div className="db-profile-avatar">
+                    {(user || "U").charAt(0).toUpperCase()}
+                  </div>
+                  <div className="db-profile-name">{user || "Usuario"}</div>
+                  <span className="db-profile-badge">Administrador</span>
+                </div>
+                <div className="db-profile-divider" />
+                <div className="db-profile-actions">
+                  <button className="db-profile-btn" onClick={() => { setMenuOpen(false); router.push("/profile"); }}>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                    Editar perfil
+                  </button>
+                  <button className="db-profile-btn db-profile-btn-logout" onClick={() => { setMenuOpen(false); logout(); router.push("/login"); }}>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Cerrar sesión
+                  </button>
+                </div>
+              </div>
+            </>,
+            document.body
+          )}
         </header>
 
         {/* STATS */}
