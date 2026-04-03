@@ -119,28 +119,75 @@ export default function DashboardPage() {
           {/* Portal: popup flotante estilo Google */}
           {menuOpen && typeof document !== "undefined" && createPortal(
             <>
-              <div className="db-profile-backdrop" onClick={() => setMenuOpen(false)} />
-              <div className="db-profile-popup" ref={menuRef}>
-                <button className="db-profile-close" onClick={() => setMenuOpen(false)} aria-label="Cerrar">
+              {/* Backdrop invisible para cerrar al hacer clic fuera */}
+              <div onClick={() => setMenuOpen(false)} style={{ position:"fixed", inset:0, zIndex:9998 }} />
+
+              {/* Popup card */}
+              <div ref={menuRef} style={{
+                position:"fixed", top:68, right:16, zIndex:9999,
+                width:272, background:"white", borderRadius:20,
+                boxShadow:"0 8px 40px rgba(0,0,0,.18), 0 2px 10px rgba(0,0,0,.08)",
+                border:"1px solid #e8eaed", overflow:"hidden",
+                animation:"profilePopIn .18s cubic-bezier(.22,.68,0,1.2)",
+              }}>
+                {/* Botón cerrar */}
+                <div onClick={() => setMenuOpen(false)} style={{
+                  position:"absolute", top:10, right:10, width:30, height:30,
+                  borderRadius:"50%", cursor:"pointer", display:"flex",
+                  alignItems:"center", justifyContent:"center", color:"#5f6368",
+                  zIndex:1,
+                }}
+                  onMouseEnter={e => (e.currentTarget.style.background="#f1f3f4")}
+                  onMouseLeave={e => (e.currentTarget.style.background="transparent")}
+                >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-                <div className="db-profile-top">
-                  <div className="db-profile-avatar">
+                </div>
+
+                {/* Info usuario */}
+                <div style={{ padding:"32px 20px 20px", display:"flex", flexDirection:"column", alignItems:"center", gap:10, textAlign:"center" }}>
+                  <div style={{
+                    width:64, height:64, borderRadius:"50%",
+                    background:"linear-gradient(135deg,#00d4aa,#00a88f)",
+                    display:"flex", alignItems:"center", justifyContent:"center",
+                    color:"white", fontWeight:700, fontSize:"1.6rem",
+                    boxShadow:"0 4px 14px rgba(0,168,143,.3)",
+                  }}>
                     {(user || "U").charAt(0).toUpperCase()}
                   </div>
-                  <div className="db-profile-name">{user || "Usuario"}</div>
-                  <span className="db-profile-badge">Administrador</span>
+                  <div style={{ fontSize:".98rem", fontWeight:700, color:"#202124" }}>{user || "Usuario"}</div>
+                  <span style={{ fontSize:".72rem", color:"#5f6368", background:"#f1f3f4", padding:"3px 12px", borderRadius:20, fontWeight:500 }}>Administrador</span>
                 </div>
-                <div className="db-profile-divider" />
-                <div className="db-profile-actions">
-                  <button className="db-profile-btn" onClick={() => { setMenuOpen(false); router.push("/profile"); }}>
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-                    Editar perfil
-                  </button>
-                  <button className="db-profile-btn db-profile-btn-logout" onClick={() => { setMenuOpen(false); logout(); router.push("/login"); }}>
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                    Cerrar sesión
-                  </button>
+
+                <div style={{ height:1, background:"#e8eaed" }} />
+
+                {/* Acciones */}
+                <div style={{ padding:"8px 10px 10px" }}>
+                  {[
+                    {
+                      label:"Editar perfil",
+                      icon:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>,
+                      color:"#202124", hover:"#f1f3f4",
+                      action:() => { setMenuOpen(false); router.push("/profile"); },
+                    },
+                    {
+                      label:"Cerrar sesión",
+                      icon:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+                      color:"#d93025", hover:"#fce8e6",
+                      action:() => { setMenuOpen(false); logout(); router.push("/login"); },
+                    },
+                  ].map(({ label, icon, color, hover, action }) => (
+                    <div key={label} onClick={action} style={{
+                      display:"flex", alignItems:"center", gap:12,
+                      padding:"11px 12px", borderRadius:12, cursor:"pointer",
+                      color, fontSize:".875rem", fontWeight:500, userSelect:"none",
+                    }}
+                      onMouseEnter={e => (e.currentTarget.style.background = hover)}
+                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                    >
+                      <span style={{ color, opacity:.8, display:"flex" }}>{icon}</span>
+                      {label}
+                    </div>
+                  ))}
                 </div>
               </div>
             </>,
