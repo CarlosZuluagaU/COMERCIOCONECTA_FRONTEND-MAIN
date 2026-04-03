@@ -310,13 +310,13 @@ export default function LandingPage() {
             </div>
             <div className="footer-col">
               <h5>Empresa</h5>
-              <a href="#">Nosotros</a>
-              <a href="#">Blog</a>
+              <a href="/nosotros">Nosotros</a>
+              <a href="/blog">Blog</a>
             </div>
             <div className="footer-col">
               <h5>Soporte</h5>
-              <a href="#">Centro de ayuda</a>
-              <a href="#">Contacto</a>
+              <a href="/centro-ayuda">Centro de ayuda</a>
+              <a href="/contacto">Contacto</a>
             </div>
           </div>
           <div className="footer-bottom">
