@@ -13,6 +13,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   loginWithGoogle: (googleIdToken: string) => Promise<{ isNew: boolean }>;
   logout: () => void;
+  updateUser: (nombre: string, newToken?: string, newRefreshToken?: string) => void;
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -102,8 +103,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(null); setUser(null); setGoogleUser(null); setComercioId(null);
   };
 
+  const updateUser = (nombre: string, newToken?: string, newRefreshToken?: string) => {
+    localStorage.setItem("user", nombre);
+    setUser(nombre);
+    if (newToken) {
+      localStorage.setItem("token", newToken);
+      setToken(newToken);
+    }
+    if (newRefreshToken) {
+      localStorage.setItem("refreshToken", newRefreshToken);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, googleUser, comercioId, authLoaded, login, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, token, googleUser, comercioId, authLoaded, login, loginWithGoogle, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

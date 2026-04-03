@@ -9,7 +9,7 @@ import "../dashboard/admin.css";
 const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
 export default function ProfilePage() {
-  const { user, token, logout } = useAuth();
+  const { user, token, logout, updateUser } = useAuth();
   const router = useRouter();
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [form, setForm] = useState({ nombre: "", telefono: "", email: "" });
@@ -31,16 +31,19 @@ export default function ProfilePage() {
   }, [token]);
 
   const guardarPerfil = async () => {
+    if (!form.nombre.trim()) { setMsg({ text: "El nombre no puede estar vacío", ok: false }); return; }
+    if (!form.email.trim()) { setMsg({ text: "El correo no puede estar vacío", ok: false }); return; }
     setSaving(true); setMsg(null);
     try {
       const res = await fetch(`${API}/auth/profile`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ nombre: form.nombre, telefono: form.telefono }),
+        body: JSON.stringify({ nombre: form.nombre, telefono: form.telefono, email: form.email }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Error al guardar");
-      localStorage.setItem("user", data.nombre || form.nombre);
+      // Actualiza nombre (y tokens si el email cambió)
+      updateUser(data.nombre || form.nombre, data.accessToken, data.refreshToken);
       setMsg({ text: "Perfil actualizado correctamente", ok: true });
     } catch (e: any) {
       setMsg({ text: e.message, ok: false });
@@ -111,10 +114,11 @@ export default function ProfilePage() {
 
                 <div className="adm-field" style={{ marginTop: 14 }}>
                   <label className="adm-label">Correo electrónico</label>
-                  <input className="adm-input" value={form.email} disabled
-                    style={{ background: "#f7f8fa", color: "#9ca3af", cursor: "not-allowed" }} />
-                  <span style={{ fontSize: ".72rem", color: "#9ca3af", marginTop: 4, display: "block" }}>
-                    El correo no se puede modificar
+                  <input className="adm-input" type="email" value={form.email}
+                    onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                    placeholder="correo@ejemplo.com" />
+                  <span style={{ fontSize: ".72rem", color: "#6b7280", marginTop: 4, display: "block" }}>
+                    Si cambias el correo, tu sesión se actualizará automáticamente
                   </span>
                 </div>
 
