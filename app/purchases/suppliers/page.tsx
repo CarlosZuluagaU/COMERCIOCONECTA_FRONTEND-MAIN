@@ -28,7 +28,7 @@ interface Proveedor {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
 export default function ProveedoresPage() {
-  const { user, token } = useAuth();
+  const { user, token, comercioId } = useAuth();
   const [activeMenu, setActiveMenu] = useState<string | null>("Compras");
   const [busqueda, setBusqueda] = useState("");
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
@@ -50,7 +50,11 @@ export default function ProveedoresPage() {
     if (!token) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/proveedores`, {
+      const cid = comercioId ?? localStorage.getItem("comercioId");
+      const url = cid
+        ? `${API_BASE_URL}/proveedores?comercioId=${cid}`
+        : `${API_BASE_URL}/proveedores`;
+      const response = await fetch(url, {
         headers: {
           "Authorization": `Bearer ${token}`,
         },
@@ -122,6 +126,7 @@ export default function ProveedoresPage() {
         body: JSON.stringify({
           ...formData,
           productos: proveedorEdit?.productos || [],
+          comercioId: (comercioId ?? Number(localStorage.getItem("comercioId"))) || null,
         }),
       });
 

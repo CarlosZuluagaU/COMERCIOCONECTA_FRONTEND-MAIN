@@ -7,6 +7,26 @@ import "./register.css";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
+// ── NIT DIAN validation ────────────────────────────────────────────────────
+function calcDV(nit9: string): number {
+  const factors = [3, 7, 13, 17, 19, 23, 29, 37, 41];
+  const sum = nit9.split("").reduce((acc, d, i) => acc + Number(d) * factors[8 - i], 0);
+  const rem = sum % 11;
+  return rem <= 1 ? rem : 11 - rem;
+}
+function formatNIT(raw: string): string {
+  const digits = raw.replace(/\D/g, "").slice(0, 10);
+  return digits.length <= 9 ? digits : digits.slice(0, 9) + "-" + digits.slice(9);
+}
+function validateNIT(value: string): string | null {
+  const m = value.match(/^(\d{9})-(\d)$/);
+  if (!m) return "Formato requerido: 9 dígitos + dígito de verificación (ej: 900123456-7)";
+  const expected = calcDV(m[1]);
+  if (Number(m[2]) !== expected) return `Dígito de verificación incorrecto — debería ser ${expected}`;
+  return null;
+}
+// ──────────────────────────────────────────────────────────────────────────
+
 const CATEGORIAS = [
   "Salud y Belleza",
   "Ropa y Moda",
@@ -53,6 +73,7 @@ export default function RegisterPage() {
     nit: "",
     ciudad: "",
     categoria: "Salud y Belleza",
+    direccion: "",
     telefono: "",
   });
 
@@ -60,25 +81,42 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [nitError, setNitError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleNitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatNIT(e.target.value);
+    setFormData(prev => ({ ...prev, nit: formatted }));
+    if (formData.tipoDocumento === "NIT") {
+      setNitError(formatted.length === 11 ? validateNIT(formatted) : null);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.tipoDocumento === "NIT") {
+      const err = validateNIT(formData.nit);
+      if (err) { setNitError(err); return; }
+    }
     setLoading(true);
     setError(null);
     setSuccess(null);
     try {
       const payload = {
-        nombre: `${formData.nombre} ${formData.apellido}`.trim(),
+        nombre: formData.nombre.trim(),
+        apellido: formData.apellido.trim(),
         email: formData.email,
         password: formData.password,
         comercioNombre: formData.comercioNombre,
+        tipoDocumento: formData.tipoDocumento,
         nit: formData.nit,
-        direccion: formData.ciudad,
+        ciudad: formData.ciudad,
+        direccion: formData.direccion,
+        categoria: formData.categoria,
         telefono: formData.telefono || "N/A",
       };
       const res = await axios.post(`${API_BASE_URL}/auth/register`, payload);
@@ -245,22 +283,31 @@ export default function RegisterPage() {
           <div className="form-row">
             <div className="fg">
               <label>Tipo de documento</label>
-              <select name="tipoDocumento" value={formData.tipoDocumento} onChange={handleChange}>
+              <select name="tipoDocumento" value={formData.tipoDocumento} onChange={e => {
+                handleChange(e);
+                setNitError(null);
+                setFormData(prev => ({ ...prev, tipoDocumento: e.target.value, nit: "" }));
+              }}>
                 <option>NIT</option>
                 <option>CC</option>
                 <option>CE</option>
               </select>
             </div>
             <div className="fg">
-              <label>Número</label>
+              <label>Número {formData.tipoDocumento === "NIT" && <span style={{ color: "#9ca3af", fontWeight: 400, fontSize: ".72rem" }}>9 dígitos + dígito verificación</span>}</label>
               <input
                 type="text"
                 name="nit"
                 value={formData.nit}
-                onChange={handleChange}
-                placeholder="900123456-1"
+                onChange={handleNitChange}
+                placeholder={formData.tipoDocumento === "NIT" ? "900123456-7" : "Número de documento"}
+                style={nitError ? { borderColor: "#ef4444" } : formData.nit.length === 11 && !nitError ? { borderColor: "#10b981" } : {}}
                 required
               />
+              {nitError && <span style={{ fontSize: ".72rem", color: "#ef4444", marginTop: 2 }}>{nitError}</span>}
+              {formData.tipoDocumento === "NIT" && !nitError && formData.nit.length === 11 && (
+                <span style={{ fontSize: ".72rem", color: "#10b981", marginTop: 2 }}>✓ NIT válido</span>
+              )}
             </div>
           </div>
 
@@ -281,6 +328,29 @@ export default function RegisterPage() {
               <select name="categoria" value={formData.categoria} onChange={handleChange}>
                 {CATEGORIAS.map((c) => <option key={c}>{c}</option>)}
               </select>
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="fg">
+              <label>Dirección</label>
+              <input
+                type="text"
+                name="direccion"
+                value={formData.direccion}
+                onChange={handleChange}
+                placeholder="Calle 123 #45-67"
+              />
+            </div>
+            <div className="fg">
+              <label>Teléfono</label>
+              <input
+                type="tel"
+                name="telefono"
+                value={formData.telefono}
+                onChange={handleChange}
+                placeholder="+57 300 123 4567"
+              />
             </div>
           </div>
 

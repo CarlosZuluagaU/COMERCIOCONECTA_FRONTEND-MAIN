@@ -165,6 +165,7 @@ export default function StoreCustomizerPage() {
   const [tab, setTab]             = useState<TabId>("design");
   const [panelOpen, setPanelOpen] = useState(true);
   const [saved, setSaved]         = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [saving, setSaving]       = useState(false);
   const [unsaved, setUnsaved]     = useState(false);
   const fileRef                   = useRef<HTMLInputElement>(null);
@@ -231,23 +232,27 @@ export default function StoreCustomizerPage() {
 
   const handleSave = async () => {
     setSaving(true);
+    setSaveError(null);
     try {
       const token = localStorage.getItem("token");
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (token) headers["Authorization"] = `Bearer ${token}`;
-      await fetch(`${API}/comercios/${CID}/apariencia`, {
+      const res = await fetch(`${API}/comercios/${CID}/apariencia`, {
         method: "PUT",
         headers,
         body: JSON.stringify(cfg),
       });
-      localStorage.setItem("storeConfig", JSON.stringify(cfg));
+      if (!res.ok) {
+        const err = await res.text().catch(() => `Error ${res.status}`);
+        setSaveError(err || `Error ${res.status}`);
+        return;
+      }
+      try { localStorage.setItem("storeConfig", JSON.stringify(cfg)); } catch { /* quota */ }
       setSaved(true);
       setUnsaved(false);
       setTimeout(() => setSaved(false), 2500);
-    } catch {
-      setSaved(true);
-      setUnsaved(false);
-      setTimeout(() => setSaved(false), 2500);
+    } catch (err: unknown) {
+      setSaveError(err instanceof Error ? err.message : "Error de red al guardar");
     } finally {
       setSaving(false);
     }
@@ -256,8 +261,31 @@ export default function StoreCustomizerPage() {
   const handleLogoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // PNG / WebP / GIF pueden tener transparencia — conservar canal alpha
+    const hasAlpha = ["image/png", "image/webp", "image/gif"].includes(file.type);
     const reader = new FileReader();
-    reader.onload = ev => update({ logoUrl: ev.target?.result as string });
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 400;
+        const ratio = Math.min(MAX / img.width, MAX / img.height, 1);
+        const canvas = document.createElement("canvas");
+        canvas.width  = Math.round(img.width  * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        const ctx = canvas.getContext("2d")!;
+        // Para PNG transparente NO rellenar fondo — dejar el contexto vacío (transparente)
+        if (!hasAlpha) {
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const out = hasAlpha
+          ? canvas.toDataURL("image/png")          // preserva transparencia
+          : canvas.toDataURL("image/jpeg", 0.82);  // JPEG sin alpha → comprime más
+        update({ logoUrl: out });
+      };
+      img.src = ev.target?.result as string;
+    };
     reader.readAsDataURL(file);
   };
 
@@ -306,6 +334,34 @@ export default function StoreCustomizerPage() {
             ))}
           </div>
           <button
+            className="cust-btn-default"
+            onClick={() => {
+              if (confirm("¿Restablecer todos los colores y estilos a los valores originales? El nombre, logo y textos no cambian.")) {
+                setCfg(prev => ({
+                  ...DEFAULT_CFG,
+                  nombre:        prev.nombre,
+                  tagline:       prev.tagline,
+                  logoUrl:       prev.logoUrl,
+                  heroTitle:     prev.heroTitle,
+                  heroSubtitle:  prev.heroSubtitle,
+                  heroCta:       prev.heroCta,
+                  categorias:    prev.categorias,
+                  footerTexto:   prev.footerTexto,
+                  footerTelefono: prev.footerTelefono,
+                  facebook:      prev.facebook,
+                  instagram:     prev.instagram,
+                  twitter:       prev.twitter,
+                  tiktok:        prev.tiktok,
+                  whatsapp:      prev.whatsapp,
+                  customCss:     prev.customCss,
+                }));
+                setUnsaved(true);
+              }
+            }}
+          >
+            ↺ Default
+          </button>
+          <button
             className="cust-btn-preview"
             onClick={() => {
               localStorage.setItem("storeConfig", JSON.stringify(cfg));
@@ -315,14 +371,17 @@ export default function StoreCustomizerPage() {
             👁 Vista previa
           </button>
           <button
-            className={`cust-btn-save${saved ? " saved" : ""}`}
+            className={`cust-btn-save${saved ? " saved" : saveError ? " error" : ""}`}
             onClick={handleSave}
             disabled={saving}
           >
-            {saved ? "✓ Guardado" : saving ? "Guardando…" : "💾 Guardar cambios"}
+            {saved ? "✓ Guardado" : saving ? "Guardando…" : saveError ? "⚠ Error al guardar" : "💾 Guardar cambios"}
           </button>
         </div>
       </div>
+      {saveError && (
+        <div className="cust-save-error">{saveError}</div>
+      )}
 
       {/* ═══════════ LAYOUT ═══════════ */}
       <div className="cust-layout" style={{ position: "relative" }}>
@@ -354,10 +413,21 @@ export default function StoreCustomizerPage() {
                     <div className="cust-logo-preview">
                       {cfg.logoUrl ? <img src={cfg.logoUrl} alt="logo" /> : <span>🛍️</span>}
                     </div>
-                    <div className="cust-upload-zone" onClick={() => fileRef.current?.click()}>
-                      <div className="cust-upload-icon">📷</div>
-                      <strong>Subir logo</strong>
-                      <p>PNG o SVG transparente · Máx 2MB</p>
+                    <div className="cust-logo-actions">
+                      <div className="cust-upload-zone" onClick={() => fileRef.current?.click()}>
+                        <div className="cust-upload-icon">📷</div>
+                        <strong>Subir logo</strong>
+                        <p>PNG o SVG transparente · Máx 2MB</p>
+                      </div>
+                      {cfg.logoUrl && (
+                        <button
+                          className="cust-logo-remove-btn"
+                          title="Eliminar logo"
+                          onClick={() => { update({ logoUrl: "" }); if (fileRef.current) fileRef.current.value = ""; }}
+                        >
+                          🗑 Eliminar logo
+                        </button>
+                      )}
                     </div>
                     <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleLogoFile} />
                   </div>

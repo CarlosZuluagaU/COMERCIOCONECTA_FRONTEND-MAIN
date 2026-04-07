@@ -87,11 +87,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setGoogleUser(gUser);
     try {
       const res = await axios.post(`${API_BASE_URL}/auth/login`, { email: gUser.email, password: `google_${gUser.sub}` });
-      const { accessToken, refreshToken } = res.data;
+      const { accessToken, refreshToken, nombre, comercioId: cid } = res.data;
       localStorage.setItem("token", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
-      localStorage.setItem("user", gUser.email);
-      setToken(accessToken); setUser(gUser.email);
+      // nombre from backend already has apellido concatenated in the register response
+      const displayName = nombre && nombre !== gUser.email ? nombre : gUser.name || gUser.email;
+      localStorage.setItem("user", displayName);
+      if (cid != null) localStorage.setItem("comercioId", String(cid));
+      setToken(accessToken); setUser(displayName);
+      if (cid != null) setComercioId(cid);
       return { isNew: false };
     } catch {
       return { isNew: true };

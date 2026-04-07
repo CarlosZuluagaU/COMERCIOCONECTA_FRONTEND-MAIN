@@ -1,9 +1,9 @@
 /* LAYOUT */
-.prf-content { max-width: 1060px !important; }
+.prf-content { padding: 28px !important; }
 
 .prf-grid {
   display: grid;
-  grid-template-columns: 1fr 360px;
+  grid-template-columns: 2fr 1fr;
   gap: 20px;
   align-items: start;
 }
@@ -20,22 +20,76 @@
   gap: 22px;
   margin-bottom: 4px;
 }
+
+/* Avatar wrapper — needed for the pencil button overlay */
+.prf-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 88px;
+  height: 88px;
+}
 .prf-hero-avatar {
-  width: 72px; height: 72px; border-radius: 50%;
+  width: 88px; height: 88px; border-radius: 50%;
   background: linear-gradient(135deg, #00d4aa, #00a88f);
   display: flex; align-items: center; justify-content: center;
-  color: white; font-weight: 800; font-size: 1.8rem;
+  color: white; font-weight: 800; font-size: 2.2rem;
   border: 3px solid rgba(255,255,255,.25);
-  flex-shrink: 0;
 }
-.prf-hero-info h2 { font-size: 1.15rem; font-weight: 800; color: white; margin-bottom: 4px; }
-.prf-hero-info p  { font-size: .8rem; color: rgba(255,255,255,.6); margin-bottom: 10px; }
-.prf-hero-badges  { display: flex; gap: 8px; }
+.prf-hero-avatar-img {
+  width: 88px; height: 88px; border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255,255,255,.3);
+  display: block;
+}
+
+/* Pencil edit button — overlaid bottom-right of avatar */
+.prf-avatar-edit-btn {
+  position: absolute !important;
+  bottom: 0; right: 0;
+  width: 28px !important; height: 28px !important;
+  border-radius: 50% !important;
+  background: white !important;
+  border: 2px solid #00a88f !important;
+  display: flex !important; align-items: center; justify-content: center;
+  cursor: pointer;
+  padding: 0 !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,.2) !important;
+  color: #00a88f !important;
+  transition: background .15s !important;
+}
+.prf-avatar-edit-btn:hover { background: #e6faf6 !important; }
+
+/* Hero info */
+.prf-hero-info { flex: 1; }
+.prf-hero-info h2 { font-size: 1.3rem; font-weight: 800; color: white; margin-bottom: 4px; }
+.prf-hero-info p  { font-size: .82rem; color: rgba(255,255,255,.6); margin-bottom: 12px; }
+.prf-hero-badges  { display: flex; gap: 8px; flex-wrap: wrap; }
 .prf-badge {
   font-size: .7rem; padding: 3px 12px; border-radius: 20px; font-weight: 600;
 }
 .prf-badge-green { background: rgba(0,212,170,.2); color: #00d4aa; border: 1px solid rgba(0,212,170,.3); }
 .prf-badge-dim   { background: rgba(255,255,255,.1); color: rgba(255,255,255,.75); border: 1px solid rgba(255,255,255,.2); }
+
+/* Stats — right side of hero */
+.prf-hero-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.prf-hero-stat-val {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #00d4aa;
+  line-height: 1;
+}
+.prf-hero-stat-lbl {
+  font-size: .72rem;
+  color: rgba(255,255,255,.5);
+  white-space: nowrap;
+}
 
 /* CARD TITLE */
 .prf-card-title {
@@ -97,9 +151,9 @@
 /* GOOGLE BADGE */
 .prf-badge-google { background: rgba(66,133,244,.15); color: #4285F4; border: 1px solid rgba(66,133,244,.3); }
 
-/* AVATAR IMG (Google photo) */
-.prf-hero-avatar-img {
-  width: 72px; height: 72px; border-radius: 50%;
+/* AVATAR IMG (Google photo) — kept for fallback compatibility */
+.prf-hero-avatar-img-legacy {
+  width: 88px; height: 88px; border-radius: 50%;
   object-fit: cover;
   border: 3px solid rgba(255,255,255,.3);
   flex-shrink: 0;
@@ -135,6 +189,16 @@
 }
 .prf-google-link:hover { background: #eff6ff; }
 
+/* ACTIVITY LOG */
+.prf-activity-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid #f5f5f5;
+}
+.prf-activity-item:last-child { border-bottom: none; padding-bottom: 0; }
+.prf-act-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+.prf-act-text { font-size: .8rem; color: #374151; font-weight: 500; }
+.prf-act-time { font-size: .7rem; color: #9ca3af; margin-top: 2px; }
+
 /* DANGER */
 .prf-danger-card { border: 1.5px solid #fee2e2 !important; }
 .prf-danger-item {
@@ -144,9 +208,9 @@
 .prf-danger-item span { font-size: .72rem; color: #9ca3af; }
 .prf-btn-outline-danger {
   background: none !important; border: 1.5px solid #ef4444 !important;
-  color: #ef4444 !important; padding: 7px 16px; border-radius: 8px;
+  color: #ef4444 !important; padding: 6px 14px; border-radius: 8px;
   font-size: .78rem; font-weight: 700; cursor: pointer; white-space: nowrap;
-  flex-shrink: 0;
+  flex-shrink: 0; width: auto !important;
 }
 .prf-btn-outline-danger:hover { background: #fef2f2 !important; }
 

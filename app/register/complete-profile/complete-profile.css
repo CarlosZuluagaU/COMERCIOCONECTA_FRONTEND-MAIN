@@ -1,92 +1,126 @@
-.register-page {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f0f4f8;
-  padding: 24px;
+/* Page wrapper – same bg as register */
+.cp-page {
+  background: linear-gradient(135deg, #f0f4f8 0%, #e8f4f1 100%);
 }
 
-.complete-profile-box {
-  width: 600px;
-  max-width: 95%;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-  padding: 40px 44px;
-}
-
-.complete-profile-header {
+/* Card – wider than auth-card to fit 2-col rows comfortably */
+.cp-card {
+  background: white;
+  border-radius: 20px;
+  padding: 36px 40px 32px;
+  box-shadow: 0 4px 32px rgba(31,59,77,.1), 0 1px 4px rgba(31,59,77,.06);
+  width: 100%;
+  max-width: 560px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 18px;
-  margin-bottom: 20px;
+  animation: fadeUp .25s ease;
 }
 
-.google-avatar {
-  width: 56px;
-  height: 56px;
+/* Header: avatar + greeting */
+.cp-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cp-avatar {
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  background: #1F3B4D;
+  background: linear-gradient(135deg, #1F3B4D, #2c5364);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 800;
   color: #fff;
+  border: 3px solid #e2f5f0;
 }
+.cp-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-.google-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.cp-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #1F3B4D;
+  margin: 0 0 3px;
 }
-
-.subtitle-text {
-  font-size: 14px;
-  color: #888;
+.cp-sub {
+  font-size: .83rem;
+  color: #64748b;
   margin: 0;
 }
 
-.google-info-bar {
+/* Google info bar */
+.cp-google-bar {
   display: flex;
   align-items: center;
   gap: 10px;
   background: #f0fdf4;
   border: 1px solid #bbf7d0;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 10px 14px;
-  margin-bottom: 24px;
 }
 
-.google-check {
-  background: #10b981;
-  color: white;
-  font-size: 12px;
+.cp-google-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: white;
+  border: 1px solid #d1fae5;
+  color: #374151;
+  font-size: .75rem;
   font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 12px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
 }
 
-.google-email {
-  font-size: 14px;
+.cp-google-email {
+  font-size: .84rem;
   color: #1F3B4D;
-  font-weight: 500;
+  font-weight: 600;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.back-link {
-  text-align: center;
-  margin-top: 20px;
-  font-size: 13px;
+.cp-google-check {
+  font-size: .72rem;
+  color: #10b981;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
-.back-link a {
-  color: #00d4aa;
-  text-decoration: none;
+/* Submit button – teal gradient */
+.cp-btn-submit {
+  width: 100%;
+  padding: 13px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #00d4aa, #00a88f);
+  color: white;
+  font-size: .95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: inherit;
+  margin-top: 4px;
+  box-shadow: 0 4px 14px rgba(0,168,143,.25);
+}
+.cp-btn-submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0,168,143,.35);
+}
+.cp-btn-submit:disabled {
+  opacity: .65;
+  cursor: not-allowed;
+  transform: none;
 }
 
-.back-link a:hover {
-  color: #00a88f;
+@media (max-width: 600px) {
+  .cp-card { padding: 28px 20px 24px; }
 }

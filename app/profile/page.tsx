@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import Sidebar from "../dashboard/Sidebar";
@@ -14,6 +14,35 @@ const empty = {
   tipoDocumento: "Cédula de ciudadanía", numeroDocumento: "",
   fechaNacimiento: "", ciudad: "", direccion: "", biografia: "",
 };
+
+function getBrowserInfo(): string {
+  if (typeof navigator === "undefined") return "";
+  const ua = navigator.userAgent;
+  let browser = "Navegador";
+  let os = "Dispositivo";
+  if (/Edg\//.test(ua)) browser = "Edge";
+  else if (/Firefox\//.test(ua)) browser = "Firefox";
+  else if (/Chrome\//.test(ua)) browser = "Chrome";
+  else if (/Safari\//.test(ua) && !/Chrome/.test(ua)) browser = "Safari";
+  if (/Windows/.test(ua)) os = "Windows";
+  else if (/Macintosh/.test(ua)) os = "Mac";
+  else if (/Android/.test(ua)) os = "Android";
+  else if (/iPhone|iPad/.test(ua)) os = "iOS";
+  else if (/Linux/.test(ua)) os = "Linux";
+  return `${browser} / ${os}`;
+}
+
+function relTime(ts: number): string {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  if (mins < 2) return "Ahora mismo";
+  if (mins < 60) return `Hace ${mins} min`;
+  if (hours < 24) return `Hace ${hours} h`;
+  if (days === 1) return "Ayer";
+  return `Hace ${days} días`;
+}
 
 function pwdStrength(v: string) {
   let s = 0;
@@ -39,30 +68,97 @@ export default function ProfilePage() {
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
   const [msgPwd, setMsgPwd] = useState<{ text: string; ok: boolean } | null>(null);
   const [showNueva, setShowNueva] = useState(false);
+  const [deactivating, setDeactivating] = useState(false);
+  const [activity, setActivity] = useState<{ dot: string; text: string; time: string }[]>([]);
+  const [prefs, setPrefs] = useState({ moneda: "COP", zonaHoraria: "America/Bogota", idioma: "Español", formatoFecha: "DD/MM/AAAA" });
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [comercioNombre, setComercioNombre] = useState("");
+  const [miembroDesde, setMiembroDesde] = useState("");
+  const [totalPedidos, setTotalPedidos] = useState<number | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [savingPrefs, setSavingPrefs] = useState(false);
+  const [msgPrefs, setMsgPrefs] = useState<{ text: string; ok: boolean } | null>(null);
+
+  useEffect(() => {
+    // Record/read current session
+    const sessionKey = "prf_session";
+    const browserInfo = getBrowserInfo();
+    const now = Date.now();
+    const existing = localStorage.getItem(sessionKey);
+    if (!existing) {
+      localStorage.setItem(sessionKey, JSON.stringify({ ts: now, browser: browserInfo }));
+    }
+    const session = JSON.parse(localStorage.getItem(sessionKey) || "{}");
+
+    const items: { dot: string; text: string; time: string }[] = [];
+    items.push({ dot: "#10b981", text: "Inicio de sesión exitoso", time: `${relTime(session.ts || now)} · ${session.browser || browserInfo}` });
+
+    const lastSave = localStorage.getItem("prf_last_save");
+    if (lastSave) items.push({ dot: "#3b82f6", text: "Perfil actualizado", time: relTime(parseInt(lastSave)) });
+
+    const lastPwd = localStorage.getItem("prf_last_pwd");
+    if (lastPwd) items.push({ dot: "#f59e0b", text: "Contraseña cambiada", time: relTime(parseInt(lastPwd)) });
+
+    setActivity(items);
+
+    // Load preferences from localStorage
+    const savedPrefs = localStorage.getItem("prf_prefs");
+    if (savedPrefs) setPrefs(JSON.parse(savedPrefs));
+
+    // Load stored avatar
+    const stored = localStorage.getItem("prf_avatar");
+    if (stored) setAvatarUrl(stored);
+  }, []);
 
   useEffect(() => {
     if (!token) return;
     fetch(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : null)
       .then(d => {
-        if (d) setForm({
-          nombre:          d.nombre          || "",
-          apellido:        d.apellido        || "",
-          email:           d.email           || "",
-          telefono:        d.telefono        || "",
-          tipoDocumento:   d.tipoDocumento   || "Cédula de ciudadanía",
-          numeroDocumento: d.numeroDocumento || "",
-          fechaNacimiento: d.fechaNacimiento || "",
-          ciudad:          d.ciudad          || "",
-          direccion:       d.direccion       || "",
-          biografia:       d.biografia       || "",
-        });
+        if (d) {
+          setForm({
+            nombre:          d.nombre          || "",
+            apellido:        d.apellido        || "",
+            email:           d.email           || "",
+            telefono:        d.telefono        || "",
+            tipoDocumento:   d.tipoDocumento   || "Cédula de ciudadanía",
+            numeroDocumento: d.numeroDocumento || "",
+            fechaNacimiento: d.fechaNacimiento || "",
+            ciudad:          d.ciudad          || "",
+            direccion:       d.direccion       || "",
+            biografia:       d.biografia       || "",
+          });
+          if (d.comercioNombre) setComercioNombre(d.comercioNombre);
+          if (d.createdAt) {
+            const dt = new Date(d.createdAt);
+            setMiembroDesde(dt.toLocaleDateString("es-CO", { month: "long", year: "numeric" }));
+          }
+          // Fetch orders count
+          if (d.comercioId) {
+            fetch(`${API}/checkout/all-orders?comercioId=${d.comercioId}`, { headers: { Authorization: `Bearer ${token}` } })
+              .then(r => r.ok ? r.json() : [])
+              .then((orders: any[]) => setTotalPedidos(orders.length))
+              .catch(() => {});
+          }
+        }
       })
       .finally(() => setLoading(false));
   }, [token]);
 
   const f = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm(prev => ({ ...prev, [field]: e.target.value }));
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      localStorage.setItem("prf_avatar", dataUrl);
+      setAvatarUrl(dataUrl);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const guardar = async () => {
     if (!form.nombre.trim()) { setMsg({ text: "El nombre no puede estar vacío", ok: false }); return; }
@@ -76,8 +172,27 @@ export default function ProfilePage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Error al guardar");
+      // Actualizar el form con lo que la DB realmente guardó
+      setForm(prev => ({
+        ...prev,
+        nombre:          data.nombre          ?? prev.nombre,
+        apellido:        data.apellido        ?? prev.apellido,
+        telefono:        data.telefono        ?? prev.telefono,
+        tipoDocumento:   data.tipoDocumento   ?? prev.tipoDocumento,
+        numeroDocumento: data.numeroDocumento ?? prev.numeroDocumento,
+        fechaNacimiento: data.fechaNacimiento ?? prev.fechaNacimiento,
+        ciudad:          data.ciudad          ?? prev.ciudad,
+        direccion:       data.direccion       ?? prev.direccion,
+        biografia:       data.biografia       ?? prev.biografia,
+        ...(data.email ? { email: data.email } : {}),
+      }));
       const fullName = [data.nombre, data.apellido].filter(Boolean).join(" ");
       updateUser(fullName || form.nombre, data.accessToken, data.refreshToken);
+      localStorage.setItem("prf_last_save", Date.now().toString());
+      setActivity(prev => {
+        const filtered = prev.filter(a => a.text !== "Perfil actualizado");
+        return [filtered[0], { dot: "#3b82f6", text: "Perfil actualizado", time: "Ahora mismo" }, ...filtered.slice(1)];
+      });
       setMsg({ text: "Perfil actualizado correctamente", ok: true });
     } catch (e: any) {
       setMsg({ text: e.message, ok: false });
@@ -87,17 +202,24 @@ export default function ProfilePage() {
   };
 
   const cambiarPwd = async () => {
+    if (!pwd.actual)                     { setMsgPwd({ text: "Ingresa tu contraseña actual", ok: false }); return; }
     if (!pwd.nueva)                      { setMsgPwd({ text: "Ingresa la nueva contraseña", ok: false }); return; }
     if (pwd.nueva !== pwd.confirmar)     { setMsgPwd({ text: "Las contraseñas no coinciden", ok: false }); return; }
     if (pwd.nueva.length < 6)            { setMsgPwd({ text: "Mínimo 6 caracteres", ok: false }); return; }
+    if (pwd.actual === pwd.nueva)        { setMsgPwd({ text: "La nueva contraseña debe ser diferente a la actual", ok: false }); return; }
     setSavingPwd(true); setMsgPwd(null);
     try {
       const res = await fetch(`${API}/auth/profile`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ password: pwd.nueva }),
+        body: JSON.stringify({ currentPassword: pwd.actual, password: pwd.nueva }),
       });
       if (!res.ok) throw new Error("Error al cambiar contraseña");
+      localStorage.setItem("prf_last_pwd", Date.now().toString());
+      setActivity(prev => {
+        const filtered = prev.filter(a => a.text !== "Contraseña cambiada");
+        return [filtered[0], { dot: "#f59e0b", text: "Contraseña cambiada", time: "Ahora mismo" }, ...filtered.slice(1)];
+      });
       setMsgPwd({ text: "Contraseña actualizada. Redirigiendo…", ok: true });
       setPwd({ actual: "", nueva: "", confirmar: "" });
       setTimeout(() => { logout(); router.push("/login"); }, 2000);
@@ -134,20 +256,38 @@ export default function ProfilePage() {
 
             {/* HERO */}
             <div className="prf-hero">
-              {googleUser?.picture ? (
-                <img src={googleUser.picture} alt="avatar" className="prf-hero-avatar prf-hero-avatar-img" />
-              ) : (
-                <div className="prf-hero-avatar">{inicial}</div>
-              )}
+              {/* Avatar con botón editar */}
+              <div className="prf-avatar-wrap">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="avatar" className="prf-hero-avatar-img" />
+                ) : googleUser?.picture ? (
+                  <img src={googleUser.picture} alt="avatar" className="prf-hero-avatar-img" />
+                ) : (
+                  <div className="prf-hero-avatar">{inicial}</div>
+                )}
+                <button className="prf-avatar-edit-btn" title="Cambiar foto" onClick={() => avatarInputRef.current?.click()}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleAvatarChange} />
+              </div>
+
               <div className="prf-hero-info">
                 <h2>{nombreCompleto}</h2>
-                <p>{form.email || "—"}{form.ciudad ? ` · ${form.ciudad}` : ""}</p>
+                <p>{form.email || "—"}{miembroDesde ? ` · Miembro desde ${miembroDesde}` : ""}</p>
                 <div className="prf-hero-badges">
                   <span className="prf-badge prf-badge-green">● Activo</span>
-                  {isGoogle && <span className="prf-badge prf-badge-google">🔗 Cuenta Google</span>}
+                  {comercioNombre && <span className="prf-badge prf-badge-dim">🏪 {comercioNombre}</span>}
+                  {isGoogle && <span className="prf-badge prf-badge-google">🔗 Google</span>}
                   <span className="prf-badge prf-badge-dim">Administrador</span>
                 </div>
               </div>
+
+              {totalPedidos !== null && (
+                <div className="prf-hero-stats">
+                  <div className="prf-hero-stat-val">{totalPedidos}</div>
+                  <div className="prf-hero-stat-lbl">Pedidos gestionados</div>
+                </div>
+              )}
             </div>
 
             <div className="prf-grid">
@@ -246,6 +386,74 @@ export default function ProfilePage() {
                   </button>
                 </div>
 
+                {/* PREFERENCIAS DEL SISTEMA */}
+                <div className="adm-fcard">
+                  <div className="prf-card-title">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+                    Preferencias del Sistema
+                  </div>
+                  <div className="adm-row">
+                    <div className="adm-field">
+                      <label>Moneda</label>
+                      <select value={prefs.moneda} onChange={e => setPrefs(p => ({ ...p, moneda: e.target.value }))}>
+                        <option value="COP">COP — Peso colombiano</option>
+                        <option value="USD">USD — Dólar estadounidense</option>
+                        <option value="EUR">EUR — Euro</option>
+                      </select>
+                    </div>
+                    <div className="adm-field">
+                      <label>Zona horaria</label>
+                      <select value={prefs.zonaHoraria} onChange={e => setPrefs(p => ({ ...p, zonaHoraria: e.target.value }))}>
+                        <option value="America/Bogota">America/Bogotá (UTC-5)</option>
+                        <option value="America/Lima">America/Lima (UTC-5)</option>
+                        <option value="America/Mexico_City">America/Ciudad de México (UTC-6)</option>
+                        <option value="America/Buenos_Aires">America/Buenos Aires (UTC-3)</option>
+                        <option value="America/Santiago">America/Santiago (UTC-3)</option>
+                        <option value="America/New_York">America/New York (UTC-5)</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="adm-row" style={{ marginTop: 12 }}>
+                    <div className="adm-field">
+                      <label>Idioma de la plataforma</label>
+                      <select value={prefs.idioma} onChange={e => setPrefs(p => ({ ...p, idioma: e.target.value }))}>
+                        <option value="Español">Español</option>
+                        <option value="English">English</option>
+                        <option value="Português">Português</option>
+                      </select>
+                    </div>
+                    <div className="adm-field">
+                      <label>Formato de fecha</label>
+                      <select value={prefs.formatoFecha} onChange={e => setPrefs(p => ({ ...p, formatoFecha: e.target.value }))}>
+                        <option value="DD/MM/AAAA">DD/MM/AAAA</option>
+                        <option value="MM/DD/AAAA">MM/DD/AAAA</option>
+                        <option value="AAAA/MM/DD">AAAA/MM/DD</option>
+                      </select>
+                    </div>
+                  </div>
+                  {msgPrefs && (
+                    <div className={`prf-msg ${msgPrefs.ok ? "prf-msg-ok" : "prf-msg-err"}`}>
+                      {msgPrefs.ok ? "✅" : "❌"} {msgPrefs.text}
+                    </div>
+                  )}
+                  <button
+                    className="prf-btn-save"
+                    disabled={savingPrefs}
+                    onClick={() => {
+                      setSavingPrefs(true);
+                      localStorage.setItem("prf_prefs", JSON.stringify(prefs));
+                      setTimeout(() => {
+                        setMsgPrefs({ text: "Preferencias guardadas", ok: true });
+                        setSavingPrefs(false);
+                        setTimeout(() => setMsgPrefs(null), 3000);
+                      }, 400);
+                    }}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    {savingPrefs ? "Guardando…" : "Guardar preferencias"}
+                  </button>
+                </div>
+
               </div>
 
               {/* COLUMNA DERECHA */}
@@ -286,7 +494,17 @@ export default function ProfilePage() {
                     /* ── Cuenta normal: cambio de contraseña ── */
                     <>
                       <div className="adm-field" style={{ marginBottom: 14 }}>
-                        <label>Nueva contraseña</label>
+                        <label>Contraseña actual *</label>
+                        <input
+                          type="password"
+                          value={pwd.actual}
+                          onChange={e => setPwd(p => ({ ...p, actual: e.target.value }))}
+                          placeholder="Tu contraseña actual"
+                        />
+                      </div>
+
+                      <div className="adm-field" style={{ marginBottom: 14 }}>
+                        <label>Nueva contraseña *</label>
                         <div className="prf-pwd-wrap">
                           <input
                             type={showNueva ? "text" : "password"}
@@ -337,6 +555,25 @@ export default function ProfilePage() {
                   )}
                 </div>
 
+                {/* ACTIVIDAD RECIENTE */}
+                <div className="adm-fcard">
+                  <div className="prf-card-title">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    Actividad Reciente
+                  </div>
+                  {activity.length === 0 ? (
+                    <p style={{ fontSize: ".8rem", color: "#9ca3af", textAlign: "center", padding: "12px 0" }}>Sin actividad registrada</p>
+                  ) : activity.map((item, i) => (
+                    <div key={i} className="prf-activity-item">
+                      <div className="prf-act-dot" style={{ background: item.dot }} />
+                      <div>
+                        <div className="prf-act-text">{item.text}</div>
+                        <div className="prf-act-time">{item.time}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
                 {/* ZONA DE PELIGRO */}
                 <div className="adm-fcard prf-danger-card">
                   <div className="prf-card-title prf-card-title-danger">
@@ -350,6 +587,24 @@ export default function ProfilePage() {
                     </div>
                     <button className="prf-btn-outline-danger" onClick={() => { logout(); router.push("/login"); }}>
                       Cerrar
+                    </button>
+                  </div>
+                  <div className="prf-danger-item" style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid #fee2e2" }}>
+                    <div>
+                      <p>Desactivar cuenta</p>
+                      <span>Tu cuenta quedará pausada temporalmente</span>
+                    </div>
+                    <button
+                      className="prf-btn-outline-danger"
+                      disabled={deactivating}
+                      onClick={() => {
+                        if (!window.confirm("¿Seguro que deseas desactivar tu cuenta? Podrás reactivarla contactando a soporte.")) return;
+                        setDeactivating(true);
+                        logout();
+                        router.push("/login");
+                      }}
+                    >
+                      {deactivating ? "…" : "Desactivar"}
                     </button>
                   </div>
                 </div>
