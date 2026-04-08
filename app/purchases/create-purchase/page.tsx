@@ -91,7 +91,7 @@ export default function RealizarCompraPage() {
 
     setSaving(true);
     try {
-      const cid = comercioId ?? Number(localStorage.getItem("comercioId")) || null;
+      const cid = (comercioId ?? Number(localStorage.getItem("comercioId"))) || null;
       const res = await fetch(`${API_BASE_URL}/compras`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
