@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { FiPlus, FiEdit, FiTrash2, FiPhone, FiMail, FiMapPin, FiSearch, FiUsers } from "react-icons/fi";
 import Sidebar from "../../dashboard/Sidebar";
 import "../../dashboard/dashboard.css";
+import "../../dashboard/admin.css";
 import "./suppliers.css";
 
 interface Proveedor {
