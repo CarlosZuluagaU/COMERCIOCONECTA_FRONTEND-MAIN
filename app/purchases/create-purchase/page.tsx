@@ -29,7 +29,7 @@ interface ItemCompra {
 }
 
 export default function RealizarCompraPage() {
-  const { token: authToken } = useAuth();
+  const { token: authToken, comercioId } = useAuth();
   const [activeMenu, setActiveMenu] = useState<string | null>("Compras");
 
   const [numeroFactura, setNumeroFactura] = useState("");
@@ -54,9 +54,11 @@ export default function RealizarCompraPage() {
       if (!token) return;
 
       try {
+        const cid = comercioId ?? localStorage.getItem("comercioId");
+        const provUrl = cid ? `${API_BASE_URL}/proveedores?comercioId=${cid}` : `${API_BASE_URL}/proveedores`;
         const [prodRes, provRes] = await Promise.all([
           fetch(`${API_BASE_URL}/productos`, { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }),
-          fetch(`${API_BASE_URL}/proveedores`, { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }),
+          fetch(provUrl, { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }),
         ]);
 
         if (!prodRes.ok) throw new Error(`Error al cargar productos: ${prodRes.status}`);
@@ -116,9 +118,11 @@ export default function RealizarCompraPage() {
     }
 
     try {
+      const cid = comercioId ?? Number(localStorage.getItem("comercioId")) || null;
       const compraDTO = {
         numeroFactura,
-        proveedorId: proveedor, 
+        proveedorId: proveedor,
+        comercioId: cid,
         fechaCompra,
         subtotal,
         iva: Math.round(totalIVA),

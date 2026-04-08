@@ -28,7 +28,7 @@ const TAB_MAP: Record<string, string> = {
 const PAGE_SIZE = 10;
 
 export default function HistoricoComprasPage() {
-  const { user } = useAuth();
+  const { user, comercioId } = useAuth();
   const router = useRouter();
   const [activeMenu, setActiveMenu] = useState<string | null>("Compras");
   const [busqueda, setBusqueda] = useState("");
@@ -39,7 +39,9 @@ export default function HistoricoComprasPage() {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/compras`)
+    const cid = comercioId ?? localStorage.getItem("comercioId");
+    const url = cid ? `${API_BASE_URL}/compras?comercioId=${cid}` : `${API_BASE_URL}/compras`;
+    fetch(url)
       .then((r) => r.ok ? r.json() : [])
       .then((d) => { setCompras(d); setLoading(false); })
       .catch(() => setLoading(false));
