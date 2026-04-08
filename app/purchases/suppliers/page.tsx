@@ -1,17 +1,10 @@
 "use client";
 import React, { useState, useEffect, ChangeEvent } from "react";
 import { useAuth } from "../../context/AuthContext";
-import {
-  FiPlus,
-  FiEdit,
-  FiTrash2,
-  FiPhone,
-  FiMail,
-  FiMapPin,
-  FiSearch,
-} from "react-icons/fi";
+import { FiPlus, FiEdit, FiTrash2, FiPhone, FiMail, FiMapPin, FiSearch, FiUsers } from "react-icons/fi";
 import Sidebar from "../../dashboard/Sidebar";
 import "../../dashboard/dashboard.css";
+import "./suppliers.css";
 
 interface Proveedor {
   id: string;
@@ -28,7 +21,7 @@ interface Proveedor {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
 export default function ProveedoresPage() {
-  const { user, token, comercioId } = useAuth();
+  const { token, comercioId } = useAuth();
   const [activeMenu, setActiveMenu] = useState<string | null>("Compras");
   const [busqueda, setBusqueda] = useState("");
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
@@ -36,316 +29,248 @@ export default function ProveedoresPage() {
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
 
   const [formData, setFormData] = useState<Omit<Proveedor, "id" | "productos">>({
-    nombre: "",
-    contacto: "",
-    telefono: "",
-    email: "",
-    direccion: "",
-    tipo: "Cosméticos",
-    estado: "Activo",
+    nombre: "", contacto: "", telefono: "", email: "",
+    direccion: "", tipo: "Cosméticos", estado: "Activo",
   });
 
-  // ===== Fetch proveedores seguro =====
   const fetchProveedores = async () => {
     if (!token) return;
-
     try {
       const cid = comercioId ?? localStorage.getItem("comercioId");
-      const url = cid
-        ? `${API_BASE_URL}/proveedores?comercioId=${cid}`
-        : `${API_BASE_URL}/proveedores`;
-      const response = await fetch(url, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        console.error("Error en la solicitud:", response.status, response.statusText);
-        setProveedores([]);
-        return;
-      }
-
-      const text = await response.text();
-      const data: Proveedor[] = text ? JSON.parse(text) : [];
-      setProveedores(data);
-    } catch (error) {
-      console.error("Error cargando proveedores:", error);
-      setProveedores([]);
-    }
+      const url = cid ? `${API_BASE_URL}/proveedores?comercioId=${cid}` : `${API_BASE_URL}/proveedores`;
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      const text = await res.text();
+      setProveedores(text ? JSON.parse(text) : []);
+    } catch { setProveedores([]); }
   };
 
-  useEffect(() => {
-    fetchProveedores();
-  }, [token]);
+  useEffect(() => { fetchProveedores(); }, [token]);
 
-  // ===== Filtrado =====
-  const proveedoresFiltrados = proveedores.filter(
-    (proveedor) =>
-      proveedor.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-      proveedor.contacto.toLowerCase().includes(busqueda.toLowerCase()) ||
-      proveedor.tipo.toLowerCase().includes(busqueda.toLowerCase())
+  const proveedoresFiltrados = proveedores.filter(p =>
+    p.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+    p.contacto.toLowerCase().includes(busqueda.toLowerCase()) ||
+    p.tipo.toLowerCase().includes(busqueda.toLowerCase())
   );
 
-  // ===== Abrir formulario =====
-  const abrirFormulario = (proveedor?: Proveedor) => {
-    if (proveedor) {
-      setProveedorEdit(proveedor);
-      setFormData({ ...proveedor });
-    } else {
-      setProveedorEdit(null);
-      setFormData({
-        nombre: "",
-        contacto: "",
-        telefono: "",
-        email: "",
-        direccion: "",
-        tipo: "Cosméticos",
-        estado: "Activo",
-      });
-    }
+  const abrirFormulario = (p?: Proveedor) => {
+    setProveedorEdit(p || null);
+    setFormData(p ? { ...p } : { nombre: "", contacto: "", telefono: "", email: "", direccion: "", tipo: "Cosméticos", estado: "Activo" });
     setMostrarFormulario(true);
   };
 
-  // ===== Guardar proveedor =====
   const guardarProveedor = async () => {
     if (!token) return;
-
     try {
       const metodo = proveedorEdit ? "PUT" : "POST";
-      const url = proveedorEdit
-        ? `${API_BASE_URL}/proveedores/${proveedorEdit.id}`
-        : `${API_BASE_URL}/proveedores`;
-
-      const response = await fetch(url, {
+      const url = proveedorEdit ? `${API_BASE_URL}/proveedores/${proveedorEdit.id}` : `${API_BASE_URL}/proveedores`;
+      const res = await fetch(url, {
         method: metodo,
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           ...formData,
           productos: proveedorEdit?.productos || [],
           comercioId: (comercioId ?? Number(localStorage.getItem("comercioId"))) || null,
         }),
       });
-
-      if (!response.ok) throw new Error("Error guardando proveedor");
-
+      if (!res.ok) throw new Error();
       await fetchProveedores();
       setMostrarFormulario(false);
-    } catch (error) {
-      console.error(error);
-      alert("No se pudo guardar el proveedor");
-    }
+    } catch { alert("No se pudo guardar el proveedor"); }
   };
 
-  // ===== Eliminar proveedor =====
   const eliminarProveedor = async (id: string) => {
-    if (!token) return;
-    if (!confirm("¿Está seguro de eliminar este proveedor?")) return;
-
+    if (!token || !confirm("¿Eliminar este proveedor?")) return;
     try {
-      const response = await fetch(`${API_BASE_URL}/proveedores/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error("Error eliminando proveedor");
-
-      setProveedores(proveedores.filter((p) => p.id !== id));
-    } catch (error) {
-      console.error(error);
-      alert("No se pudo eliminar el proveedor");
-    }
+      const res = await fetch(`${API_BASE_URL}/proveedores/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) throw new Error();
+      setProveedores(prev => prev.filter(p => p.id !== id));
+    } catch { alert("No se pudo eliminar el proveedor"); }
   };
 
-  // ===== Handlers de formulario =====
-  const handleBusquedaChange = (event: ChangeEvent<HTMLInputElement>) =>
-    setBusqueda(event.target.value);
+  const field = (f: keyof typeof formData) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+    setFormData(prev => ({ ...prev, [f]: e.target.value }));
 
-  const handleFormChange =
-    (field: keyof typeof formData) =>
-    (event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-      setFormData((prev) => ({ ...prev, [field]: event.target.value }));
-
-  const handleTipoChange = (event: ChangeEvent<HTMLSelectElement>) =>
-    setFormData((prev) => ({ ...prev, tipo: event.target.value as any }));
-
-  const handleEstadoChange = (event: ChangeEvent<HTMLSelectElement>) =>
-    setFormData((prev) => ({ ...prev, estado: event.target.value as any }));
+  const inicial = (nombre: string) => (nombre || "?").charAt(0).toUpperCase();
 
   return (
     <div className="dashboard-page">
       <Sidebar activeMenu={activeMenu} onMenuToggle={setActiveMenu} />
-
       <main className="dashboard-main">
-        <header className="dashboard-header">
-          <div className="header-content">
-            <div className="welcome-section">
-              <h1 className="welcome-title">Gestión de Proveedores</h1>
-              <p className="welcome-date">Administre los proveedores de su negocio</p>
-              <button onClick={() => abrirFormulario()} className="btn-primary compact">
-                <FiPlus style={{ marginRight: "8px" }} /> Nuevo Proveedor
-              </button>
-            </div>
+
+        {/* Header */}
+        <header className="sup-header">
+          <div className="sup-header-left">
+            <h1>🏢 Gestión de Proveedores</h1>
+            <p>Administra los proveedores de tu negocio</p>
           </div>
+          <button className="sup-btn-new" onClick={() => abrirFormulario()}>
+            <FiPlus /> Nuevo Proveedor
+          </button>
         </header>
 
-        <section className="stats-section">
-          <div className="search-container">
-            <div className="search-box">
-              <FiSearch className="search-icon" />
-              <input
-                type="text"
-                placeholder="Buscar proveedores..."
-                value={busqueda}
-                onChange={handleBusquedaChange}
-                className="search-input"
-              />
+        <div className="adm-content">
+
+          {/* Stats */}
+          <div className="adm-stats-3">
+            <div className="adm-stat" style={{ "--sc": "#00d4aa" } as React.CSSProperties}>
+              <h4>Total Proveedores</h4>
+              <div className="adm-val">{proveedores.length}</div>
+            </div>
+            <div className="adm-stat" style={{ "--sc": "#10b981" } as React.CSSProperties}>
+              <h4>Activos</h4>
+              <div className="adm-val">{proveedores.filter(p => p.estado === "Activo").length}</div>
+            </div>
+            <div className="adm-stat" style={{ "--sc": "#6b7280" } as React.CSSProperties}>
+              <h4>Inactivos</h4>
+              <div className="adm-val">{proveedores.filter(p => p.estado === "Inactivo").length}</div>
             </div>
           </div>
-        </section>
 
-        <section className="content-section">
-          <div className="suppliers-grid">
-            {proveedoresFiltrados.map((proveedor) => (
-              <div key={proveedor.id} className="supplier-card">
-                <div className="supplier-header">
-                  <div>
-                    <h3>{proveedor.nombre}</h3>
-                    <span className={`type-badge type-${proveedor.tipo.toLowerCase()}`}>
-                      {proveedor.tipo}
-                    </span>
+          {/* Toolbar */}
+          <div className="sup-toolbar">
+            <div className="sup-search-wrap">
+              <FiSearch color="#aaa" />
+              <input
+                className="sup-search-input"
+                placeholder="Buscar por nombre, contacto o tipo…"
+                value={busqueda}
+                onChange={e => setBusqueda(e.target.value)}
+              />
+            </div>
+            <span className="sup-count">{proveedoresFiltrados.length} proveedor{proveedoresFiltrados.length !== 1 ? "es" : ""}</span>
+          </div>
+
+          {/* Grid de tarjetas */}
+          <div className="sup-grid">
+            {proveedoresFiltrados.length === 0 ? (
+              <div className="sup-empty">
+                <FiUsers size={48} />
+                <p>No hay proveedores</p>
+                <span>Agrega tu primer proveedor con el botón "Nuevo Proveedor"</span>
+              </div>
+            ) : proveedoresFiltrados.map(p => (
+              <div key={p.id} className="sup-card">
+                {/* Top oscuro */}
+                <div className="sup-card-top">
+                  <div className="sup-avatar">{inicial(p.nombre)}</div>
+                  <div className="sup-card-name">
+                    <h3>{p.nombre}</h3>
+                    <span className="sup-tipo-badge">{p.tipo}</span>
                   </div>
-                  <span className={`status-badge status-${proveedor.estado.toLowerCase()}`}>
-                    {proveedor.estado}
+                  <span className={`sup-estado-badge ${p.estado === "Activo" ? "sup-estado-activo" : "sup-estado-inactivo"}`}>
+                    {p.estado}
                   </span>
                 </div>
-                <div className="supplier-info">
-                  <div className="info-item">
-                    <FiPhone className="info-icon" /> <span>{proveedor.telefono}</span>
-                  </div>
-                  <div className="info-item">
-                    <FiMail className="info-icon" /> <span>{proveedor.email}</span>
-                  </div>
-                  <div className="info-item">
-                    <FiMapPin className="info-icon" /> <span>{proveedor.direccion}</span>
-                  </div>
-                  <div className="info-item">
-                    <strong>Contacto: </strong> <span>{proveedor.contacto}</span>
-                  </div>
+
+                {/* Info de contacto */}
+                <div className="sup-card-info">
+                  {p.contacto && (
+                    <div className="sup-info-row">
+                      <span className="sup-info-label">Contacto</span>
+                      <span>{p.contacto}</span>
+                    </div>
+                  )}
+                  {p.telefono && (
+                    <div className="sup-info-row">
+                      <FiPhone size={13} />
+                      <span>{p.telefono}</span>
+                    </div>
+                  )}
+                  {p.email && (
+                    <div className="sup-info-row">
+                      <FiMail size={13} />
+                      <span>{p.email}</span>
+                    </div>
+                  )}
+                  {p.direccion && (
+                    <div className="sup-info-row">
+                      <FiMapPin size={13} />
+                      <span>{p.direccion}</span>
+                    </div>
+                  )}
                 </div>
-                <div className="supplier-products">
-                  <strong>Productos: </strong>
-                  <div className="product-tags">
-                    {proveedor.productos.map((producto, index) => (
-                      <span key={index} className="product-tag">
-                        {producto}
-                      </span>
-                    ))}
-                  </div>
+
+                {/* Tags productos */}
+                <div className="sup-products">
+                  <div className="sup-products-label">Productos</div>
+                  {p.productos && p.productos.length > 0 ? (
+                    <div className="sup-tags">
+                      {p.productos.map((prod, i) => (
+                        <span key={i} className="sup-tag">{prod}</span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="sup-no-products">Sin productos asignados</span>
+                  )}
                 </div>
-                <div className="supplier-actions">
-                  <button onClick={() => abrirFormulario(proveedor)} className="btn-secondary">
-                    <FiEdit />
+
+                {/* Acciones */}
+                <div className="sup-card-actions">
+                  <button className="sup-act-btn sup-act-edit" onClick={() => abrirFormulario(p)}>
+                    <FiEdit size={13} /> Editar
                   </button>
-                  <button onClick={() => eliminarProveedor(proveedor.id)} className="btn-danger">
-                    <FiTrash2 />
+                  <button className="sup-act-btn sup-act-del" onClick={() => eliminarProveedor(p.id)}>
+                    <FiTrash2 size={13} /> Eliminar
                   </button>
                 </div>
               </div>
             ))}
           </div>
-        </section>
 
+        </div>
+
+        {/* Modal */}
         {mostrarFormulario && (
-          <div className="modal-overlay">
-            <div className="modal">
-              <div className="modal-header">
-                <h3>{proveedorEdit ? "Editar Proveedor" : "Nuevo Proveedor"}</h3>
-                <button onClick={() => setMostrarFormulario(false)} className="close-button">
-                  ×
-                </button>
+          <div className="sup-modal-overlay" onClick={e => { if (e.target === e.currentTarget) setMostrarFormulario(false); }}>
+            <div className="sup-modal">
+              <div className="sup-modal-header">
+                <h3>{proveedorEdit ? "✏️ Editar Proveedor" : "➕ Nuevo Proveedor"}</h3>
+                <button className="sup-modal-close" onClick={() => setMostrarFormulario(false)}>✕</button>
               </div>
-              <div className="modal-body">
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label>Nombre del Proveedor</label>
-                    <input
-                      type="text"
-                      value={formData.nombre}
-                      onChange={handleFormChange("nombre")}
-                      className="form-input"
-                      placeholder="Ej: Distribuidora Beauty"
-                    />
+              <div className="sup-modal-body">
+                <div className="sup-modal-fields">
+                  <div className="sup-field">
+                    <label>Nombre *</label>
+                    <input className="sup-input" placeholder="Ej: Distribuidora Beauty" value={formData.nombre} onChange={field("nombre")} />
                   </div>
-                  <div className="form-group">
-                    <label>Persona de Contacto</label>
-                    <input
-                      type="text"
-                      value={formData.contacto}
-                      onChange={handleFormChange("contacto")}
-                      className="form-input"
-                      placeholder="Ej: María González"
-                    />
+                  <div className="sup-field">
+                    <label>Persona de Contacto *</label>
+                    <input className="sup-input" placeholder="Ej: María González" value={formData.contacto} onChange={field("contacto")} />
                   </div>
-                  <div className="form-group">
+                  <div className="sup-field">
                     <label>Teléfono</label>
-                    <input
-                      type="tel"
-                      value={formData.telefono}
-                      onChange={handleFormChange("telefono")}
-                      className="form-input"
-                      placeholder="+57 300 123 4567"
-                    />
+                    <input className="sup-input" placeholder="+57 300 123 4567" value={formData.telefono} onChange={field("telefono")} />
                   </div>
-                  <div className="form-group">
+                  <div className="sup-field">
                     <label>Email</label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={handleFormChange("email")}
-                      className="form-input"
-                      placeholder="ejemplo@proveedor.com"
-                    />
+                    <input type="email" className="sup-input" placeholder="ejemplo@proveedor.com" value={formData.email} onChange={field("email")} />
                   </div>
-                  <div className="form-group">
+                  <div className="sup-field full">
                     <label>Dirección</label>
-                    <textarea
-                      value={formData.direccion}
-                      onChange={handleFormChange("direccion")}
-                      className="form-input"
-                      placeholder="Dirección completa"
-                      rows={3}
-                    />
+                    <textarea className="sup-input" placeholder="Dirección completa" rows={2} value={formData.direccion} onChange={field("direccion")} />
                   </div>
-                  <div className="form-group">
+                  <div className="sup-field">
                     <label>Tipo</label>
-                    <select value={formData.tipo} onChange={handleTipoChange} className="form-input">
+                    <select className="sup-input" value={formData.tipo} onChange={field("tipo")}>
                       <option value="Cosméticos">Cosméticos</option>
                       <option value="Farmacéutico">Farmacéutico</option>
                       <option value="General">General</option>
                     </select>
                   </div>
-                  <div className="form-group">
+                  <div className="sup-field">
                     <label>Estado</label>
-                    <select value={formData.estado} onChange={handleEstadoChange} className="form-input">
+                    <select className="sup-input" value={formData.estado} onChange={field("estado")}>
                       <option value="Activo">Activo</option>
                       <option value="Inactivo">Inactivo</option>
                     </select>
                   </div>
                 </div>
               </div>
-              <div className="modal-footer">
-                <button onClick={() => setMostrarFormulario(false)} className="btn-secondary">
-                  Cancelar
-                </button>
+              <div className="sup-modal-footer">
+                <button className="sup-btn-cancel" onClick={() => setMostrarFormulario(false)}>Cancelar</button>
                 <button
+                  className="sup-btn-submit"
                   onClick={guardarProveedor}
-                  className="btn-primary"
                   disabled={!formData.nombre || !formData.contacto}
                 >
                   {proveedorEdit ? "Actualizar" : "Crear Proveedor"}
@@ -354,6 +279,7 @@ export default function ProveedoresPage() {
             </div>
           </div>
         )}
+
       </main>
     </div>
   );

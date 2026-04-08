@@ -1,0 +1,218 @@
+/* ===== CREATE PURCHASE — mismo sistema de diseño que product-list ===== */
+
+/* Header */
+.cp-header {
+  background: white;
+  padding: 20px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  flex-shrink: 0;
+}
+.cp-header h1 {
+  font-size: 1.15rem;
+  color: #1F3B4D;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cp-header p {
+  font-size: .82rem;
+  color: #888;
+  margin: 2px 0 0;
+}
+
+/* Layout dos columnas */
+.cp-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  align-items: start;
+  padding: 20px 24px;
+}
+
+/* Cards */
+.cp-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  overflow: hidden;
+}
+.cp-card-title {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: .95rem;
+  font-weight: 700;
+  color: #1F3B4D;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cp-card-body { padding: 20px; }
+
+/* Grid de campos */
+.cp-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.cp-fields .full { grid-column: 1 / -1; }
+.cp-field label {
+  display: block;
+  font-size: .78rem;
+  font-weight: 700;
+  color: #555;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+.cp-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: .88rem;
+  font-family: inherit;
+  outline: none;
+  background: white;
+  box-sizing: border-box;
+  transition: border-color .15s;
+}
+.cp-input:focus { border-color: #00d4aa; }
+
+/* Sección agregar producto */
+.cp-add-section {
+  margin-top: 20px;
+  background: #f7f8fa;
+  border-radius: 10px;
+  padding: 16px;
+}
+.cp-add-title {
+  font-size: .88rem;
+  font-weight: 700;
+  color: #1F3B4D;
+  margin: 0 0 12px;
+}
+.cp-add-row {
+  display: grid;
+  grid-template-columns: 1fr 100px auto;
+  gap: 10px;
+  align-items: end;
+}
+.cp-btn-add {
+  padding: 9px 16px;
+  background: linear-gradient(135deg, #00d4aa, #00a88f);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: .84rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  width: auto;
+}
+.cp-btn-add:hover { opacity: .9; }
+.cp-btn-add:disabled { opacity: .5; cursor: default; }
+
+/* Tabla de items */
+.cp-items-title {
+  font-size: .88rem;
+  font-weight: 700;
+  color: #1F3B4D;
+  margin: 20px 0 10px;
+}
+.cp-table-wrap {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #eee;
+}
+.cp-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.cp-table thead th {
+  background: #f7f8fa;
+  padding: 10px 14px;
+  text-align: left;
+  font-size: .74rem;
+  color: #888;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  border-bottom: 1px solid #eee;
+}
+.cp-table tbody td {
+  padding: 11px 14px;
+  font-size: .86rem;
+  color: #333;
+  border-bottom: 1px solid #f5f5f5;
+  vertical-align: middle;
+}
+.cp-table tbody tr:last-child td { border-bottom: none; }
+.cp-table tbody tr:hover { background: #fafffe; }
+.cp-btn-del {
+  padding: 5px 9px;
+  background: #fef2f2;
+  border: none;
+  border-radius: 6px;
+  color: #dc2626;
+  cursor: pointer;
+  font-size: .9rem;
+  display: inline-flex;
+  align-items: center;
+  width: auto;
+}
+.cp-btn-del:hover { background: #fee2e2; }
+
+/* Card resumen */
+.cp-summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  font-size: .88rem;
+  color: #555;
+  border-bottom: 1px solid #f5f5f5;
+}
+.cp-summary-row:last-of-type { border-bottom: none; }
+.cp-summary-total {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 0 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1F3B4D;
+}
+.cp-btn-save {
+  margin-top: 16px;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #00d4aa, #00a88f);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: .9rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity .15s;
+}
+.cp-btn-save:hover { opacity: .9; }
+.cp-btn-save:disabled { opacity: .45; cursor: default; }
+
+/* Empty items hint */
+.cp-empty-hint {
+  text-align: center;
+  padding: 28px 0;
+  color: #bbb;
+  font-size: .84rem;
+}
