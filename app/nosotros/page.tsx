@@ -106,10 +106,9 @@ export default function NosotrosPage() {
           <h2 className="section-title" style={{ marginTop: 14, textAlign: "center" }}>Las personas detrás del producto</h2>
           <div className="team-grid">
             {[
-              { inicial: "C", nombre: "Carlos Zuluaga", rol: "CEO & Co-fundador", desc: "Ingeniero de sistemas. Obsesionado con el producto y la experiencia de usuario." },
-              { inicial: "Y", nombre: "Yuliana Gómez", rol: "CTO & Co-fundadora", desc: "Desarrolladora full-stack. Construye la arquitectura que mueve el negocio." },
-              { inicial: "A", nombre: "Andrés Pérez", rol: "Head of Sales", desc: "Ex-comerciante. Conoce el dolor del cliente porque lo vivió en carne propia." },
-              { inicial: "L", nombre: "Laura Martínez", rol: "Diseño & UX", desc: "Diseñadora que hace que lo complejo parezca simple. Defensora del usuario." },
+              { inicial: "C", nombre: "Carlos Zuluaga", rol: "Desarrollador Backend", desc: "Ingeniero de sistemas. Construye y mantiene la arquitectura del servidor y las APIs del negocio." },
+              { inicial: "Y", nombre: "Yuliana Gómez", rol: "PM & Desarrollo", desc: "Gestiona el producto y lidera el desarrollo. Conecta la visión del negocio con la tecnología." },
+              { inicial: "J", nombre: "Joseph Roldán", rol: "Desarrollador & Diseño UI", desc: "Construye interfaces intuitivas y cuida cada detalle visual para que el producto sea simple y bonito." },
             ].map(({ inicial, nombre, rol, desc }) => (
               <div key={nombre} className="team-card">
                 <div className="team-avatar">{inicial}</div>
