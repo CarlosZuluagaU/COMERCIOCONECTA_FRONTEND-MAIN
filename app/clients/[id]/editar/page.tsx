@@ -75,7 +75,7 @@ export default function EditarClientePage() {
       setForm(prev => ({ ...prev, [field]: e.target.value }));
 
   const guardar = async () => {
-    if (!form.tipoDocumento || !form.numeroDocumento || !form.nombres) {
+    if (!form.nombres) {
       alert("Por favor complete los campos obligatorios (*)"); return;
     }
     setSaving(true);
@@ -94,7 +94,7 @@ export default function EditarClientePage() {
     }
   };
 
-  const canSave = !!form.tipoDocumento && !!form.numeroDocumento && !!form.nombres && !saving;
+  const canSave = !!form.nombres && !saving;
 
   if (loading) {
     return (
@@ -150,7 +150,7 @@ export default function EditarClientePage() {
                 <h3>Información Personal</h3>
                 <div className="adm-row">
                   <div className="adm-field">
-                    <label>Nombres *</label>
+                    <label>Nombres</label>
                     <input value={form.nombres} onChange={handleChange("nombres")} placeholder="Ej: María" />
                   </div>
                   <div className="adm-field">
@@ -158,20 +158,8 @@ export default function EditarClientePage() {
                     <input value={form.apellidos} onChange={handleChange("apellidos")} placeholder="Ej: González" />
                   </div>
                 </div>
-                <div className="adm-row">
-                  <div className="adm-field">
-                    <label>Tipo de documento *</label>
-                    <select value={form.tipoDocumento} onChange={handleChange("tipoDocumento")}>
-                      <option value="">Seleccionar tipo</option>
-                      {TIPOS_DOC.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                    </select>
-                  </div>
-                  <div className="adm-field">
-                    <label>Número de documento *</label>
-                    <input value={form.numeroDocumento} onChange={handleChange("numeroDocumento")} placeholder="Ej: 1234567890" />
-                  </div>
-                </div>
-                <div className="adm-row">
+
+<div className="adm-row">
                   <div className="adm-field">
                     <label>Teléfono</label>
                     <input value={form.telefono} onChange={handleChange("telefono")} placeholder="Ej: 3001234567" />
@@ -205,7 +193,7 @@ export default function EditarClientePage() {
             {/* RIGHT */}
             <div className="adm-save">
               <h3>Guardar cambios</h3>
-              <p>Los campos marcados con * son obligatorios.</p>
+              <p>Edita los datos del cliente y guarda los cambios.</p>
               <button className="adm-btn-full" onClick={guardar} disabled={!canSave}>
                 <FiSave style={{ marginRight: 6 }} />
                 {saving ? "Guardando…" : "Guardar Cliente"}
