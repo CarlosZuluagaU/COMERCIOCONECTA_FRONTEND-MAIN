@@ -25,7 +25,8 @@ function formatTotal(n: number) {
 
 function estadoBadge(estado: string) {
   switch (estado) {
-    case "ERROR":      return "pl-badge pl-green";   // frontend muestra ERROR como APROBADA
+    case "ERROR":      return "pl-badge pl-green";
+    case "INVOICED":   return "pl-badge pl-green";
     case "COMPLETADO": return "pl-badge pl-yellow";
     case "PROCESANDO": return "pl-badge pl-yellow";
     case "CREATED":    return "pl-badge pl-gray";
@@ -36,6 +37,7 @@ function estadoBadge(estado: string) {
 function estadoLabel(estado: string) {
   switch (estado) {
     case "ERROR":      return "Aprobada";
+    case "INVOICED":   return "Facturado";
     case "COMPLETADO": return "Completado";
     case "PROCESANDO": return "Procesando";
     case "CREATED":    return "Creada";
@@ -109,7 +111,7 @@ export default function VentasPage() {
       <main className="dashboard-main">
 
         <header className="pl-header">
-          <h1>🧾 Historial de Ventas</h1>
+          <h1>Historial de Ventas</h1>
           <button
             className="pl-btn-add"
             onClick={fetchVentas}
@@ -141,7 +143,7 @@ export default function VentasPage() {
           {/* Toolbar */}
           <div className="pl-toolbar">
             <div className="pl-search-wrap">
-              <span>🔍</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <input
                 className="pl-search-input"
                 placeholder="Buscar por ID, cliente, documento…"
@@ -197,7 +199,19 @@ export default function VentasPage() {
                             >
                               <FiEye size={13} /> Ver
                             </button>
-                            {v.estado !== "ERROR" && (
+                            {v.estado === "INVOICED" ? (
+                              <span
+                                style={{
+                                  display: "inline-flex", alignItems: "center", gap: 4,
+                                  padding: "4px 10px", borderRadius: 6,
+                                  background: "#f1f5f9", color: "#94a3b8",
+                                  fontSize: ".8rem", fontWeight: 600,
+                                  border: "1px solid #e2e8f0",
+                                }}
+                              >
+                                <FiCheckCircle size={13} /> Facturado
+                              </span>
+                            ) : v.estado !== "ERROR" && (
                               <button
                                 className="pl-act-btn"
                                 style={{ background: "#d1fae5", color: "#065f46", display: "inline-flex", alignItems: "center", gap: 4 }}
