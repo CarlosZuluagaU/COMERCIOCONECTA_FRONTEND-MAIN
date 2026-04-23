@@ -78,6 +78,8 @@ export default function TiendaPage() {
     root.style.removeProperty("--sp-banner-sec");
     root.style.removeProperty("--sp-footer-texto");
     root.style.removeProperty("--sp-iconos-sociales");
+    root.style.removeProperty("--sp-header-bg");
+    root.style.removeProperty("--sp-footer-bg");
 
     const apply = (cfg: any) => {
       if (!cfg) return;
@@ -101,6 +103,8 @@ export default function TiendaPage() {
       if (cfg.colorIconosSociales)      root.style.setProperty("--sp-iconos-sociales",   cfg.colorIconosSociales);
       if (cfg.colorNombre)              root.style.setProperty("--sp-nombre",            cfg.colorNombre);
       if (cfg.colorTagline)             root.style.setProperty("--sp-tagline",           cfg.colorTagline);
+      if (cfg.colorHeaderBg)            root.style.setProperty("--sp-header-bg",         cfg.colorHeaderBg);
+      if (cfg.colorFooterBg)            root.style.setProperty("--sp-footer-bg",         cfg.colorFooterBg);
       setStoreCfg({
         nombre:         cfg.nombre         || "ComerciosConecta",
         tagline:        cfg.tagline        || "Tu tienda de confianza",

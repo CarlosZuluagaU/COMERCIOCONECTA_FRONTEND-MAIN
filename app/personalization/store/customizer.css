@@ -554,7 +554,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--sp-primary, #112D47);
+  background: var(--sp-header-bg, var(--sp-primary, #112D47));
   color: white;
 }
 .sp-logo { font-size: 1.1rem; font-weight: 800; font-family: inherit; color: var(--sp-nombre, white); }
@@ -670,7 +670,7 @@
 }
 
 .sp-footer {
-  background: var(--sp-primary, #112D47);
+  background: var(--sp-footer-bg, var(--sp-primary, #112D47));
   color: white;
   padding: 14px 24px;
 }

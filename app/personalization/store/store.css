@@ -6,28 +6,31 @@
 .back-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  color: #1F3B4D;
-  font-size: 13px;
+  gap: 6px;
+  color: #334155;
+  font-size: .85rem;
   font-weight: 600;
   cursor: pointer;
-  border: 1px solid #ddd;
-  background: #fff;
-  padding: 8px 16px;
+  border: 1.5px solid #e2e8f0;
+  background: #f1f5f9;
+  padding: 9px 18px;
   border-radius: 8px;
   text-decoration: none;
   margin-bottom: 20px;
-  transition: border 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+  transition: border-color .18s, background .18s, color .18s, box-shadow .18s;
 }
 .back-btn:hover {
-  border-color: #00d4aa;
-  box-shadow: 0 2px 8px rgba(0,212,170,.15);
+  border-color: #14B8A6;
+  background: #f0fdfb;
+  color: #0f766e;
+  box-shadow: 0 2px 8px rgba(20,184,166,.18);
 }
 
 .page-title {
   font-size: 22px;
   font-weight: 800;
-  color: #1F3B4D;
+  color: #112D47;
   margin-bottom: 4px;
 }
 .page-sub {
@@ -48,8 +51,8 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.7px;
-  color: #1F3B4D;
-  border-bottom: 2px solid #00d4aa;
+  color: #112D47;
+  border-bottom: 2px solid #14B8A6;
   padding-bottom: 8px;
   margin-bottom: 20px;
 }
@@ -86,7 +89,7 @@
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-  border-color: #00d4aa;
+  border-color: #14B8A6;
 }
 
 .color-row {
@@ -117,7 +120,7 @@
 .color-hex {
   font-size: 14px;
   font-weight: 600;
-  color: #1F3B4D;
+  color: #112D47;
   font-family: monospace;
 }
 
@@ -146,7 +149,7 @@
 }
 .btn-save {
   padding: 10px 24px;
-  background: #00d4aa;
+  background: #14B8A6;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -162,7 +165,7 @@
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: #1F3B4D;
+  background: #112D47;
   color: #fff;
   padding: 14px 20px;
   border-radius: 10px;

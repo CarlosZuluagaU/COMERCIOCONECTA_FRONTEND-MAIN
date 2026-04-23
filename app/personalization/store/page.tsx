@@ -71,24 +71,26 @@ interface Config {
   logoUrl: string;
   colorPrimario: string;
   colorAcento: string;
-  colorTexto: string;
-  colorTextoSecundario: string;
-  colorTextoBoton: string;
-  colorBoton: string;
-  colorBotonCta: string;
-  colorBanner: string;
-  colorCarritoBoton: string;
-  colorBannerSecundario: string;
-  colorFooterTexto: string;
-  colorIconosSociales: string;
+  colorHeaderBg: string;
   colorNombre: string;
   colorTagline: string;
+  colorCarritoBoton: string;
+  colorFooterBg: string;
+  colorFooterTexto: string;
+  colorIconosSociales: string;
+  colorBanner: string;
+  colorBannerSecundario: string;
+  colorTexto: string;
+  colorTextoSecundario: string;
+  colorBoton: string;
+  colorBotonCta: string;
+  colorTextoBoton: string;
   fontFamily: string;
-  buttonRadius: string;
-  cardRadius: string;
   layout: string;
   hoverBtn: string;
   colorHoverBtn: string;
+  buttonRadius: string;
+  cardRadius: string;
   heroTitle: string;
   heroSubtitle: string;
   heroCta: string;
@@ -109,18 +111,20 @@ const DEFAULT_CFG: Config = {
   logoUrl:              "",
   colorPrimario:        "#1F3B4D",
   colorAcento:          "#00d4aa",
+  colorHeaderBg:        "#1F3B4D",
+  colorNombre:          "#ffffff",
+  colorTagline:         "rgba(255,255,255,0.6)",
+  colorCarritoBoton:    "#00d4aa",
+  colorFooterBg:        "#1F3B4D",
+  colorFooterTexto:     "#ffffff",
+  colorIconosSociales:  "#ffffff",
+  colorBanner:          "#1F3B4D",
+  colorBannerSecundario:"#00d4aa",
   colorTexto:           "#1F3B4D",
   colorTextoSecundario: "#666666",
-  colorTextoBoton:      "#ffffff",
   colorBoton:           "#1F3B4D",
   colorBotonCta:        "#00d4aa",
-  colorBanner:           "#1F3B4D",
-  colorCarritoBoton:     "#00d4aa",
-  colorBannerSecundario: "#00d4aa",
-  colorFooterTexto:      "#ffffff",
-  colorIconosSociales:   "#ffffff",
-  colorNombre:           "#ffffff",
-  colorTagline:          "rgba(255,255,255,0.6)",
+  colorTextoBoton:      "#ffffff",
   fontFamily:           "'Manrope', sans-serif",
   buttonRadius:         "50px",
   cardRadius:           "12px",
@@ -215,10 +219,12 @@ export default function StoreCustomizerPage() {
           colorBanner:           data.colorBanner           || DEFAULT_CFG.colorBanner,
           colorCarritoBoton:     data.colorCarritoBoton     || DEFAULT_CFG.colorCarritoBoton,
           colorBannerSecundario: data.colorBannerSecundario || DEFAULT_CFG.colorBannerSecundario,
-          colorFooterTexto:      data.colorFooterTexto      || DEFAULT_CFG.colorFooterTexto,
-          colorIconosSociales:   data.colorIconosSociales   || DEFAULT_CFG.colorIconosSociales,
+          colorHeaderBg:         data.colorHeaderBg         || DEFAULT_CFG.colorHeaderBg,
           colorNombre:           data.colorNombre           || DEFAULT_CFG.colorNombre,
           colorTagline:          data.colorTagline          || DEFAULT_CFG.colorTagline,
+          colorFooterBg:         data.colorFooterBg         || DEFAULT_CFG.colorFooterBg,
+          colorFooterTexto:      data.colorFooterTexto      || DEFAULT_CFG.colorFooterTexto,
+          colorIconosSociales:   data.colorIconosSociales   || DEFAULT_CFG.colorIconosSociales,
           fontFamily:           data.fontFamily           || DEFAULT_CFG.fontFamily,
           buttonRadius:         data.buttonRadius         || DEFAULT_CFG.buttonRadius,
           cardRadius:           data.cardRadius           || DEFAULT_CFG.cardRadius,
@@ -323,6 +329,8 @@ export default function StoreCustomizerPage() {
     "--sp-banner":            cfg.colorBanner,
     "--sp-carrito-btn":       cfg.colorCarritoBoton,
     "--sp-banner-sec":        cfg.colorBannerSecundario,
+    "--sp-header-bg":         cfg.colorHeaderBg,
+    "--sp-footer-bg":         cfg.colorFooterBg,
     "--sp-footer-texto":      cfg.colorFooterTexto,
     "--sp-iconos-sociales":   cfg.colorIconosSociales,
     "--sp-nombre":            cfg.colorNombre,
@@ -433,7 +441,8 @@ export default function StoreCustomizerPage() {
             {/* ════ TAB: DISEÑO ════ */}
             {tab === "design" && (
               <>
-                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>} bg="#e0f2fe" title="Identidad de Marca" subtitle="Logo, nombre y slogan" defaultOpen>
+                {/* ── 1. Identidad de Marca ── */}
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>} bg="#e0f2fe" title="Identidad de Marca" subtitle="Logo, nombre, eslogan y paleta de colores" defaultOpen>
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">Logo de la tienda</label>
                     <div className="cust-logo-preview">
@@ -465,20 +474,13 @@ export default function StoreCustomizerPage() {
                     <label className="cust-ctrl-label">Eslogan / tagline</label>
                     <input className="cust-input" value={cfg.tagline} onChange={e => update({ tagline: e.target.value })} />
                   </div>
-                </Section>
-
-                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>} bg="#fef9c3" title="Colores" subtitle="Paleta principal de la tienda" defaultOpen>
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">
-                      Color primario <span className="cust-ctrl-hint">(header, botones CTA)</span>
+                      Color primario <span className="cust-ctrl-hint">(base de la paleta)</span>
                     </label>
                     <div className="cust-color-row">
-                      <input
-                        type="color"
-                        className="cust-color-swatch"
-                        value={cfg.colorPrimario}
-                        onChange={e => update({ colorPrimario: e.target.value })}
-                      />
+                      <input type="color" className="cust-color-swatch" value={cfg.colorPrimario}
+                        onChange={e => update({ colorPrimario: e.target.value })} />
                       <div className="cust-color-value">{cfg.colorPrimario}</div>
                     </div>
                   </div>
@@ -487,12 +489,8 @@ export default function StoreCustomizerPage() {
                       Color de acento <span className="cust-ctrl-hint">(detalles, badges)</span>
                     </label>
                     <div className="cust-color-row">
-                      <input
-                        type="color"
-                        className="cust-color-swatch"
-                        value={cfg.colorAcento}
-                        onChange={e => update({ colorAcento: e.target.value })}
-                      />
+                      <input type="color" className="cust-color-swatch" value={cfg.colorAcento}
+                        onChange={e => update({ colorAcento: e.target.value })} />
                       <div className="cust-color-value">{cfg.colorAcento}</div>
                     </div>
                   </div>
@@ -505,14 +503,34 @@ export default function StoreCustomizerPage() {
                           className={`cust-palette-color${cfg.colorPrimario === pal.p ? " selected" : ""}`}
                           style={{ background: pal.p }}
                           title={pal.p}
-                          onClick={() => update({ colorPrimario: pal.p, colorAcento: pal.a, colorBoton: pal.p, colorBotonCta: pal.a, colorBanner: pal.p })}
+                          onClick={() => update({ colorPrimario: pal.p, colorAcento: pal.a, colorBoton: pal.p, colorBotonCta: pal.a, colorBanner: pal.p, colorHeaderBg: pal.p, colorFooterBg: pal.p })}
                         />
                       ))}
                     </div>
                   </div>
                 </Section>
 
-                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h16M4 12h16M4 18h7"/></svg>} bg="#e0f2fe" title="Color del Título y Categorías" subtitle="Texto del nombre de la tienda y badges de categoría" defaultOpen>
+                {/* ── 2. Header y Footer ── */}
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="4" rx="1"/><rect x="2" y="17" width="20" height="4" rx="1"/><line x1="6" y1="8" x2="18" y2="8"/><line x1="6" y1="13" x2="18" y2="13"/></svg>} bg="#dbeafe" title="Header y Footer" subtitle="Fondo y colores de texto del encabezado y pie de página" defaultOpen>
+                  <p style={{ fontSize: ".72rem", fontWeight: 700, color: "#3b82f6", marginBottom: 10, letterSpacing: ".06em", textTransform: "uppercase" }}>Header</p>
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Fondo del header <span className="cust-ctrl-hint">(barra superior)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorHeaderBg}
+                        onChange={e => update({ colorHeaderBg: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorHeaderBg}</div>
+                    </div>
+                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {([[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#ffffff","Blanco"],["#000000","Negro"],["#0f172a","Oscuro"]] as [string,string][]).map(([c,l]) => (
+                        <div key={l} onClick={() => update({ colorHeaderBg: c })}
+                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                            background:c, color:c==="#ffffff"?"#333":"#fff",
+                            border:cfg.colorHeaderBg===c?"2px solid #333":"2px solid transparent" }}>{l}</div>
+                      ))}
+                    </div>
+                  </div>
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">
                       Color del nombre de la tienda <span className="cust-ctrl-hint">(texto en el header)</span>
@@ -522,10 +540,10 @@ export default function StoreCustomizerPage() {
                         onChange={e => update({ colorNombre: e.target.value })} />
                       <div className="cust-color-value">{cfg.colorNombre}</div>
                     </div>
-                    <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
+                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
                       {([["#ffffff","Blanco"],["#000000","Negro"],[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"]] as [string,string][]).map(([color,label]) => (
                         <div key={label} onClick={() => update({ colorNombre: color })}
-                          style={{ cursor:"pointer", padding:"5px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
                             background:color, color:color==="#ffffff"?"#333":"#fff",
                             border:cfg.colorNombre===color?"2px solid #333":"2px solid transparent" }}>{label}</div>
                       ))}
@@ -533,24 +551,256 @@ export default function StoreCustomizerPage() {
                   </div>
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">
-                      Color de categorías <span className="cust-ctrl-hint">(badges en tarjetas de producto)</span>
+                      Color del tagline / categorías <span className="cust-ctrl-hint">(eslogan en header y badges de producto)</span>
                     </label>
                     <div className="cust-color-row">
                       <input type="color" className="cust-color-swatch" value={cfg.colorTagline}
                         onChange={e => update({ colorTagline: e.target.value })} />
                       <div className="cust-color-value">{cfg.colorTagline}</div>
                     </div>
-                    <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
-                      {([["#00d4aa","Verde"],[cfg.colorAcento,"Acento"],[cfg.colorPrimario,"Primario"],["#7c3aed","Morado"],["#f59e0b","Amarillo"]] as [string,string][]).map(([color,label]) => (
+                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {([["#ffffff","Blanco"],[cfg.colorAcento,"Acento"],[cfg.colorPrimario,"Primario"],["#7c3aed","Morado"],["#f59e0b","Amarillo"]] as [string,string][]).map(([color,label]) => (
                         <div key={label} onClick={() => update({ colorTagline: color })}
-                          style={{ cursor:"pointer", padding:"5px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
-                            background:color, color:"#fff",
+                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                            background:color, color: color==="#ffffff"?"#333":"#fff",
                             border:cfg.colorTagline===color?"2px solid #333":"2px solid transparent" }}>{label}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Botón carrito <span className="cust-ctrl-hint">(ícono del carrito en el header)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorCarritoBoton}
+                        onChange={e => update({ colorCarritoBoton: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorCarritoBoton}</div>
+                    </div>
+                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {([[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#10b981","Verde"],["#7c3aed","Morado"],["#dc2626","Rojo"],["#000000","Negro"]] as [string,string][]).map(([c,l]) => (
+                        <div key={l} onClick={() => update({ colorCarritoBoton: c })}
+                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                            background:c, color: c==="#ffffff"?"#333":"#fff",
+                            border: cfg.colorCarritoBoton===c?"2px solid #333":"2px solid transparent" }}>{l}</div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div style={{ height: 1, background: "#e2e8f0", margin: "16px 0" }} />
+                  <p style={{ fontSize: ".72rem", fontWeight: 700, color: "#3b82f6", marginBottom: 10, letterSpacing: ".06em", textTransform: "uppercase" }}>Footer</p>
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Fondo del footer <span className="cust-ctrl-hint">(barra inferior)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorFooterBg}
+                        onChange={e => update({ colorFooterBg: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorFooterBg}</div>
+                    </div>
+                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {([[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#ffffff","Blanco"],["#000000","Negro"],["#0f172a","Oscuro"]] as [string,string][]).map(([c,l]) => (
+                        <div key={l} onClick={() => update({ colorFooterBg: c })}
+                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                            background:c, color:c==="#ffffff"?"#333":"#fff",
+                            border:cfg.colorFooterBg===c?"2px solid #333":"2px solid transparent" }}>{l}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Texto del footer <span className="cust-ctrl-hint">(nombre, copyright, teléfono)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorFooterTexto}
+                        onChange={e => update({ colorFooterTexto: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorFooterTexto}</div>
+                    </div>
+                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {([["#ffffff","Blanco"],["#000000","Negro"],[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"]] as [string,string][]).map(([color,label]) => (
+                        <div key={label} onClick={() => update({ colorFooterTexto: color })}
+                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                            background:color, color:color==="#ffffff"?"#333":"#fff",
+                            border:cfg.colorFooterTexto===color?"2px solid #333":"2px solid transparent" }}>{label}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Iconos de redes sociales <span className="cust-ctrl-hint">(Facebook, Instagram, etc.)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorIconosSociales}
+                        onChange={e => update({ colorIconosSociales: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorIconosSociales}</div>
+                    </div>
+                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {([["#ffffff","Blanco"],["#000000","Negro"],[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"]] as [string,string][]).map(([color,label]) => (
+                        <div key={label} onClick={() => update({ colorIconosSociales: color })}
+                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                            background:color, color:color==="#ffffff"?"#333":"#fff",
+                            border:cfg.colorIconosSociales===color?"2px solid #333":"2px solid transparent" }}>{label}</div>
                       ))}
                     </div>
                   </div>
                 </Section>
 
+                {/* ── 3. Banner y Categorías ── */}
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>} bg="#fce7f3" title="Banner y Categorías" subtitle="Fondo del hero y color lateral de sección">
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Color del banner <span className="cust-ctrl-hint">(sección principal de la tienda)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorBanner}
+                        onChange={e => update({ colorBanner: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorBanner}</div>
+                    </div>
+                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {([[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#7c3aed","Morado"],["#b91c1c","Rojo"],["#065f46","Verde"],["#0f172a","Oscuro"]] as [string,string][]).map(([c,l]) => (
+                        <div key={l} onClick={() => update({ colorBanner: c })}
+                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                            background:c, color:"#fff",
+                            border: cfg.colorBanner===c?"2px solid #333":"2px solid transparent" }}>{l}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Color secundario del banner <span className="cust-ctrl-hint">(degradado final del hero)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorBannerSecundario}
+                        onChange={e => update({ colorBannerSecundario: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorBannerSecundario}</div>
+                    </div>
+                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {([[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#7c3aed","Morado"],["#f59e0b","Amarillo"],["#10b981","Verde"],["#ffffff","Blanco"]] as [string,string][]).map(([c,l]) => (
+                        <div key={l} onClick={() => update({ colorBannerSecundario: c })}
+                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                            background:c, color: c==="#ffffff"?"#333":"#fff",
+                            border: cfg.colorBannerSecundario===c?"2px solid #333":"2px solid transparent" }}>{l}</div>
+                      ))}
+                    </div>
+                    <div style={{
+                      marginTop: 10, borderRadius: 8, height: 40,
+                      background: `linear-gradient(135deg, ${cfg.colorBanner} 0%, ${cfg.colorBannerSecundario} 100%)`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: ".75rem", fontWeight: 700, color: "white",
+                    }}>
+                      Vista previa del banner
+                    </div>
+                  </div>
+                </Section>
+
+                {/* ── 4. Colores de Botones ── */}
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="8" width="18" height="8" rx="4"/></svg>} bg="#d1fae5" title="Colores de Botones" subtitle="Fondo y texto de cada tipo de botón">
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Botón "Agregar al carrito" <span className="cust-ctrl-hint">(tarjetas de producto)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorBoton}
+                        onChange={e => update({ colorBoton: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorBoton}</div>
+                    </div>
+                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {([[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#10b981","Verde"],["#7c3aed","Morado"],["#dc2626","Rojo"],["#000000","Negro"]] as [string,string][]).map(([c,l]) => (
+                        <div key={l} onClick={() => update({ colorBoton: c })}
+                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                            background:c, color: c==="#ffffff"?"#333":"#fff",
+                            border: cfg.colorBoton===c?"2px solid #333":"2px solid transparent" }}>{l}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Botón CTA <span className="cust-ctrl-hint">(Explorar, Pagar, Confirmar)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorBotonCta}
+                        onChange={e => update({ colorBotonCta: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorBotonCta}</div>
+                    </div>
+                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {([[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#10b981","Verde"],["#f59e0b","Amarillo"],["#7c3aed","Morado"],["#000000","Negro"]] as [string,string][]).map(([c,l]) => (
+                        <div key={l} onClick={() => update({ colorBotonCta: c })}
+                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                            background:c, color: c==="#ffffff"?"#333":"#fff",
+                            border: cfg.colorBotonCta===c?"2px solid #333":"2px solid transparent" }}>{l}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Texto en botones <span className="cust-ctrl-hint">(letras dentro de todos los botones)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorTextoBoton}
+                        onChange={e => update({ colorTextoBoton: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorTextoBoton}</div>
+                    </div>
+                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {([["#ffffff","Blanco"],["#000000","Negro"],[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"]] as [string,string][]).map(([color,label]) => (
+                        <div key={label} onClick={() => update({ colorTextoBoton: color })}
+                          style={{ cursor: "pointer", padding: "4px 10px", borderRadius: 6, fontSize: ".72rem", fontWeight: 700,
+                            background: color, color: color === "#ffffff" ? "#333" : "#fff",
+                            border: cfg.colorTextoBoton === color ? "2px solid #333" : "2px solid transparent" }}>
+                          {label}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </Section>
+
+                {/* ── 5. Fuentes y Colores de Texto ── */}
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>} bg="#ede9fe" title="Fuentes y Colores de Texto" subtitle="Tipografía y colores del contenido principal">
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">Fuente</label>
+                    <select
+                      className="cust-input"
+                      value={cfg.fontFamily}
+                      onChange={e => {
+                        const selected = FONTS.find(f => f.css === e.target.value);
+                        if (selected?.google) loadGoogleFont(selected.google);
+                        update({ fontFamily: e.target.value });
+                      }}
+                    >
+                      {FONTS.map(f => (
+                        <option key={f.css} value={f.css}>{f.label} — {f.desc}</option>
+                      ))}
+                    </select>
+                    <div style={{
+                      fontFamily: cfg.fontFamily,
+                      marginTop: 8, padding: "8px 12px",
+                      background: "#f4f6f8", borderRadius: 8,
+                      fontSize: ".82rem", fontWeight: 600, color: cfg.colorPrimario,
+                    }}>
+                      Aa Bb — La tienda se verá con esta fuente
+                    </div>
+                  </div>
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Texto principal <span className="cust-ctrl-hint">(títulos, precios)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorTexto}
+                        onChange={e => update({ colorTexto: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorTexto}</div>
+                    </div>
+                  </div>
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Texto secundario <span className="cust-ctrl-hint">(marca, descripción)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorTextoSecundario}
+                        onChange={e => update({ colorTextoSecundario: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorTextoSecundario}</div>
+                    </div>
+                  </div>
+                </Section>
+
+                {/* ── 6. Layout ── */}
                 <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>} bg="#fef9c3" title="Layout de la Tienda" subtitle="Elige cómo se muestran los productos" defaultOpen>
                   <div className="cust-ctrl-group">
                     <div className="cust-layout-grid">
@@ -575,6 +825,7 @@ export default function StoreCustomizerPage() {
                   </div>
                 </Section>
 
+                {/* ── 7. Hover ── */}
                 <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>} bg="#ede9fe" title="Efecto Hover de Botones" subtitle="Animación al pasar el cursor sobre botones" defaultOpen>
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">Tipo de efecto</label>
@@ -655,219 +906,7 @@ export default function StoreCustomizerPage() {
                   </div>
                 </Section>
 
-                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="8" width="18" height="8" rx="4"/></svg>} bg="#d1fae5" title="Colores de Botones" subtitle="Color de fondo de cada tipo de botón">
-                  <div className="cust-ctrl-group">
-                    <label className="cust-ctrl-label">
-                      Botón "Agregar al carrito" <span className="cust-ctrl-hint">(tarjetas de producto)</span>
-                    </label>
-                    <div className="cust-color-row">
-                      <input type="color" className="cust-color-swatch" value={cfg.colorBoton}
-                        onChange={e => update({ colorBoton: e.target.value })} />
-                      <div className="cust-color-value">{cfg.colorBoton}</div>
-                    </div>
-                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                      {([[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#10b981","Verde"],["#7c3aed","Morado"],["#dc2626","Rojo"],["#000000","Negro"]] as [string,string][]).map(([c,l]) => (
-                        <div key={l} onClick={() => update({ colorBoton: c })}
-                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
-                            background:c, color: c==="#ffffff"?"#333":"#fff",
-                            border: cfg.colorBoton===c?"2px solid #333":"2px solid transparent" }}>{l}</div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="cust-ctrl-group">
-                    <label className="cust-ctrl-label">
-                      Botón carrito <span className="cust-ctrl-hint">(header, contador del carrito)</span>
-                    </label>
-                    <div className="cust-color-row">
-                      <input type="color" className="cust-color-swatch" value={cfg.colorCarritoBoton}
-                        onChange={e => update({ colorCarritoBoton: e.target.value })} />
-                      <div className="cust-color-value">{cfg.colorCarritoBoton}</div>
-                    </div>
-                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                      {([[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#10b981","Verde"],["#7c3aed","Morado"],["#dc2626","Rojo"],["#000000","Negro"]] as [string,string][]).map(([c,l]) => (
-                        <div key={l} onClick={() => update({ colorCarritoBoton: c })}
-                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
-                            background:c, color: c==="#ffffff"?"#333":"#fff",
-                            border: cfg.colorCarritoBoton===c?"2px solid #333":"2px solid transparent" }}>{l}</div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="cust-ctrl-group">
-                    <label className="cust-ctrl-label">
-                      Botón CTA <span className="cust-ctrl-hint">(Explorar, Pagar, Confirmar)</span>
-                    </label>
-                    <div className="cust-color-row">
-                      <input type="color" className="cust-color-swatch" value={cfg.colorBotonCta}
-                        onChange={e => update({ colorBotonCta: e.target.value })} />
-                      <div className="cust-color-value">{cfg.colorBotonCta}</div>
-                    </div>
-                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                      {([[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#10b981","Verde"],["#f59e0b","Amarillo"],["#7c3aed","Morado"],["#000000","Negro"]] as [string,string][]).map(([c,l]) => (
-                        <div key={l} onClick={() => update({ colorBotonCta: c })}
-                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
-                            background:c, color: c==="#ffffff"?"#333":"#fff",
-                            border: cfg.colorBotonCta===c?"2px solid #333":"2px solid transparent" }}>{l}</div>
-                      ))}
-                    </div>
-                  </div>
-                </Section>
-
-                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>} bg="#fce7f3" title="Color del Banner" subtitle="Fondo del hero / portada de la tienda">
-                  <div className="cust-ctrl-group">
-                    <label className="cust-ctrl-label">
-                      Color del banner <span className="cust-ctrl-hint">(sección principal de la tienda)</span>
-                    </label>
-                    <div className="cust-color-row">
-                      <input type="color" className="cust-color-swatch" value={cfg.colorBanner}
-                        onChange={e => update({ colorBanner: e.target.value })} />
-                      <div className="cust-color-value">{cfg.colorBanner}</div>
-                    </div>
-                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                      {([[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#7c3aed","Morado"],["#b91c1c","Rojo"],["#065f46","Verde"],["#0f172a","Oscuro"]] as [string,string][]).map(([c,l]) => (
-                        <div key={l} onClick={() => update({ colorBanner: c })}
-                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
-                            background:c, color:"#fff",
-                            border: cfg.colorBanner===c?"2px solid #333":"2px solid transparent" }}>{l}</div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="cust-ctrl-group">
-                    <label className="cust-ctrl-label">
-                      Color secundario del banner <span className="cust-ctrl-hint">(degradado final del hero)</span>
-                    </label>
-                    <div className="cust-color-row">
-                      <input type="color" className="cust-color-swatch" value={cfg.colorBannerSecundario}
-                        onChange={e => update({ colorBannerSecundario: e.target.value })} />
-                      <div className="cust-color-value">{cfg.colorBannerSecundario}</div>
-                    </div>
-                    <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                      {([[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#7c3aed","Morado"],["#f59e0b","Amarillo"],["#10b981","Verde"],["#ffffff","Blanco"]] as [string,string][]).map(([c,l]) => (
-                        <div key={l} onClick={() => update({ colorBannerSecundario: c })}
-                          style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
-                            background:c, color: c==="#ffffff"?"#333":"#fff",
-                            border: cfg.colorBannerSecundario===c?"2px solid #333":"2px solid transparent" }}>{l}</div>
-                      ))}
-                    </div>
-                    <div style={{
-                      marginTop: 10, borderRadius: 8, height: 40,
-                      background: `linear-gradient(135deg, ${cfg.colorBanner} 0%, ${cfg.colorBannerSecundario} 100%)`,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: ".75rem", fontWeight: 700, color: "white",
-                    }}>
-                      Vista previa del banner
-                    </div>
-                  </div>
-                </Section>
-
-                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>} bg="#ede9fe" title="Tipografía" subtitle="Fuente de la tienda">
-                  <div className="cust-ctrl-group">
-                    <label className="cust-ctrl-label">Fuente</label>
-                    <select
-                      className="cust-input"
-                      value={cfg.fontFamily}
-                      onChange={e => {
-                        const selected = FONTS.find(f => f.css === e.target.value);
-                        if (selected?.google) loadGoogleFont(selected.google);
-                        update({ fontFamily: e.target.value });
-                      }}
-                    >
-                      {FONTS.map(f => (
-                        <option key={f.css} value={f.css}>{f.label} — {f.desc}</option>
-                      ))}
-                    </select>
-                    <div style={{
-                      fontFamily: cfg.fontFamily,
-                      marginTop: 8, padding: "8px 12px",
-                      background: "#f4f6f8", borderRadius: 8,
-                      fontSize: ".82rem", fontWeight: 600, color: cfg.colorPrimario,
-                    }}>
-                      Aa Bb — La tienda se verá con esta fuente
-                    </div>
-                  </div>
-                </Section>
-
-                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>} bg="#fce7f3" title="Colores de Texto" subtitle="Color de títulos, descripciones y botones">
-                  <div className="cust-ctrl-group">
-                    <label className="cust-ctrl-label">
-                      Texto principal <span className="cust-ctrl-hint">(títulos, precios)</span>
-                    </label>
-                    <div className="cust-color-row">
-                      <input type="color" className="cust-color-swatch" value={cfg.colorTexto}
-                        onChange={e => update({ colorTexto: e.target.value })} />
-                      <div className="cust-color-value">{cfg.colorTexto}</div>
-                    </div>
-                  </div>
-                  <div className="cust-ctrl-group">
-                    <label className="cust-ctrl-label">
-                      Texto secundario <span className="cust-ctrl-hint">(marca, descripción)</span>
-                    </label>
-                    <div className="cust-color-row">
-                      <input type="color" className="cust-color-swatch" value={cfg.colorTextoSecundario}
-                        onChange={e => update({ colorTextoSecundario: e.target.value })} />
-                      <div className="cust-color-value">{cfg.colorTextoSecundario}</div>
-                    </div>
-                  </div>
-                  <div className="cust-ctrl-group">
-                    <label className="cust-ctrl-label">
-                      Texto en botones <span className="cust-ctrl-hint">(letras dentro de botones)</span>
-                    </label>
-                    <div className="cust-color-row">
-                      <input type="color" className="cust-color-swatch" value={cfg.colorTextoBoton}
-                        onChange={e => update({ colorTextoBoton: e.target.value })} />
-                      <div className="cust-color-value">{cfg.colorTextoBoton}</div>
-                    </div>
-                    <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
-                      {([["#ffffff","Blanco"],["#000000","Negro"],[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"]] as [string,string][]).map(([color,label], i) => (
-                        <div key={label} onClick={() => update({ colorTextoBoton: color })}
-                          style={{ cursor: "pointer", padding: "5px 10px", borderRadius: 6, fontSize: ".72rem", fontWeight: 700,
-                            background: color, color: color === "#ffffff" ? "#333" : "#fff",
-                            border: cfg.colorTextoBoton === color ? "2px solid #333" : "2px solid transparent" }}>
-                          {label}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </Section>
-
-                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="15" y2="18"/></svg>} bg="#fef3c7" title="Colores del Footer" subtitle="Texto del pie de página e iconos de redes">
-                  <div className="cust-ctrl-group">
-                    <label className="cust-ctrl-label">
-                      Texto del footer <span className="cust-ctrl-hint">(nombre, copyright, teléfono)</span>
-                    </label>
-                    <div className="cust-color-row">
-                      <input type="color" className="cust-color-swatch" value={cfg.colorFooterTexto}
-                        onChange={e => update({ colorFooterTexto: e.target.value })} />
-                      <div className="cust-color-value">{cfg.colorFooterTexto}</div>
-                    </div>
-                    <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
-                      {([["#ffffff","Blanco"],["#000000","Negro"],[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"]] as [string,string][]).map(([color,label]) => (
-                        <div key={label} onClick={() => update({ colorFooterTexto: color })}
-                          style={{ cursor:"pointer", padding:"5px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
-                            background:color, color:color==="#ffffff"?"#333":"#fff",
-                            border:cfg.colorFooterTexto===color?"2px solid #333":"2px solid transparent" }}>{label}</div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="cust-ctrl-group">
-                    <label className="cust-ctrl-label">
-                      Color iconos de redes sociales <span className="cust-ctrl-hint">(Facebook, Instagram, etc.)</span>
-                    </label>
-                    <div className="cust-color-row">
-                      <input type="color" className="cust-color-swatch" value={cfg.colorIconosSociales}
-                        onChange={e => update({ colorIconosSociales: e.target.value })} />
-                      <div className="cust-color-value">{cfg.colorIconosSociales}</div>
-                    </div>
-                    <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
-                      {([["#ffffff","Blanco"],["#000000","Negro"],[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"]] as [string,string][]).map(([color,label]) => (
-                        <div key={label} onClick={() => update({ colorIconosSociales: color })}
-                          style={{ cursor:"pointer", padding:"5px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
-                            background:color, color:color==="#ffffff"?"#333":"#fff",
-                            border:cfg.colorIconosSociales===color?"2px solid #333":"2px solid transparent" }}>{label}</div>
-                      ))}
-                    </div>
-                  </div>
-                </Section>
-
+                {/* ── 8. Componentes ── */}
                 <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>} bg="#d1fae5" title="Estilo de Componentes" subtitle="Bordes de botones y tarjetas">
                   <label className="cust-ctrl-label">Estilo de botones</label>
                   <div className="cust-style-grid">
