@@ -1,6 +1,19 @@
 "use client";
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import {
+  FiBarChart2,
+  FiBox,
+  FiShoppingBag,
+  FiUsers,
+  FiFileText,
+  FiPackage,
+  FiTruck,
+  FiSliders,
+  FiExternalLink,
+  FiLogOut,
+  FiChevronDown,
+} from "react-icons/fi";
 import "./sidebar.css";
 
 interface SidebarProps {
@@ -11,13 +24,13 @@ interface SidebarProps {
 const menu = [
   {
     label: "Estadísticas",
-    icon: "📊",
+    icon: <FiBarChart2 size={16} />,
     path: "/dashboard",
     sub: [],
   },
   {
     label: "Productos",
-    icon: "📦",
+    icon: <FiBox size={16} />,
     sub: [
       { label: "Listado de productos", path: "/products/product-list" },
       { label: "Agregar producto",     path: "/products/add-product" },
@@ -25,29 +38,28 @@ const menu = [
   },
   {
     label: "Pedidos",
-    icon: "🛒",
+    icon: <FiShoppingBag size={16} />,
     sub: [
       { label: "Ver pedidos", path: "/ecommerce/orders" },
     ],
   },
   {
     label: "Clientes",
-    icon: "👥",
+    icon: <FiUsers size={16} />,
     sub: [
       { label: "Listado de clientes", path: "/clients/list-clients" },
-      { label: "Agregar cliente",     path: "/clients/create-client" },
     ],
   },
   {
     label: "Facturación",
-    icon: "🧾",
+    icon: <FiFileText size={16} />,
     sub: [
-      { label: "Ver ventas",  path: "/sales" },
+      { label: "Ver ventas", path: "/sales" },
     ],
   },
   {
     label: "Compras",
-    icon: "📋",
+    icon: <FiPackage size={16} />,
     sub: [
       { label: "Histórico de compras", path: "/purchases/purchase-history" },
       { label: "Realizar compra",      path: "/purchases/create-purchase" },
@@ -55,8 +67,16 @@ const menu = [
     ],
   },
   {
+    label: "Envíos",
+    icon: <FiTruck size={16} />,
+    sub: [
+      { label: "Gestionar envíos",        path: "/shipping/manage" },
+      { label: "Configuración de envíos", path: "/shipping/config" },
+    ],
+  },
+  {
     label: "Personalización",
-    icon: "🎨",
+    icon: <FiSliders size={16} />,
     sub: [
       { label: "Apariencia de la tienda", path: "/personalization/store" },
     ],
@@ -64,24 +84,42 @@ const menu = [
 ];
 
 export default function Sidebar({ activeMenu, onMenuToggle }: SidebarProps) {
-  const router = useRouter();
+  const router   = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState<string | null>(null);
 
-  const toggle = (label: string) => setOpen(prev => prev === label ? null : label);
+  const toggle = (label: string) => {
+    setOpen(prev => (prev === label ? null : label));
+  };
 
   const handleLogout = () => {
-    ["token", "refreshToken", "user", "googleUser"].forEach(k => localStorage.removeItem(k));
+    ["token", "refreshToken", "user", "googleUser"].forEach(k =>
+      localStorage.removeItem(k)
+    );
     router.push("/login");
   };
 
   return (
     <aside className="sb">
-      <div className="sb-brand">
-        <h1>Comercios<span>Conecta</span></h1>
-        <p>Suite empresarial</p>
-      </div>
 
+      {/* ── Brand ── */}
+      <a href="/dashboard" className="sb-brand">
+        <img
+          src="/logo-mark.svg"
+          width={32}
+          height={32}
+          alt="ComerciosConecta"
+          className="sb-brand-logo"
+        />
+        <div className="sb-brand-text">
+          <p className="sb-brand-name">
+            Comercios<span>Conecta</span>
+          </p>
+          <p className="sb-brand-sub">Suite empresarial</p>
+        </div>
+      </a>
+
+      {/* ── Nav ── */}
       <nav className="sb-nav">
         {menu.map(item => {
           const isActive = item.path
@@ -106,7 +144,9 @@ export default function Sidebar({ activeMenu, onMenuToggle }: SidebarProps) {
                 >
                   <span className="sb-icon">{item.icon}</span>
                   {item.label}
-                  <span className="sb-chevron">{isOpen ? "▴" : "▾"}</span>
+                  <span className={`sb-chevron ${isOpen ? "open" : ""}`}>
+                    <FiChevronDown size={13} />
+                  </span>
                 </button>
               )}
 
@@ -128,19 +168,24 @@ export default function Sidebar({ activeMenu, onMenuToggle }: SidebarProps) {
         })}
       </nav>
 
+      {/* ── Tienda online ── */}
       <div className="sb-store-section">
         <p className="sb-store-label">Tu tienda online</p>
         <a href="/store" target="_blank" className="sb-store-btn">
-          🛍️ Ver mi Tienda
+          <FiExternalLink size={14} />
+          Ver mi Tienda
         </a>
       </div>
 
+      {/* ── Footer ── */}
       <div className="sb-footer">
         <button className="sb-logout" onClick={handleLogout}>
-          🚪 Cerrar sesión
+          <FiLogOut size={15} />
+          Cerrar sesión
         </button>
-        <p className="sb-version">Sistema v1.0.0</p>
+        <p className="sb-version">v1.0.0</p>
       </div>
+
     </aside>
   );
 }
