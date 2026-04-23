@@ -88,6 +88,7 @@ interface Config {
   cardRadius: string;
   layout: string;
   hoverBtn: string;
+  colorHoverBtn: string;
   heroTitle: string;
   heroSubtitle: string;
   heroCta: string;
@@ -125,6 +126,7 @@ const DEFAULT_CFG: Config = {
   cardRadius:           "12px",
   layout:               "clasico",
   hoverBtn:             "oscurecer",
+  colorHoverBtn:        "",
   heroTitle:      "Descubre tu belleza interior",
   heroSubtitle:   "Productos de calidad premium · Envíos rápidos · Precios increíbles",
   heroCta:        "Explorar Productos",
@@ -222,6 +224,7 @@ export default function StoreCustomizerPage() {
           cardRadius:           data.cardRadius           || DEFAULT_CFG.cardRadius,
           layout:               data.layout               || DEFAULT_CFG.layout,
           hoverBtn:             data.hoverBtn             || DEFAULT_CFG.hoverBtn,
+          colorHoverBtn:        data.colorHoverBtn        || DEFAULT_CFG.colorHoverBtn,
           heroTitle:      data.heroTitle      || DEFAULT_CFG.heroTitle,
           heroSubtitle:   data.heroSubtitle   || DEFAULT_CFG.heroSubtitle,
           heroCta:        data.heroCta        || DEFAULT_CFG.heroCta,
@@ -324,6 +327,7 @@ export default function StoreCustomizerPage() {
     "--sp-iconos-sociales":   cfg.colorIconosSociales,
     "--sp-nombre":            cfg.colorNombre,
     "--sp-tagline":           cfg.colorTagline,
+    ...(cfg.colorHoverBtn ? { "--sp-hover-btn": cfg.colorHoverBtn } : {}),
     fontFamily:          cfg.fontFamily,
   } as React.CSSProperties;
 
@@ -573,6 +577,7 @@ export default function StoreCustomizerPage() {
 
                 <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>} bg="#ede9fe" title="Efecto Hover de Botones" subtitle="Animación al pasar el cursor sobre botones" defaultOpen>
                   <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">Tipo de efecto</label>
                     <div className="cust-hover-grid">
                       {([
                         { id: "oscurecer", label: "Oscurecer",  demo: "Comprar" },
@@ -598,6 +603,52 @@ export default function StoreCustomizerPage() {
                             {opt.demo}
                           </button>
                           <small>{opt.label}</small>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Color del hover <span className="cust-ctrl-hint">(fondo del botón al pasar el cursor)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input
+                        type="color"
+                        className="cust-color-swatch"
+                        value={cfg.colorHoverBtn || cfg.colorBoton || cfg.colorPrimario}
+                        onChange={e => update({ colorHoverBtn: e.target.value })}
+                      />
+                      <div className="cust-color-value">{cfg.colorHoverBtn || "Auto"}</div>
+                      {cfg.colorHoverBtn && (
+                        <button
+                          onClick={() => update({ colorHoverBtn: "" })}
+                          style={{ marginLeft: 8, padding: "3px 10px", border: "1px solid #e2e8f0", borderRadius: 6, background: "#f8fafc", color: "#64748b", fontSize: ".72rem", cursor: "pointer" }}
+                        >
+                          Quitar
+                        </button>
+                      )}
+                    </div>
+                    <div style={{ marginTop: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {([
+                        [cfg.colorAcento,  "Acento"],
+                        [cfg.colorPrimario,"Primario"],
+                        ["#10b981","Verde"],
+                        ["#7c3aed","Morado"],
+                        ["#dc2626","Rojo"],
+                        ["#f59e0b","Amarillo"],
+                        ["#000000","Negro"],
+                      ] as [string, string][]).map(([color, label]) => (
+                        <div
+                          key={label}
+                          onClick={() => update({ colorHoverBtn: color })}
+                          style={{
+                            cursor: "pointer", padding: "4px 10px", borderRadius: 6,
+                            fontSize: ".72rem", fontWeight: 700,
+                            background: color, color: color === "#f59e0b" ? "#333" : "#fff",
+                            border: cfg.colorHoverBtn === color ? "2px solid #333" : "2px solid transparent",
+                          }}
+                        >
+                          {label}
                         </div>
                       ))}
                     </div>
@@ -980,7 +1031,7 @@ export default function StoreCustomizerPage() {
             </span>
           </div>
           <div className="cust-preview-wrap">
-            <div className={`cust-preview-frame ${device} layout-${cfg.layout} btn-hover-${cfg.hoverBtn}`} style={previewStyle}>
+            <div className={`cust-preview-frame ${device} layout-${cfg.layout} btn-hover-${cfg.hoverBtn}${cfg.colorHoverBtn ? " has-hover-color" : ""}`} style={previewStyle}>
 
               {/* Inject custom CSS */}
               {cfg.customCss && <style>{cfg.customCss}</style>}

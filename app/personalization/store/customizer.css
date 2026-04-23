@@ -850,3 +850,11 @@
   70%  { transform: scale(0.95); }
   100% { transform: scale(1);    }
 }
+
+/* Color de hover personalizado — se aplica encima del efecto */
+.has-hover-color .sp-card-btn:hover,
+.has-hover-color .sp-hero-btn:hover,
+.has-hover-color .sp-cart-btn:hover {
+  background: var(--sp-hover-btn) !important;
+  filter: none;
+}

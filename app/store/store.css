@@ -306,6 +306,14 @@
   100% { transform: scale(1);    }
 }
 
+/* Color de hover personalizado */
+.has-hover-color .add-btn:hover,
+.has-hover-color .cart-btn:hover,
+.has-hover-color .checkout-btn:hover {
+  background: var(--sp-hover-btn) !important;
+  filter: none;
+}
+
 /* ── Store title & category colors via CSS vars ── */
 .store-logo-name { color: var(--sp-nombre, white); }
 .store-logo-tagline { color: var(--sp-tagline, rgba(255,255,255,0.6)); }
