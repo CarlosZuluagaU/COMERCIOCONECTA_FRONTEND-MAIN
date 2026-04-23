@@ -502,11 +502,11 @@ export default function StoreCustomizerPage() {
                   </div>
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">
-                      Color primario <span className="cust-ctrl-hint">(base de la paleta)</span>
+                      Color primario <span className="cust-ctrl-hint">(actualiza header, footer y banner)</span>
                     </label>
                     <div className="cust-color-row">
                       <input type="color" className="cust-color-swatch" value={cfg.colorPrimario}
-                        onChange={e => update({ colorPrimario: e.target.value })} />
+                        onChange={e => update({ colorPrimario: e.target.value, colorHeaderBg: e.target.value, colorFooterBg: e.target.value, colorBanner: e.target.value, colorBoton: e.target.value })} />
                       <div className="cust-color-value">{cfg.colorPrimario}</div>
                     </div>
                   </div>
@@ -541,16 +541,16 @@ export default function StoreCustomizerPage() {
                   <p style={{ fontSize: ".72rem", fontWeight: 700, color: "#3b82f6", marginBottom: 10, letterSpacing: ".06em", textTransform: "uppercase" }}>Header</p>
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">
-                      Fondo del header <span className="cust-ctrl-hint">(barra superior)</span>
+                      Fondo del header <span className="cust-ctrl-hint">(barra superior — sincroniza con color primario)</span>
                     </label>
                     <div className="cust-color-row">
                       <input type="color" className="cust-color-swatch" value={cfg.colorHeaderBg}
-                        onChange={e => update({ colorHeaderBg: e.target.value })} />
+                        onChange={e => update({ colorHeaderBg: e.target.value, colorPrimario: e.target.value })} />
                       <div className="cust-color-value">{cfg.colorHeaderBg}</div>
                     </div>
                     <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
                       {([[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"],["#ffffff","Blanco"],["#000000","Negro"],["#0f172a","Oscuro"]] as [string,string][]).map(([c,l]) => (
-                        <div key={l} onClick={() => update({ colorHeaderBg: c })}
+                        <div key={l} onClick={() => update({ colorHeaderBg: c, colorPrimario: c })}
                           style={{ cursor:"pointer", padding:"4px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
                             background:c, color:c==="#ffffff"?"#333":"#fff",
                             border:cfg.colorHeaderBg===c?"2px solid #333":"2px solid transparent" }}>{l}</div>
@@ -1058,8 +1058,8 @@ export default function StoreCustomizerPage() {
                       placeholder={"/* Ejemplo: cambiar fondo de la página */\nbody {\n  background: #f0f4f8;\n}\n\n/* Agrandar el hero */\n.sp-hero {\n  padding: 80px 24px;\n}\n\n/* Quitar sombra de tarjetas */\n.sp-card {\n  box-shadow: none;\n}"}
                     />
                     {cfg.customCss && (
-                      <div style={{ marginTop: 8, padding: "6px 10px", borderRadius: 6, background: "#ecfdf5", border: "1px solid #6ee7b7", fontSize: ".72rem", color: "#065f46" }}>
-                        ✓ CSS activo — visible en el preview y guardado en la tienda
+                      <div style={{ marginTop: 8, padding: "6px 10px", borderRadius: 6, background: unsaved ? "#fef9c3" : "#ecfdf5", border: `1px solid ${unsaved ? "#fbbf24" : "#6ee7b7"}`, fontSize: ".72rem", color: unsaved ? "#92400e" : "#065f46" }}>
+                        {unsaved ? "⚠ CSS activo en el preview — haz clic en «Guardar cambios» para aplicarlo a la tienda" : "✓ CSS guardado y activo en la tienda"}
                       </div>
                     )}
                   </div>

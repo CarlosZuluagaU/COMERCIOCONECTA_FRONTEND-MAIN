@@ -103,8 +103,9 @@ export default function TiendaPage() {
       if (cfg.colorIconosSociales)      root.style.setProperty("--sp-iconos-sociales",   cfg.colorIconosSociales);
       if (cfg.colorNombre)              root.style.setProperty("--sp-nombre",            cfg.colorNombre);
       if (cfg.colorTagline)             root.style.setProperty("--sp-tagline",           cfg.colorTagline);
-      if (cfg.colorHeaderBg)            root.style.setProperty("--sp-header-bg",         cfg.colorHeaderBg);
-      if (cfg.colorFooterBg)            root.style.setProperty("--sp-footer-bg",         cfg.colorFooterBg);
+      // Always set header/footer bg — fall back to primary if not explicitly saved
+      root.style.setProperty("--sp-header-bg", cfg.colorHeaderBg || cfg.colorPrimario || "#1F3B4D");
+      root.style.setProperty("--sp-footer-bg", cfg.colorFooterBg || cfg.colorPrimario || "#1F3B4D");
       setStoreCfg({
         nombre:         cfg.nombre         || "ComerciosConecta",
         tagline:        cfg.tagline        || "Tu tienda de confianza",
