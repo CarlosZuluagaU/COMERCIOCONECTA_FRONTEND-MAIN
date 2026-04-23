@@ -18,6 +18,7 @@ function loadGoogleFont(family: string | null) {
   document.head.appendChild(link);
 }
 const FONT_GOOGLE_MAP: Record<string, string> = {
+  "'Manrope', sans-serif":        "Manrope",
   "'Inter', sans-serif":          "Inter",
   "'Poppins', sans-serif":        "Poppins",
   "'Montserrat', sans-serif":     "Montserrat",
@@ -114,6 +115,7 @@ export default function TiendaPage() {
         tiktok:         cfg.tiktok         || "",
         whatsapp:       cfg.whatsapp       || "",
         layout:         cfg.layout         || "clasico",
+        hoverBtn:       cfg.hoverBtn       || "oscurecer",
       });
     };
 
@@ -145,12 +147,83 @@ export default function TiendaPage() {
     heroTitle: "", heroSubtitle: "", heroCta: "",
     footerTexto: "", footerTelefono: "",
     facebook: "", instagram: "", twitter: "", tiktok: "", whatsapp: "",
-    layout: "clasico",
+    layout: "clasico", hoverBtn: "oscurecer",
   });
 
   const [cliente, setCliente] = useState({
-    nombre: "", email: "", telefono: "", direccion: "", ciudad: "", notas: "",
+    nombre: "", email: "", telefono: "", direccion: "", ciudad: "", departamento: "", notas: "",
   });
+
+  // ── Envío ────────────────────────────────────────────────
+  interface OpcionEnvio {
+    tipoEnvio: string;
+    descripcion: string;
+    costoEnCentavos: number;
+    costoFinalEnCentavos: number;
+    envioGratis: boolean;
+    diasEstimados: number;
+  }
+  const [envioOpciones, setEnvioOpciones] = useState<OpcionEnvio[]>([]);
+  const [envioSeleccionado, setEnvioSeleccionado] = useState<OpcionEnvio | null>(null);
+  const [calculandoEnvio, setCalculandoEnvio] = useState(false);
+  const [envioError, setEnvioError] = useState("");
+  const [latDestino, setLatDestino]   = useState<number | null>(null);
+  const [lngDestino, setLngDestino]   = useState<number | null>(null);
+
+  const TIPO_LABEL: Record<string, string> = {
+    RECOGIDA: "Recogida en tienda",
+    LOCAL_PROPIO: "Mensajero propio",
+    LOCAL_TRANSPORTADORA: "Transportadora local",
+    NACIONAL_TRANSPORTADORA: "Envío nacional",
+  };
+
+  const calcularEnvio = async () => {
+    const cid = authComercioId ?? 1;
+    if (!cliente.ciudad && !cliente.direccion) {
+      setEnvioError("Ingresa tu ciudad o dirección primero.");
+      return;
+    }
+    setCalculandoEnvio(true);
+    setEnvioError("");
+    setEnvioOpciones([]);
+    setEnvioSeleccionado(null);
+
+    try {
+      // Geocodificar la dirección del cliente con Nominatim (gratis)
+      const query = [cliente.direccion, cliente.ciudad, "Colombia"].filter(Boolean).join(", ");
+      const geoRes = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`,
+        { headers: { "Accept-Language": "es" } }
+      );
+      const geoData = await geoRes.json();
+      let lat: number | null = null;
+      let lng: number | null = null;
+      if (geoData && geoData.length > 0) {
+        lat = parseFloat(geoData[0].lat);
+        lng = parseFloat(geoData[0].lon);
+        setLatDestino(lat);
+        setLngDestino(lng);
+      }
+
+      const montoEnCentavos = Math.round(totalCarrito * 100);
+      const body: Record<string, unknown> = { comercioId: cid, montoOrdenEnCentavos: montoEnCentavos };
+      if (lat !== null) { body.latDestino = lat; body.lngDestino = lng; }
+
+      const res = await fetch(`${API}/envios/calcular`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error("Sin configuración de envío");
+      const opciones: OpcionEnvio[] = await res.json();
+      setEnvioOpciones(opciones);
+      if (opciones.length === 1) setEnvioSeleccionado(opciones[0]);
+    } catch {
+      setEnvioError("No se pudieron calcular las opciones. El comercio puede no tener configuración de envío.");
+    } finally {
+      setCalculandoEnvio(false);
+    }
+  };
 
   useEffect(() => {
     if (!authLoaded) return;
@@ -194,8 +267,10 @@ export default function TiendaPage() {
 
   const remover = (id: string) => setCarrito(prev => prev.filter(i => i.producto.id !== id));
 
-  const totalCarrito = carrito.reduce((t, i) => t + i.producto.precio * i.cantidad, 0);
-  const totalItems   = carrito.reduce((t, i) => t + i.cantidad, 0);
+  const totalCarrito  = carrito.reduce((t, i) => t + i.producto.precio * i.cantidad, 0);
+  const totalItems    = carrito.reduce((t, i) => t + i.cantidad, 0);
+  const costoEnvio    = envioSeleccionado ? envioSeleccionado.costoFinalEnCentavos / 100 : 0;
+  const totalConEnvio = totalCarrito + costoEnvio;
 
   const formatPrecio = (p: number) =>
     new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 0 }).format(p);
@@ -205,14 +280,20 @@ export default function TiendaPage() {
 
   const handleConfirmarPedido = async () => {
     if (!cliente.nombre || !cliente.email || !cliente.telefono) {
-      alert("Por favor completa nombre, email y teléfono");
+      alert("Por favor completa nombre, email y teléfono.");
+      return;
+    }
+    if (!envioSeleccionado) {
+      alert("Por favor selecciona un método de envío.");
       return;
     }
     setProcesando(true);
     try {
-      const totalInCents = Math.round(totalCarrito * 100);
+      const subtotalInCents  = Math.round(totalCarrito * 100);
+      const shippingInCents  = envioSeleccionado.costoFinalEnCentavos;
+      const totalInCents     = subtotalInCents + shippingInCents;
 
-      // 1) Crear link de Wompi SIN crear orden todavía
+      // 1) Crear link de Wompi
       const linkRes = await fetch(`${API}/checkout/initiate-payment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -227,16 +308,23 @@ export default function TiendaPage() {
       }
       const { payment_url } = await linkRes.json();
 
-      // 2) Guardar todos los datos del pedido en localStorage
-      //    La orden se crea SOLO si Wompi aprueba el pago
+      // 2) Guardar datos del pedido (incluye envío) en localStorage
       localStorage.setItem("pendingOrder", JSON.stringify({
-        customerName:    cliente.nombre,
-        customerEmail:   cliente.email,
-        customerPhone:   cliente.telefono,
-        customerAddress: cliente.direccion,
-        customerCity:    cliente.ciudad,
-        comercioId:      authComercioId ?? 1,
+        customerName:         cliente.nombre,
+        customerEmail:        cliente.email,
+        customerPhone:        cliente.telefono,
+        customerAddress:      cliente.direccion,
+        customerCity:         cliente.ciudad,
+        comercioId:           authComercioId ?? 1,
         totalInCents,
+        // Campos de envío
+        tipoEnvio:            envioSeleccionado.tipoEnvio,
+        shippingCostInCents:  shippingInCents,
+        direccionDestino:     cliente.direccion || null,
+        ciudadDestino:        cliente.ciudad    || null,
+        departamentoDestino:  cliente.departamento || null,
+        latDestino:           latDestino,
+        lngDestino:           lngDestino,
         items: carrito.map(i => ({
           productoId:      Number(i.producto.id),
           nombre:          i.producto.nombre,
@@ -257,11 +345,16 @@ export default function TiendaPage() {
 
   const closeCheckout = () => {
     setCheckoutStep(0);
-    setCliente({ nombre: "", email: "", telefono: "", direccion: "", ciudad: "", notas: "" });
+    setCliente({ nombre: "", email: "", telefono: "", direccion: "", ciudad: "", departamento: "", notas: "" });
+    setEnvioOpciones([]);
+    setEnvioSeleccionado(null);
+    setEnvioError("");
+    setLatDestino(null);
+    setLngDestino(null);
   };
 
   return (
-    <div className={`store-page layout-${storeCfg.layout}`}>
+    <div className={`store-page layout-${storeCfg.layout} btn-hover-${storeCfg.hoverBtn}`}>
       {/* HEADER */}
       <header className="store-header">
         <div className="header-inner">
@@ -278,7 +371,8 @@ export default function TiendaPage() {
             />
           </div>
           <button className="store-cart-btn" onClick={() => setCheckoutStep(1)}>
-            🛒 Carrito
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            Carrito
             {totalItems > 0 && <span className="cart-count">{totalItems}</span>}
           </button>
         </div>
@@ -315,7 +409,9 @@ export default function TiendaPage() {
           <div style={{ textAlign: "center", padding: "60px 0", color: "#888" }}>Cargando productos…</div>
         ) : productosFiltrados.length === 0 ? (
           <div style={{ textAlign: "center", padding: "60px 0", color: "#888" }}>
-            <div style={{ fontSize: "3rem", marginBottom: 12 }}>🔍</div>
+            <div style={{ marginBottom: 12, color: "#ccc" }}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
             <p style={{ fontSize: "1.1rem", fontWeight: 600 }}>No se encontraron productos</p>
           </div>
         ) : (
@@ -323,7 +419,7 @@ export default function TiendaPage() {
             {productosFiltrados.map(p => (
               <div key={p.id} className="product-card">
                 <div className="product-img">
-                  {p.imagen ? <img src={p.imagen} alt={p.nombre} /> : <span>📦</span>}
+                  {p.imagen ? <img src={p.imagen} alt={p.nombre} /> : <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#c8d0da" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>}
                   {p.destacado && <span className="featured-badge">Destacado</span>}
                   {p.precioAnterior && (
                     <span className="discount-badge">-{Math.round((1 - p.precio / p.precioAnterior) * 100)}%</span>
@@ -339,7 +435,8 @@ export default function TiendaPage() {
                     <span className="cur-price">{formatPrecio(p.precio)}</span>
                   </div>
                   <button className="add-btn" onClick={() => agregarAlCarrito(p)}>
-                    🛒 Agregar al Carrito
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                    Agregar al Carrito
                   </button>
                 </div>
               </div>
@@ -400,13 +497,15 @@ export default function TiendaPage() {
               <>
                 <div className="co-header">
                   <button className="co-close" onClick={closeCheckout}><FiX /></button>
-                  <h3>🛒 Carrito de compras</h3>
+                  <h3>Carrito de compras</h3>
                 </div>
 
                 <div className="co-body">
                   {carrito.length === 0 ? (
                     <div className="co-empty">
-                      <div style={{ fontSize: "3rem" }}>🛒</div>
+                      <div style={{ color: "#d1d5db" }}>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                      </div>
                       <p>Tu carrito está vacío</p>
                       <button className="co-btn-sec" onClick={closeCheckout}>Ver productos</button>
                     </div>
@@ -416,7 +515,7 @@ export default function TiendaPage() {
                         {carrito.map(item => (
                           <div key={item.producto.id} className="co-item">
                             <div className="co-item-img">
-                              {item.producto.imagen ? <img src={item.producto.imagen} alt={item.producto.nombre} /> : "📦"}
+                              {item.producto.imagen ? <img src={item.producto.imagen} alt={item.producto.nombre} /> : <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c8d0da" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>}
                             </div>
                             <div className="co-item-info">
                               <div className="co-item-name">{item.producto.nombre}</div>
@@ -429,7 +528,9 @@ export default function TiendaPage() {
                             </div>
                             <div className="co-item-right">
                               <div className="co-item-subtotal">{formatPrecio(item.producto.precio * item.cantidad)}</div>
-                              <button className="co-remove" onClick={() => remover(item.producto.id)}>🗑</button>
+                              <button className="co-remove" onClick={() => remover(item.producto.id)}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                              </button>
                             </div>
                           </div>
                         ))}
@@ -437,7 +538,10 @@ export default function TiendaPage() {
 
                       <div className="co-summary">
                         <div className="co-sum-row"><span>Subtotal</span><span>{formatPrecio(totalCarrito)}</span></div>
-                        <div className="co-sum-row co-sum-total"><span>Total</span><span>{formatPrecio(totalCarrito)}</span></div>
+                        <div className="co-sum-row" style={{ color: "#888", fontSize: ".82rem" }}>
+                          <span>Envío</span><span>Se calcula al ingresar tu dirección</span>
+                        </div>
+                        <div className="co-sum-row co-sum-total"><span>Total (sin envío)</span><span>{formatPrecio(totalCarrito)}</span></div>
                       </div>
 
                       <button className="co-btn-primary" onClick={() => setCheckoutStep(2)}>
@@ -454,7 +558,7 @@ export default function TiendaPage() {
               <>
                 <div className="co-header">
                   <button className="co-back" onClick={() => setCheckoutStep(1)}><FiArrowLeft /></button>
-                  <h3>📋 Datos del pedido</h3>
+                  <h3>Datos del pedido</h3>
                   <button className="co-close" onClick={closeCheckout}><FiX /></button>
                 </div>
 
@@ -482,12 +586,19 @@ export default function TiendaPage() {
                   <div className="co-form-group">
                     <label>Dirección</label>
                     <input placeholder="Calle/Carrera..." value={cliente.direccion}
-                      onChange={e => setCliente({ ...cliente, direccion: e.target.value })} />
+                      onChange={e => { setCliente({ ...cliente, direccion: e.target.value }); setEnvioOpciones([]); setEnvioSeleccionado(null); }} />
                   </div>
-                  <div className="co-form-group">
-                    <label>Ciudad</label>
-                    <input placeholder="Ciudad" value={cliente.ciudad}
-                      onChange={e => setCliente({ ...cliente, ciudad: e.target.value })} />
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    <div className="co-form-group">
+                      <label>Ciudad</label>
+                      <input placeholder="Cali, Bogotá…" value={cliente.ciudad}
+                        onChange={e => { setCliente({ ...cliente, ciudad: e.target.value }); setEnvioOpciones([]); setEnvioSeleccionado(null); }} />
+                    </div>
+                    <div className="co-form-group">
+                      <label>Departamento</label>
+                      <input placeholder="Valle, Antioquia…" value={cliente.departamento}
+                        onChange={e => setCliente({ ...cliente, departamento: e.target.value })} />
+                    </div>
                   </div>
                   <div className="co-form-group">
                     <label>Notas adicionales</label>
@@ -495,6 +606,75 @@ export default function TiendaPage() {
                       onChange={e => setCliente({ ...cliente, notas: e.target.value })} />
                   </div>
 
+                  {/* ── MÉTODO DE ENVÍO ── */}
+                  <div className="co-section-title" style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 6 }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                    Método de envío
+                  </div>
+
+                  {envioOpciones.length === 0 && !calculandoEnvio && (
+                    <button
+                      onClick={calcularEnvio}
+                      style={{
+                        width: "100%", padding: "10px", marginBottom: 8,
+                        background: "linear-gradient(135deg,#00d4aa,#00a88f)",
+                        color: "white", border: "none", borderRadius: 10,
+                        fontWeight: 700, fontSize: ".9rem", cursor: "pointer", fontFamily: "inherit",
+                      }}
+                    >
+                      Ver opciones de envío →
+                    </button>
+                  )}
+
+                  {calculandoEnvio && (
+                    <div style={{ textAlign: "center", padding: "14px 0", color: "#888", fontSize: 13 }}>
+                      Calculando opciones de envío…
+                    </div>
+                  )}
+
+                  {envioError && (
+                    <div style={{ padding: "10px 12px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, color: "#dc2626", fontSize: 13, marginBottom: 8 }}>
+                      {envioError}
+                    </div>
+                  )}
+
+                  {envioOpciones.length > 0 && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 8 }}>
+                      {envioOpciones.map(op => {
+                        const sel = envioSeleccionado?.tipoEnvio === op.tipoEnvio;
+                        return (
+                          <label key={op.tipoEnvio} onClick={() => setEnvioSeleccionado(op)} style={{
+                            display: "flex", alignItems: "flex-start", gap: 12,
+                            padding: "12px 14px", borderRadius: 10, cursor: "pointer",
+                            border: `2px solid ${sel ? "#00d4aa" : "#e0e0e0"}`,
+                            background: sel ? "#f0fdf4" : "white",
+                            transition: "all .15s",
+                          }}>
+                            <input type="radio" name="envio" readOnly checked={sel} style={{ marginTop: 3, accentColor: "#00d4aa" }} />
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 700, fontSize: ".9rem", color: "#1F3B4D" }}>
+                                {TIPO_LABEL[op.tipoEnvio] || op.tipoEnvio}
+                              </div>
+                              <div style={{ fontSize: ".8rem", color: "#555", marginTop: 2 }}>{op.descripcion}</div>
+                              {op.diasEstimados > 0 && (
+                                <div style={{ fontSize: ".75rem", color: "#888", marginTop: 2 }}>
+                                  Entrega estimada: {op.diasEstimados} día{op.diasEstimados !== 1 ? "s" : ""}
+                                </div>
+                              )}
+                            </div>
+                            <div style={{ fontWeight: 800, fontSize: ".95rem", color: op.envioGratis ? "#16a34a" : "#1F3B4D", whiteSpace: "nowrap" }}>
+                              {op.envioGratis
+                                ? "GRATIS"
+                                : formatPrecio(op.costoFinalEnCentavos / 100)
+                              }
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* ── RESUMEN ── */}
                   <div className="co-section-title" style={{ marginTop: 16 }}>Resumen del pedido</div>
                   <div className="co-mini-order">
                     {carrito.map(i => (
@@ -503,14 +683,33 @@ export default function TiendaPage() {
                         <span>{formatPrecio(i.producto.precio * i.cantidad)}</span>
                       </div>
                     ))}
+                    <div className="co-mini-item" style={{ color: "#555" }}>
+                      <span>Subtotal productos</span>
+                      <span>{formatPrecio(totalCarrito)}</span>
+                    </div>
+                    {envioSeleccionado && (
+                      <div className="co-mini-item" style={{ color: "#555" }}>
+                        <span>Envío ({TIPO_LABEL[envioSeleccionado.tipoEnvio] || envioSeleccionado.tipoEnvio})</span>
+                        <span style={{ color: envioSeleccionado.envioGratis ? "#16a34a" : undefined }}>
+                          {envioSeleccionado.envioGratis ? "GRATIS" : formatPrecio(costoEnvio)}
+                        </span>
+                      </div>
+                    )}
                     <div className="co-mini-total">
                       <span>Total a pagar</span>
-                      <span>{formatPrecio(totalCarrito)}</span>
+                      <span>{formatPrecio(totalConEnvio)}</span>
                     </div>
                   </div>
 
-                  <button className="co-btn-dark" onClick={handleConfirmarPedido} disabled={procesando}>
-                    {procesando ? "Procesando…" : "✓ Confirmar pedido"}
+                  {!envioSeleccionado && envioOpciones.length === 0 && (
+                    <p style={{ fontSize: 12, color: "#f59e0b", fontWeight: 600, margin: "6px 0 10px" }}>
+                      Debes seleccionar un método de envío para continuar.
+                    </p>
+                  )}
+
+                  <button className="co-btn-dark" onClick={handleConfirmarPedido}
+                    disabled={procesando || !envioSeleccionado}>
+                    {procesando ? "Procesando…" : "Confirmar pedido"}
                   </button>
                 </div>
               </>

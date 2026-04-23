@@ -87,6 +87,7 @@ interface Config {
   buttonRadius: string;
   cardRadius: string;
   layout: string;
+  hoverBtn: string;
   heroTitle: string;
   heroSubtitle: string;
   heroCta: string;
@@ -123,6 +124,7 @@ const DEFAULT_CFG: Config = {
   buttonRadius:         "50px",
   cardRadius:           "12px",
   layout:               "clasico",
+  hoverBtn:             "oscurecer",
   heroTitle:      "Descubre tu belleza interior",
   heroSubtitle:   "Productos de calidad premium · Envíos rápidos · Precios increíbles",
   heroCta:        "Explorar Productos",
@@ -219,6 +221,7 @@ export default function StoreCustomizerPage() {
           buttonRadius:         data.buttonRadius         || DEFAULT_CFG.buttonRadius,
           cardRadius:           data.cardRadius           || DEFAULT_CFG.cardRadius,
           layout:               data.layout               || DEFAULT_CFG.layout,
+          hoverBtn:             data.hoverBtn             || DEFAULT_CFG.hoverBtn,
           heroTitle:      data.heroTitle      || DEFAULT_CFG.heroTitle,
           heroSubtitle:   data.heroSubtitle   || DEFAULT_CFG.heroSubtitle,
           heroCta:        data.heroCta        || DEFAULT_CFG.heroCta,
@@ -562,6 +565,39 @@ export default function StoreCustomizerPage() {
                           <div className="cust-layout-icon">{opt.icon}</div>
                           <strong>{opt.label}</strong>
                           <small>{opt.desc}</small>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </Section>
+
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>} bg="#ede9fe" title="Efecto Hover de Botones" subtitle="Animación al pasar el cursor sobre botones" defaultOpen>
+                  <div className="cust-ctrl-group">
+                    <div className="cust-hover-grid">
+                      {([
+                        { id: "oscurecer", label: "Oscurecer",  demo: "Comprar" },
+                        { id: "aclarar",   label: "Aclarar",    demo: "Comprar" },
+                        { id: "escalar",   label: "Escalar",    demo: "Comprar" },
+                        { id: "sombra",    label: "Sombra",     demo: "Comprar" },
+                        { id: "deslizar",  label: "Deslizar",   demo: "Comprar" },
+                        { id: "rebote",    label: "Rebote",     demo: "Comprar" },
+                      ] as { id: string; label: string; demo: string }[]).map(opt => (
+                        <div
+                          key={opt.id}
+                          className={`cust-hover-opt btn-hover-${opt.id}${cfg.hoverBtn === opt.id ? " selected" : ""}`}
+                          onClick={() => update({ hoverBtn: opt.id })}
+                        >
+                          <button
+                            className="cust-hover-demo-btn"
+                            style={{
+                              background: cfg.colorBoton || cfg.colorPrimario,
+                              color: cfg.colorTextoBoton,
+                              borderRadius: cfg.buttonRadius,
+                            }}
+                          >
+                            {opt.demo}
+                          </button>
+                          <small>{opt.label}</small>
                         </div>
                       ))}
                     </div>
@@ -944,7 +980,7 @@ export default function StoreCustomizerPage() {
             </span>
           </div>
           <div className="cust-preview-wrap">
-            <div className={`cust-preview-frame ${device} layout-${cfg.layout}`} style={previewStyle}>
+            <div className={`cust-preview-frame ${device} layout-${cfg.layout} btn-hover-${cfg.hoverBtn}`} style={previewStyle}>
 
               {/* Inject custom CSS */}
               {cfg.customCss && <style>{cfg.customCss}</style>}
