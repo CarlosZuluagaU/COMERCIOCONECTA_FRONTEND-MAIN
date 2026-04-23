@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { FaFacebook, FaInstagram, FaWhatsapp } from "react-icons/fa";
 import { FaXTwitter, FaTiktok } from "react-icons/fa6";
+import { FiSearch, FiShoppingCart } from "react-icons/fi";
 import "./customizer.css";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
@@ -25,6 +26,7 @@ const PALETTES = [
 
 const FONTS = [
   // Sans-serif modernas
+  { label: "Manrope",          css: "'Manrope', sans-serif",               desc: "Moderna y equilibrada",   google: "Manrope" },
   { label: "Segoe UI",         css: "'Segoe UI', system-ui, sans-serif",   desc: "Limpia y moderna",        google: null },
   { label: "Inter",            css: "'Inter', sans-serif",                 desc: "Minimalista y técnica",   google: "Inter" },
   { label: "Poppins",          css: "'Poppins', sans-serif",               desc: "Geométrica y amigable",   google: "Poppins" },
@@ -79,9 +81,12 @@ interface Config {
   colorBannerSecundario: string;
   colorFooterTexto: string;
   colorIconosSociales: string;
+  colorNombre: string;
+  colorTagline: string;
   fontFamily: string;
   buttonRadius: string;
   cardRadius: string;
+  layout: string;
   heroTitle: string;
   heroSubtitle: string;
   heroCta: string;
@@ -112,15 +117,18 @@ const DEFAULT_CFG: Config = {
   colorBannerSecundario: "#00d4aa",
   colorFooterTexto:      "#ffffff",
   colorIconosSociales:   "#ffffff",
-  fontFamily:           "'Segoe UI', system-ui, sans-serif",
+  colorNombre:           "#ffffff",
+  colorTagline:          "rgba(255,255,255,0.6)",
+  fontFamily:           "'Manrope', sans-serif",
   buttonRadius:         "50px",
   cardRadius:           "12px",
+  layout:               "clasico",
   heroTitle:      "Descubre tu belleza interior",
   heroSubtitle:   "Productos de calidad premium · Envíos rápidos · Precios increíbles",
   heroCta:        "Explorar Productos",
   categorias:     "Todos, Cuidado Personal, Cuidado Capilar, Maquillaje, Medicamentos",
   footerTexto:    "© 2026 MiComercio. Todos los derechos reservados.",
-  footerTelefono: "📞 +57 300 123 4567",
+  footerTelefono: "+57 300 123 4567",
   facebook:       "",
   instagram:      "",
   twitter:        "",
@@ -133,7 +141,7 @@ const DEFAULT_CFG: Config = {
 function Section({
   icon, bg, title, subtitle, defaultOpen, children,
 }: {
-  icon: string; bg: string; title: string; subtitle: string;
+  icon: React.ReactNode; bg: string; title: string; subtitle: string;
   defaultOpen?: boolean; children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(!!defaultOpen);
@@ -205,9 +213,12 @@ export default function StoreCustomizerPage() {
           colorBannerSecundario: data.colorBannerSecundario || DEFAULT_CFG.colorBannerSecundario,
           colorFooterTexto:      data.colorFooterTexto      || DEFAULT_CFG.colorFooterTexto,
           colorIconosSociales:   data.colorIconosSociales   || DEFAULT_CFG.colorIconosSociales,
+          colorNombre:           data.colorNombre           || DEFAULT_CFG.colorNombre,
+          colorTagline:          data.colorTagline          || DEFAULT_CFG.colorTagline,
           fontFamily:           data.fontFamily           || DEFAULT_CFG.fontFamily,
           buttonRadius:         data.buttonRadius         || DEFAULT_CFG.buttonRadius,
           cardRadius:           data.cardRadius           || DEFAULT_CFG.cardRadius,
+          layout:               data.layout               || DEFAULT_CFG.layout,
           heroTitle:      data.heroTitle      || DEFAULT_CFG.heroTitle,
           heroSubtitle:   data.heroSubtitle   || DEFAULT_CFG.heroSubtitle,
           heroCta:        data.heroCta        || DEFAULT_CFG.heroCta,
@@ -308,6 +319,8 @@ export default function StoreCustomizerPage() {
     "--sp-banner-sec":        cfg.colorBannerSecundario,
     "--sp-footer-texto":      cfg.colorFooterTexto,
     "--sp-iconos-sociales":   cfg.colorIconosSociales,
+    "--sp-nombre":            cfg.colorNombre,
+    "--sp-tagline":           cfg.colorTagline,
     fontFamily:          cfg.fontFamily,
   } as React.CSSProperties;
 
@@ -317,7 +330,10 @@ export default function StoreCustomizerPage() {
       {/* ═══════════ TOP BAR ═══════════ */}
       <div className="cust-topbar">
         <div className="cust-topbar-left">
-          <button className="cust-back-link" onClick={() => router.push("/dashboard")}>← Dashboard</button>
+          <button className="cust-back-link" onClick={() => router.push("/dashboard")}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Dashboard
+          </button>
           <div className="cust-divider" />
           <h1>Personalizador de <span>Tienda</span></h1>
         </div>
@@ -329,7 +345,7 @@ export default function StoreCustomizerPage() {
                 className={`cust-dev-btn${device === d ? " active" : ""}`}
                 onClick={() => setDevice(d)}
               >
-                {d === "desktop" ? "🖥️" : d === "tablet" ? "📱" : "📲"}
+                {d === "desktop" ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> : d === "tablet" ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>}
               </button>
             ))}
           </div>
@@ -354,12 +370,14 @@ export default function StoreCustomizerPage() {
                   tiktok:        prev.tiktok,
                   whatsapp:      prev.whatsapp,
                   customCss:     prev.customCss,
+                  layout:        prev.layout,
                 }));
                 setUnsaved(true);
               }
             }}
           >
-            ↺ Default
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+            Restablecer
           </button>
           <button
             className="cust-btn-preview"
@@ -368,14 +386,15 @@ export default function StoreCustomizerPage() {
               window.open("/store", "_blank");
             }}
           >
-            👁 Vista previa
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Vista previa
           </button>
           <button
             className={`cust-btn-save${saved ? " saved" : saveError ? " error" : ""}`}
             onClick={handleSave}
             disabled={saving}
           >
-            {saved ? "✓ Guardado" : saving ? "Guardando…" : saveError ? "⚠ Error al guardar" : "💾 Guardar cambios"}
+            {saved ? "✓ Guardado" : saving ? "Guardando…" : saveError ? "Error al guardar" : "Guardar cambios"}
           </button>
         </div>
       </div>
@@ -397,7 +416,7 @@ export default function StoreCustomizerPage() {
                 className={`cust-ptab${tab === t ? " active" : ""}`}
                 onClick={() => setTab(t)}
               >
-                {t === "design" ? "🎨 Diseño" : t === "content" ? "📝 Contenido" : "⚙️ Avanzado"}
+                {t === "design" ? "Diseño" : t === "content" ? "Contenido" : "Avanzado"}
               </button>
             ))}
           </div>
@@ -407,15 +426,15 @@ export default function StoreCustomizerPage() {
             {/* ════ TAB: DISEÑO ════ */}
             {tab === "design" && (
               <>
-                <Section icon="🏪" bg="#e0f2fe" title="Identidad de Marca" subtitle="Logo, nombre y slogan" defaultOpen>
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>} bg="#e0f2fe" title="Identidad de Marca" subtitle="Logo, nombre y slogan" defaultOpen>
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">Logo de la tienda</label>
                     <div className="cust-logo-preview">
-                      {cfg.logoUrl ? <img src={cfg.logoUrl} alt="logo" /> : <span>🛍️</span>}
+                      {cfg.logoUrl ? <img src={cfg.logoUrl} alt="logo" /> : <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>}
                     </div>
                     <div className="cust-logo-actions">
                       <div className="cust-upload-zone" onClick={() => fileRef.current?.click()}>
-                        <div className="cust-upload-icon">📷</div>
+                        <div className="cust-upload-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
                         <strong>Subir logo</strong>
                         <p>PNG o SVG transparente · Máx 2MB</p>
                       </div>
@@ -425,7 +444,7 @@ export default function StoreCustomizerPage() {
                           title="Eliminar logo"
                           onClick={() => { update({ logoUrl: "" }); if (fileRef.current) fileRef.current.value = ""; }}
                         >
-                          🗑 Eliminar logo
+                          Eliminar logo
                         </button>
                       )}
                     </div>
@@ -441,7 +460,7 @@ export default function StoreCustomizerPage() {
                   </div>
                 </Section>
 
-                <Section icon="🎨" bg="#fef9c3" title="Colores" subtitle="Paleta principal de la tienda" defaultOpen>
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>} bg="#fef9c3" title="Colores" subtitle="Paleta principal de la tienda" defaultOpen>
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">
                       Color primario <span className="cust-ctrl-hint">(header, botones CTA)</span>
@@ -486,7 +505,70 @@ export default function StoreCustomizerPage() {
                   </div>
                 </Section>
 
-                <Section icon="🔘" bg="#d1fae5" title="Colores de Botones" subtitle="Color de fondo de cada tipo de botón">
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h16M4 12h16M4 18h7"/></svg>} bg="#e0f2fe" title="Color del Título y Categorías" subtitle="Texto del nombre de la tienda y badges de categoría" defaultOpen>
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Color del nombre de la tienda <span className="cust-ctrl-hint">(texto en el header)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorNombre}
+                        onChange={e => update({ colorNombre: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorNombre}</div>
+                    </div>
+                    <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
+                      {([["#ffffff","Blanco"],["#000000","Negro"],[cfg.colorPrimario,"Primario"],[cfg.colorAcento,"Acento"]] as [string,string][]).map(([color,label]) => (
+                        <div key={label} onClick={() => update({ colorNombre: color })}
+                          style={{ cursor:"pointer", padding:"5px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                            background:color, color:color==="#ffffff"?"#333":"#fff",
+                            border:cfg.colorNombre===color?"2px solid #333":"2px solid transparent" }}>{label}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="cust-ctrl-group">
+                    <label className="cust-ctrl-label">
+                      Color de categorías <span className="cust-ctrl-hint">(badges en tarjetas de producto)</span>
+                    </label>
+                    <div className="cust-color-row">
+                      <input type="color" className="cust-color-swatch" value={cfg.colorTagline}
+                        onChange={e => update({ colorTagline: e.target.value })} />
+                      <div className="cust-color-value">{cfg.colorTagline}</div>
+                    </div>
+                    <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
+                      {([["#00d4aa","Verde"],[cfg.colorAcento,"Acento"],[cfg.colorPrimario,"Primario"],["#7c3aed","Morado"],["#f59e0b","Amarillo"]] as [string,string][]).map(([color,label]) => (
+                        <div key={label} onClick={() => update({ colorTagline: color })}
+                          style={{ cursor:"pointer", padding:"5px 10px", borderRadius:6, fontSize:".72rem", fontWeight:700,
+                            background:color, color:"#fff",
+                            border:cfg.colorTagline===color?"2px solid #333":"2px solid transparent" }}>{label}</div>
+                      ))}
+                    </div>
+                  </div>
+                </Section>
+
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>} bg="#fef9c3" title="Layout de la Tienda" subtitle="Elige cómo se muestran los productos" defaultOpen>
+                  <div className="cust-ctrl-group">
+                    <div className="cust-layout-grid">
+                      {([
+                        { id: "clasico",  label: "Clásico",  desc: "4 columnas",   icon: "⊞" },
+                        { id: "grande",   label: "Grande",   desc: "2 columnas",   icon: "▣" },
+                        { id: "lista",    label: "Lista",    desc: "Horizontal",   icon: "☰" },
+                        { id: "minimal",  label: "Minimal",  desc: "3 col limpio", icon: "⊟" },
+                        { id: "magazine", label: "Magazine", desc: "Destacado",    icon: "▤" },
+                      ] as { id: string; label: string; desc: string; icon: string }[]).map(opt => (
+                        <div
+                          key={opt.id}
+                          className={`cust-layout-opt${cfg.layout === opt.id ? " selected" : ""}`}
+                          onClick={() => update({ layout: opt.id })}
+                        >
+                          <div className="cust-layout-icon">{opt.icon}</div>
+                          <strong>{opt.label}</strong>
+                          <small>{opt.desc}</small>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </Section>
+
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="8" width="18" height="8" rx="4"/></svg>} bg="#d1fae5" title="Colores de Botones" subtitle="Color de fondo de cada tipo de botón">
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">
                       Botón "Agregar al carrito" <span className="cust-ctrl-hint">(tarjetas de producto)</span>
@@ -543,7 +625,7 @@ export default function StoreCustomizerPage() {
                   </div>
                 </Section>
 
-                <Section icon="🖼" bg="#fce7f3" title="Color del Banner" subtitle="Fondo del hero / portada de la tienda">
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>} bg="#fce7f3" title="Color del Banner" subtitle="Fondo del hero / portada de la tienda">
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">
                       Color del banner <span className="cust-ctrl-hint">(sección principal de la tienda)</span>
@@ -590,7 +672,7 @@ export default function StoreCustomizerPage() {
                   </div>
                 </Section>
 
-                <Section icon="🔤" bg="#ede9fe" title="Tipografía" subtitle="Fuente de la tienda">
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>} bg="#ede9fe" title="Tipografía" subtitle="Fuente de la tienda">
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">Fuente</label>
                     <select
@@ -617,7 +699,7 @@ export default function StoreCustomizerPage() {
                   </div>
                 </Section>
 
-                <Section icon="🖋" bg="#fce7f3" title="Colores de Texto" subtitle="Color de títulos, descripciones y botones">
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>} bg="#fce7f3" title="Colores de Texto" subtitle="Color de títulos, descripciones y botones">
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">
                       Texto principal <span className="cust-ctrl-hint">(títulos, precios)</span>
@@ -660,7 +742,7 @@ export default function StoreCustomizerPage() {
                   </div>
                 </Section>
 
-                <Section icon="🔡" bg="#fef3c7" title="Colores del Footer" subtitle="Texto del pie de página e iconos de redes">
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="15" y2="18"/></svg>} bg="#fef3c7" title="Colores del Footer" subtitle="Texto del pie de página e iconos de redes">
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">
                       Texto del footer <span className="cust-ctrl-hint">(nombre, copyright, teléfono)</span>
@@ -699,7 +781,7 @@ export default function StoreCustomizerPage() {
                   </div>
                 </Section>
 
-                <Section icon="⬛" bg="#d1fae5" title="Estilo de Componentes" subtitle="Bordes de botones y tarjetas">
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>} bg="#d1fae5" title="Estilo de Componentes" subtitle="Bordes de botones y tarjetas">
                   <label className="cust-ctrl-label">Estilo de botones</label>
                   <div className="cust-style-grid">
                     {[
@@ -744,7 +826,7 @@ export default function StoreCustomizerPage() {
             {/* ════ TAB: CONTENIDO ════ */}
             {tab === "content" && (
               <>
-                <Section icon="🖼" bg="#fef9c3" title="Banner Principal" subtitle="Encabezado de la tienda" defaultOpen>
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>} bg="#fef9c3" title="Banner Principal" subtitle="Encabezado de la tienda" defaultOpen>
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">Título del hero</label>
                     <input className="cust-input" value={cfg.heroTitle} onChange={e => update({ heroTitle: e.target.value })} />
@@ -759,7 +841,7 @@ export default function StoreCustomizerPage() {
                   </div>
                 </Section>
 
-                <Section icon="🗂" bg="#dbeafe" title="Categorías de Navegación" subtitle="Menú horizontal de la tienda" defaultOpen>
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>} bg="#dbeafe" title="Categorías de Navegación" subtitle="Menú horizontal de la tienda" defaultOpen>
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">
                       Categorías visibles <span className="cust-ctrl-hint">(separar con coma)</span>
@@ -768,7 +850,7 @@ export default function StoreCustomizerPage() {
                   </div>
                 </Section>
 
-                <Section icon="🔗" bg="#ede9fe" title="Pie de Página" subtitle="Footer e información de contacto" defaultOpen>
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>} bg="#ede9fe" title="Pie de Página" subtitle="Footer e información de contacto" defaultOpen>
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">Texto del footer</label>
                     <input className="cust-input" value={cfg.footerTexto} onChange={e => update({ footerTexto: e.target.value })} />
@@ -779,7 +861,7 @@ export default function StoreCustomizerPage() {
                   </div>
                 </Section>
 
-                <Section icon="📱" bg="#dbeafe" title="Redes Sociales" subtitle="Solo aparecen si tienen enlace">
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>} bg="#dbeafe" title="Redes Sociales" subtitle="Solo aparecen si tienen enlace">
                   {[
                     { key: "facebook",  label: "Facebook",    Icon: FaFacebook,  color: "#1877f2", placeholder: "https://facebook.com/micomercio" },
                     { key: "instagram", label: "Instagram",   Icon: FaInstagram, color: "#e1306c", placeholder: "https://instagram.com/micomercio" },
@@ -807,7 +889,7 @@ export default function StoreCustomizerPage() {
             {/* ════ TAB: AVANZADO ════ */}
             {tab === "advanced" && (
               <>
-                <Section icon="💻" bg="#fef2f2" title="CSS Personalizado" subtitle="Para usuarios avanzados" defaultOpen>
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>} bg="#fef2f2" title="CSS Personalizado" subtitle="Para usuarios avanzados" defaultOpen>
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">CSS adicional</label>
                     <textarea
@@ -819,7 +901,7 @@ export default function StoreCustomizerPage() {
                   </div>
                 </Section>
 
-                <Section icon="🔗" bg="#d1fae5" title="Dominio Personalizado" subtitle="URL de la tienda" defaultOpen>
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>} bg="#d1fae5" title="Dominio Personalizado" subtitle="URL de la tienda" defaultOpen>
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">URL actual</label>
                     <div className="cust-url-box">comerciosconecta.com/tienda/{slug}</div>
@@ -862,7 +944,7 @@ export default function StoreCustomizerPage() {
             </span>
           </div>
           <div className="cust-preview-wrap">
-            <div className={`cust-preview-frame ${device}`} style={previewStyle}>
+            <div className={`cust-preview-frame ${device} layout-${cfg.layout}`} style={previewStyle}>
 
               {/* Inject custom CSS */}
               {cfg.customCss && <style>{cfg.customCss}</style>}
@@ -874,8 +956,8 @@ export default function StoreCustomizerPage() {
                     ? <img src={cfg.logoUrl} alt="logo" />
                     : <><strong>{cfg.nombre}</strong><sub>{cfg.tagline}</sub></>}
                 </div>
-                <div className="sp-search">🔍 Buscar productos…</div>
-                <button className="sp-cart-btn">🛒 Carrito (0)</button>
+                <div className="sp-search"><FiSearch size={13} /> Buscar productos…</div>
+                <button className="sp-cart-btn"><FiShoppingCart size={13} /> Carrito (0)</button>
               </div>
 
               {/* Nav categories */}
@@ -897,18 +979,18 @@ export default function StoreCustomizerPage() {
                 <h3>Productos Destacados</h3>
                 <div className="sp-grid">
                   {[
-                    { icon: "🧴", cat: "Cuidado Personal", name: "Crema Hidratante", price: "$28.000" },
-                    { icon: "🧴", cat: "Capilar",           name: "Shampoo H&S",      price: "$33.000" },
-                    { icon: "💄", cat: "Maquillaje",        name: "Labial MAC",        price: "$45.000" },
-                    { icon: "☀️", cat: "Piel",              name: "Protector Solar",   price: "$32.000" },
+                    { cat: "Cuidado Personal", name: "Crema Hidratante", price: "$28.000" },
+                    { cat: "Capilar",           name: "Shampoo H&S",      price: "$33.000" },
+                    { cat: "Maquillaje",        name: "Labial MAC",        price: "$45.000" },
+                    { cat: "Piel",              name: "Protector Solar",   price: "$32.000" },
                   ].map((p, i) => (
                     <div key={i} className="sp-card">
-                      <div className="sp-card-img">{p.icon}</div>
+                      <div className="sp-card-img"><FiShoppingCart size={28} style={{ opacity: .25 }} /></div>
                       <div className="sp-card-body">
                         <div className="sp-card-cat">{p.cat}</div>
                         <div className="sp-card-name">{p.name}</div>
                         <div className="sp-card-price">{p.price}</div>
-                        <button className="sp-card-btn">🛒 Agregar</button>
+                        <button className="sp-card-btn"><FiShoppingCart size={12} /> Agregar</button>
                       </div>
                     </div>
                   ))}
