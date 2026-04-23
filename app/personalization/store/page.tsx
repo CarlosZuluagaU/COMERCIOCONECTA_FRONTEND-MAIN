@@ -145,6 +145,32 @@ const DEFAULT_CFG: Config = {
   customCss:      "",
 };
 
+// Scope custom CSS to the preview frame so body/root rules don't leak out
+function scopeCustomCss(css: string, scope: string): string {
+  // Remove comments to simplify parsing
+  const stripped = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  // Split into rule blocks (simple, non-nested)
+  return stripped.replace(
+    /([^{}]+)\{([^{}]*)\}/g,
+    (_, selectors, declarations) => {
+      const scoped = selectors
+        .split(",")
+        .map((s: string) => {
+          const t = s.trim();
+          if (!t) return "";
+          // body and :root map to the scope element itself
+          if (/^(body|:root|html)$/.test(t)) return scope;
+          // If already scoped or is keyframe/media identifier, leave as-is
+          if (t.startsWith("@") || t.startsWith(scope)) return t;
+          return `${scope} ${t}`;
+        })
+        .filter(Boolean)
+        .join(", ");
+      return `${scoped} { ${declarations} }`;
+    }
+  );
+}
+
 // Collapsible section component
 function Section({
   icon, bg, title, subtitle, defaultOpen, children,
@@ -1015,15 +1041,27 @@ export default function StoreCustomizerPage() {
             {/* ════ TAB: AVANZADO ════ */}
             {tab === "advanced" && (
               <>
-                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>} bg="#fef2f2" title="CSS Personalizado" subtitle="Para usuarios avanzados" defaultOpen>
+                <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>} bg="#fef2f2" title="CSS Personalizado" subtitle="Estilos aplicados al preview y a la tienda real" defaultOpen>
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">CSS adicional</label>
+                    <p style={{ fontSize: ".72rem", color: "#64748b", marginBottom: 8, lineHeight: 1.5 }}>
+                      Puedes usar <code style={{ background: "#f1f5f9", padding: "1px 5px", borderRadius: 4 }}>body</code> y clases como{" "}
+                      <code style={{ background: "#f1f5f9", padding: "1px 5px", borderRadius: 4 }}>.sp-header</code>,{" "}
+                      <code style={{ background: "#f1f5f9", padding: "1px 5px", borderRadius: 4 }}>.sp-card</code>,{" "}
+                      <code style={{ background: "#f1f5f9", padding: "1px 5px", borderRadius: 4 }}>.sp-hero</code>, etc.
+                      El CSS se aplica en tiempo real en el preview y en la tienda al guardar.
+                    </p>
                     <textarea
                       className="cust-textarea code"
                       value={cfg.customCss}
                       onChange={e => update({ customCss: e.target.value })}
-                      placeholder={"/* Escribe tu CSS personalizado aquí */\n.sp-hero { padding: 60px 24px; }\n.sp-card { box-shadow: none; }"}
+                      placeholder={"/* Ejemplo: cambiar fondo de la página */\nbody {\n  background: #f0f4f8;\n}\n\n/* Agrandar el hero */\n.sp-hero {\n  padding: 80px 24px;\n}\n\n/* Quitar sombra de tarjetas */\n.sp-card {\n  box-shadow: none;\n}"}
                     />
+                    {cfg.customCss && (
+                      <div style={{ marginTop: 8, padding: "6px 10px", borderRadius: 6, background: "#ecfdf5", border: "1px solid #6ee7b7", fontSize: ".72rem", color: "#065f46" }}>
+                        ✓ CSS activo — visible en el preview y guardado en la tienda
+                      </div>
+                    )}
                   </div>
                 </Section>
 
@@ -1072,8 +1110,8 @@ export default function StoreCustomizerPage() {
           <div className="cust-preview-wrap">
             <div className={`cust-preview-frame ${device} layout-${cfg.layout} btn-hover-${cfg.hoverBtn}${cfg.colorHoverBtn ? " has-hover-color" : ""}`} style={previewStyle}>
 
-              {/* Inject custom CSS */}
-              {cfg.customCss && <style>{cfg.customCss}</style>}
+              {/* Inject custom CSS scoped to the preview frame */}
+              {cfg.customCss && <style>{scopeCustomCss(cfg.customCss, ".cust-preview-frame")}</style>}
 
               {/* Store Header */}
               <div className="sp-header">

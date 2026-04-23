@@ -121,6 +121,7 @@ export default function TiendaPage() {
         layout:         cfg.layout         || "clasico",
         hoverBtn:       cfg.hoverBtn       || "oscurecer",
         hoverBtnColor:  cfg.colorHoverBtn  || "",
+        customCss:      cfg.customCss      || "",
       });
     };
 
@@ -153,6 +154,7 @@ export default function TiendaPage() {
     footerTexto: "", footerTelefono: "",
     facebook: "", instagram: "", twitter: "", tiktok: "", whatsapp: "",
     layout: "clasico", hoverBtn: "oscurecer", hoverBtnColor: "",
+    customCss: "",
   });
 
   const [cliente, setCliente] = useState({
@@ -363,6 +365,7 @@ export default function TiendaPage() {
       className={`store-page layout-${storeCfg.layout} btn-hover-${storeCfg.hoverBtn}${storeCfg.hoverBtnColor ? " has-hover-color" : ""}`}
       style={storeCfg.hoverBtnColor ? { "--sp-hover-btn": storeCfg.hoverBtnColor } as React.CSSProperties : undefined}
     >
+      {storeCfg.customCss && <style>{storeCfg.customCss}</style>}
       {/* HEADER */}
       <header className="store-header">
         <div className="header-inner">
