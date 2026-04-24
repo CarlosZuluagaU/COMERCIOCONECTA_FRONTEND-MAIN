@@ -128,8 +128,6 @@ export default function ListadoClientesPage() {
                   <thead>
                     <tr>
                       <th>Cliente</th>
-                      <th>Tipo Doc.</th>
-                      <th>Documento</th>
                       <th>Ciudad</th>
                       <th>Teléfono</th>
                       <th>Tipo</th>
@@ -155,8 +153,6 @@ export default function ListadoClientesPage() {
                               </div>
                             </div>
                           </td>
-                          <td>{c.tipoDocumento}</td>
-                          <td>{c.numeroDocumento}</td>
                           <td>{c.ciudad || "—"}</td>
                           <td>{c.telefono}</td>
                           <td>
