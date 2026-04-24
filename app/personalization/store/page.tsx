@@ -512,7 +512,7 @@ export default function StoreCustomizerPage() {
                   </div>
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">
-                      Color de acento <span className="cust-ctrl-hint">(detalles, badges)</span>
+                      Color de acento <span className="cust-ctrl-hint">(categorías de nav, badges de productos, botón CTA)</span>
                     </label>
                     <div className="cust-color-row">
                       <input type="color" className="cust-color-swatch" value={cfg.colorAcento}
@@ -577,7 +577,7 @@ export default function StoreCustomizerPage() {
                   </div>
                   <div className="cust-ctrl-group">
                     <label className="cust-ctrl-label">
-                      Color del tagline / categorías <span className="cust-ctrl-hint">(eslogan en header y badges de producto)</span>
+                      Color del tagline <span className="cust-ctrl-hint">(eslogan debajo del nombre en el header)</span>
                     </label>
                     <div className="cust-color-row">
                       <input type="color" className="cust-color-swatch" value={cfg.colorTagline}

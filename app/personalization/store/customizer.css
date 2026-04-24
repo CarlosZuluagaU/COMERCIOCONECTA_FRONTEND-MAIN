@@ -605,7 +605,7 @@
   cursor: pointer;
 }
 .sp-nav-item.active {
-  color: var(--sp-primary, #112D47);
+  color: var(--sp-accent, #14B8A6);
   border-bottom-color: var(--sp-accent, #14B8A6);
   font-weight: 700;
 }
@@ -652,7 +652,7 @@
   font-size: 2rem;
 }
 .sp-card-body { padding: 10px; }
-.sp-card-cat { font-size: .65rem; font-weight: 700; text-transform: uppercase; color: var(--sp-tagline, var(--sp-accent, #14B8A6)); letter-spacing: .5px; }
+.sp-card-cat { font-size: .65rem; font-weight: 700; text-transform: uppercase; color: var(--sp-accent, #14B8A6); letter-spacing: .5px; }
 .sp-card-name { font-size: .82rem; font-weight: 700; color: var(--sp-texto, var(--sp-primary, #112D47)); margin-top: 2px; }
 .sp-card-price { font-size: .95rem; font-weight: 800; color: var(--sp-texto, var(--sp-primary, #112D47)); margin-top: 6px; }
 .sp-card-btn {
